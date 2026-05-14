@@ -1,0 +1,42 @@
+# Git
+.git/
+!.gitignore
+
+# Bundler
+.bundle
+
+# Credentials & env
+/.env*
+/config/master.key
+/config/credentials/*.key
+
+# Logs & temps
+/log/*
+!/log/.keep
+/tmp/*
+!/tmp/.keep
+/tmp/pids/*
+!/tmp/pids/.keep
+
+# Storage / uploads / compiled assets & JS builds
+/storage/*
+!/storage/.keep
+/tmp/storage/*
+!/tmp/storage/.keep
+/node_modules/
+/app/assets/builds/*
+!/app/assets/builds/.keep
+/public/assets
+
+# Compose / deploy (omit from runtime image contexts if copied)
+/docker-compose.override.yml
+
+# Cursor / IDE
+/.cursor
+.devcontainer/
+
+# Coverage & CI artifacts locally
+/coverage/
+
+# Docker metadata (Compose build still receives full context excluding this file)
+.dockerignore

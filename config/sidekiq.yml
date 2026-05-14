@@ -1,0 +1,6 @@
+# https://github.com/sidekiq/sidekiq/wiki/Advanced-Options
+#
+# Redis URL: Sidekiq reads REDIS_URL from the environment (set in docker-compose.yml).
+---
+:queues:
+  - default

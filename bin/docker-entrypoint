@@ -1,0 +1,10 @@
+#!/bin/bash -e
+
+joined="$(printf '%s ' "$@")"
+
+# Ensure schema exists before Puma boots or Sidekiq loads app code against the DB.
+if printf '%s' "$joined" | grep -qE '(^|[[:space:]])(\./)?bin/rails[[:space:]]+server|bundle[[:space:]]+exec[[:space:]]+rails[[:space:]]+server|bundle[[:space:]]+exec[[:space:]]+sidekiq([[:space:]]|$)' || printf '%s' "$joined" | grep -qE '(^|[[:space:]])sidekiq([[:space:]]|$)'; then
+  ./bin/rails db:prepare
+fi
+
+exec "$@"

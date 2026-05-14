@@ -1,0 +1,3 @@
+#!/usr/bin/env ruby
+# Process background jobs with Sidekiq (same as Compose `worker` service).
+exec "bundle", "exec", "sidekiq", *ARGV

@@ -1,0 +1,99 @@
+# Local stack: web (Rails), Sidekiq, MariaDB (MySQL-compatible), Redis.
+#
+# Typical first run after cloning:
+#   docker compose build
+#   docker compose run --rm web bin/rails db:prepare db:seed # optional seeds
+#   docker compose up
+#
+# Override platform for amd64 parity on Apple Silicon (slower emulation):
+#   DOCKER_DEFAULT_PLATFORM=linux/amd64 docker compose up
+
+services:
+  mariadb:
+    image: mariadb:11.4
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: app_development
+      MARIADB_USER: app
+      MARIADB_PASSWORD: app
+      MARIADB_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+      # Creates app_test + grants for `app` (Rails db:prepare touches development + test)
+      - ./db/docker/mariadb/zzz-teamcore.sql:/docker-entrypoint-initdb.d/zzz-teamcore.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "healthcheck.sh --connect --innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+      args:
+        RUBY_VERSION: "3.4.9"
+    command: bash -lc "rm -f tmp/pids/server.pid && exec bundle exec rails server -b 0.0.0.0"
+    environment:
+      RAILS_ENV: development
+      DB_HOST: mariadb
+      DB_PORT: "3306"
+      DB_USERNAME: app
+      DB_PASSWORD: app
+      DB_DATABASE: app_development
+      REDIS_URL: redis://redis:6379/0
+    volumes:
+      - .:/rails:cached
+    ports:
+      - "3000:3000"
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    stdin_open: true
+    tty: true
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+      args:
+        RUBY_VERSION: "3.4.9"
+    command: bash -lc "exec bundle exec sidekiq"
+    environment:
+      RAILS_ENV: development
+      DB_HOST: mariadb
+      DB_PORT: "3306"
+      DB_USERNAME: app
+      DB_PASSWORD: app
+      DB_DATABASE: app_development
+      REDIS_URL: redis://redis:6379/0
+    volumes:
+      - .:/rails:cached
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      web:
+        condition: service_started
+
+volumes:
+  mariadb_data:
