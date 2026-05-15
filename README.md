@@ -43,6 +43,17 @@ docker compose exec mariadb mariadb -uroot -proot -e "CREATE DATABASE IF NOT EXI
 - **MariaDB**: `localhost:3306` (credentials match [`docker-compose.yml`](docker-compose.yml): user `app` / password `app`, DB `app_development`)  
 - **Redis**: `localhost:6379`  
 
+### Phase 1 admin UI (GH-99)
+
+After importing seeds (`docker compose run --rm web bin/rails db:seed`), operators can reach **`/login`**:
+
+- Email: **`admin@example.com`**
+- Password: set **`ADMIN_PASSWORD`** when seeding (for example  
+  `docker compose run --rm -e ADMIN_PASSWORD='your-password' web bin/rails db:seed`). If unset, the seed uses **`changeme`** — rotate it locally.
+- Seeds attach that user to **`example`** and **`example_secondary`** demo agencies only, so **`/admin/agency_context`** doubles as an agency picker when more than one membership exists. Session **`current_agency_id`** cannot be forged to unrelated agencies — it always must match persisted membership (`user_agencies`).
+
+Signed-in admins use **`/admin`** (`/logout` destroys the browser session).
+
 Compose runs three app-related processes:
 
 - **`web`** — Rails + Puma  

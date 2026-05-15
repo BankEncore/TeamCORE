@@ -1,0 +1,9 @@
+<% content_for :title, "#{@location.name} — Location" %>
+<div class="mb-4"><%= link_to "← Locations", admin_locations_path, class: "text-sky-700 text-sm" %></div>
+<h1 class="text-2xl font-semibold mb-2"><%= @location.name %></h1>
+<dl class="grid grid-cols-1 gap-2 text-sm mb-4">
+  <dt class="text-slate-500">Code</dt><dd><%= @location.code %></dd>
+  <dt class="text-slate-500">Type</dt><dd><%= @location.location_type %></dd>
+  <dt class="text-slate-500">Status</dt><dd><%= @location.status %></dd>
+</dl>
+<%= link_to "Edit", edit_admin_location_path(@location), class: "rounded bg-slate-900 text-white px-3 py-2 text-sm" %>

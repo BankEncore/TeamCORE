@@ -206,6 +206,24 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_14_130200) do
     t.index ["location_id"], name: "index_teams_on_location_id"
   end
 
+  create_table "user_agencies", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.bigint "agency_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["agency_id"], name: "index_user_agencies_on_agency_id"
+    t.index ["user_id", "agency_id"], name: "index_user_agencies_on_user_id_and_agency_id", unique: true
+    t.index ["user_id"], name: "index_user_agencies_on_user_id"
+  end
+
+  create_table "users", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "email", null: false
+    t.string "password_digest", null: false
+    t.datetime "updated_at", null: false
+    t.index ["email"], name: "index_users_on_email", unique: true
+  end
+
   add_foreign_key "departments", "agencies"
   add_foreign_key "departments", "departments", column: "parent_department_id"
   add_foreign_key "engagement_organization_placements", "agencies"
@@ -231,4 +249,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_14_130200) do
   add_foreign_key "teams", "agencies"
   add_foreign_key "teams", "departments"
   add_foreign_key "teams", "locations"
+  add_foreign_key "user_agencies", "agencies"
+  add_foreign_key "user_agencies", "users"
 end

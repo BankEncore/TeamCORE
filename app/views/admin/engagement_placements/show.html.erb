@@ -1,0 +1,10 @@
+<% content_for :title, "Placement ##{@placement.id}" %>
+<div class="mb-4"><%= link_to "← Placements", admin_engagement_placements_path(@engagement), class: "text-sky-700 text-sm" %></div>
+<h1 class="text-2xl font-semibold mb-2">Placement #<%= @placement.id %></h1>
+<dl class="text-sm grid gap-2 mb-4">
+  <dt class="text-slate-500">Effective</dt><dd><%= @placement.effective_start_on %> — <%= @placement.effective_end_on %></dd>
+  <dt class="text-slate-500">Department</dt><dd><%= @placement.department&.name || "—" %></dd>
+  <dt class="text-slate-500">Location</dt><dd><%= @placement.location&.name || "—" %></dd>
+  <dt class="text-slate-500">Team</dt><dd><%= @placement.team&.name || "—" %></dd>
+</dl>
+<%= link_to "Edit", edit_admin_engagement_placement_path(@engagement, @placement), class: "rounded bg-slate-900 text-white px-3 py-2 text-sm" %>

@@ -1,0 +1,10 @@
+<% content_for :title, "#{@team.name} — Team" %>
+<div class="mb-4"><%= link_to "← Teams", admin_teams_path, class: "text-sky-700 text-sm" %></div>
+<h1 class="text-2xl font-semibold mb-2"><%= @team.name %></h1>
+<dl class="grid grid-cols-1 gap-2 text-sm mb-4">
+  <dt class="text-slate-500">Code</dt><dd><%= @team.code %></dd>
+  <dt class="text-slate-500">Status</dt><dd><%= @team.status %></dd>
+  <dt class="text-slate-500">Department</dt><dd><%= @team.department&.name || "—" %></dd>
+  <dt class="text-slate-500">Location</dt><dd><%= @team.location&.name || "—" %></dd>
+</dl>
+<%= link_to "Edit", edit_admin_team_path(@team), class: "rounded bg-slate-900 text-white px-3 py-2 text-sm" %>

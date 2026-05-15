@@ -322,3 +322,17 @@ EngagementOrganizationPlacement.find_or_initialize_by(
   p.assign_attributes(department: dept_cr, location: loc_virtual, team: contractor_team)
   p.save!
 end
+
+# Phase 1 admin — demo operators ( bcrypt + membership; GH-99 ).
+admin_pw = ENV.fetch("ADMIN_PASSWORD", "changeme")
+admin_user = User.find_or_initialize_by(email: "admin@example.com")
+admin_user.password = admin_pw
+admin_user.password_confirmation = admin_pw
+admin_user.save!
+
+UserAgency.where(user: admin_user, agency: agency).first_or_create!
+
+second_agency = Agency.find_or_initialize_by(code: "example_secondary")
+second_agency.assign_attributes(name: "Example Agency Secondary", status: "active")
+second_agency.save!
+UserAgency.where(user: admin_user, agency: second_agency).first_or_create!

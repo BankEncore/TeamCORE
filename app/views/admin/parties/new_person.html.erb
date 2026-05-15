@@ -1,0 +1,29 @@
+<% content_for :title, "New person party — TeamCORE Admin" %>
+<h1 class="text-2xl font-semibold mb-4">New person party</h1>
+<%= render "shared/errors", model: @party %>
+<%= form_with model: @party, url: admin_person_parties_path, method: :post, data: { turbo: false } do |f| %>
+  <div class="mb-3">
+    <%= f.label :display_name, class: "block text-sm font-medium text-slate-700 mb-1" %>
+    <%= f.text_field :display_name, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+  </div>
+  <div class="mb-3">
+    <%= f.label :external_reference, class: "block text-sm font-medium text-slate-700 mb-1" %>
+    <%= f.text_field :external_reference, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+  </div>
+  <div class="mb-3">
+    <%= f.label :notes, class: "block text-sm font-medium text-slate-700 mb-1" %>
+    <%= f.text_area :notes, rows: 2, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+  </div>
+  <h2 class="text-lg font-medium mt-6 mb-2">Person profile</h2>
+  <%= fields_for "party[person_profile]", @party.person_profile do |pf| %>
+    <div class="mb-3">
+      <%= pf.label :first_name, class: "block text-sm font-medium text-slate-700 mb-1" %>
+      <%= pf.text_field :first_name, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+    </div>
+    <div class="mb-3">
+      <%= pf.label :last_name, class: "block text-sm font-medium text-slate-700 mb-1" %>
+      <%= pf.text_field :last_name, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+    </div>
+  <% end %>
+  <%= f.submit "Create party", class: "rounded bg-slate-900 text-white px-4 py-2 text-sm cursor-pointer" %>
+<% end %>

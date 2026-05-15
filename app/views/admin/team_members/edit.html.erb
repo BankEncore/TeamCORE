@@ -1,0 +1,15 @@
+<% content_for :title, "Edit team member — TeamCORE Admin" %>
+<h1 class="text-2xl font-semibold mb-4">Edit team member</h1>
+<%= render "shared/errors", model: @team_member %>
+<%= form_with model: [:admin, @team_member], data: { turbo: false } do |f| %>
+  <p class="text-sm text-slate-600 mb-4">Party: <strong><%= @team_member.party.display_name %></strong> (cannot change)</p>
+  <div class="mb-3">
+    <%= f.label :team_member_number, class: "block text-sm font-medium text-slate-700 mb-1" %>
+    <%= f.text_field :team_member_number, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+  </div>
+  <div class="mb-4">
+    <%= f.label :status, class: "block text-sm font-medium text-slate-700 mb-1" %>
+    <%= f.select :status, LifecycleStatusable::STATUSES, {}, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+  </div>
+  <%= f.submit "Save", class: "rounded bg-slate-900 text-white px-4 py-2 text-sm cursor-pointer" %>
+<% end %>

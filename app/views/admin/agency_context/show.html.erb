@@ -1,0 +1,14 @@
+<% content_for :title, "Choose agency — TeamCORE Admin" %>
+<h1 class="text-2xl font-semibold mb-4">Choose agency</h1>
+<p class="text-slate-600 mb-4">Pick which agency tenant you want to work in.</p>
+<%= form_with url: admin_agency_context_path, method: :patch, data: { turbo: false }, class: "space-y-4 max-w-md" do %>
+  <%= hidden_field_tag :return_to, @return_to %>
+  <div>
+    <%= label_tag :agency_id, "Agency", class: "block text-sm font-medium text-slate-700 mb-1" %>
+    <%= select_tag :agency_id,
+          options_from_collection_for_select(@agencies, :id, :name),
+          class: "w-full border border-slate-300 rounded px-3 py-2",
+          prompt: "Select…" %>
+  </div>
+  <%= submit_tag "Continue", class: "rounded bg-slate-900 text-white px-4 py-2 text-sm cursor-pointer" %>
+<% end %>

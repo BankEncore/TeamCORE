@@ -1,0 +1,9 @@
+<% content_for :title, "Dashboard — TeamCORE Admin" %>
+<h1 class="text-2xl font-semibold mb-2">Dashboard</h1>
+<% if @agency_count.zero? %>
+  <p class="text-slate-600">Your account is not linked to any agencies. Contact an administrator to grant access.</p>
+<% elsif current_agency.blank? %>
+  <p class="text-slate-600">Use the agency switcher above or <%= link_to "choose an agency", admin_agency_context_path, class: "text-sky-700 underline" %>.</p>
+<% else %>
+  <p class="text-slate-600">Working in <strong><%= current_agency.name %></strong>.</p>
+<% end %>

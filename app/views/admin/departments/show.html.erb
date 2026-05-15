@@ -1,0 +1,11 @@
+<% content_for :title, "#{@department.name} — Department" %>
+<div class="mb-4"><%= link_to "← Departments", admin_departments_path, class: "text-sky-700 text-sm" %></div>
+<h1 class="text-2xl font-semibold mb-2"><%= @department.name %></h1>
+<dl class="grid grid-cols-1 gap-2 text-sm mb-4">
+  <dt class="text-slate-500">Code</dt><dd><%= @department.code %></dd>
+  <dt class="text-slate-500">Status</dt><dd><%= @department.status %></dd>
+  <% if @department.description.present? %>
+    <dt class="text-slate-500">Description</dt><dd><%= @department.description %></dd>
+  <% end %>
+</dl>
+<%= link_to "Edit", edit_admin_department_path(@department), class: "rounded bg-slate-900 text-white px-3 py-2 text-sm" %>

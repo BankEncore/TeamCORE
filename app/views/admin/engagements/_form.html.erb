@@ -1,0 +1,67 @@
+<% content_for :title, (@engagement.new_record? ? "New engagement" : "Edit engagement") %>
+<%= render "shared/errors", model: @engagement %>
+<%= form_with model: [:admin, @engagement], data: { turbo: false } do |f| %>
+  <% if @engagement.new_record? %>
+    <div class="mb-4">
+      <%= f.label :team_member_id, class: "block text-sm font-medium text-slate-700 mb-1" %>
+      <%= f.select :team_member_id,
+            options_from_collection_for_select(
+              @team_members,
+              :id,
+              ->(tm) { "#{tm.party.display_name} · TM #{tm.id}" }
+            ),
+            { prompt: "Select team member…" },
+            class: "w-full border border-slate-300 rounded px-3 py-2" %>
+    </div>
+    <div class="mb-4">
+      <%= f.label :relationship_type, class: "block text-sm font-medium text-slate-700 mb-1" %>
+      <%= f.select :relationship_type,
+            (@relationship_types || []).map { |rt| [rt.humanize, rt] },
+            { prompt: "Select…" },
+            class: "w-full border border-slate-300 rounded px-3 py-2" %>
+      <p class="text-xs text-slate-500 mt-1">Must match party type (person vs organization). Invalid choices are rejected on save.</p>
+    </div>
+  <% else %>
+    <p class="text-sm mb-4">Team member: <strong><%= @engagement.team_member.party.display_name %></strong></p>
+    <div class="mb-4">
+      <%= f.label :relationship_type, class: "block text-sm font-medium text-slate-700 mb-1" %>
+      <%= f.select :relationship_type,
+            (@relationship_types || []).map { |rt| [rt.humanize, rt] },
+            {},
+            class: "w-full border border-slate-300 rounded px-3 py-2" %>
+    </div>
+    <div class="mb-4">
+      <%= f.label :status, class: "block text-sm font-medium text-slate-700 mb-1" %>
+      <%= f.select :status, (@status_options || []).map { |s| [s.humanize, s] }, {}, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+    </div>
+  <% end %>
+
+  <div class="mb-3">
+    <%= f.label :title, class: "block text-sm font-medium text-slate-700 mb-1" %>
+    <%= f.text_field :title, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+  </div>
+  <div class="mb-3">
+    <%= f.label :notes, class: "block text-sm font-medium text-slate-700 mb-1" %>
+    <%= f.text_area :notes, rows: 3, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+  </div>
+  <div class="grid grid-cols-2 gap-3 mb-4">
+    <div>
+      <%= f.label :start_on, class: "block text-sm font-medium text-slate-700 mb-1" %>
+      <%= f.date_field :start_on, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+    </div>
+    <div>
+      <%= f.label :end_on, class: "block text-sm font-medium text-slate-700 mb-1" %>
+      <%= f.date_field :end_on, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+    </div>
+    <div>
+      <%= f.label :expected_end_on, class: "block text-sm font-medium text-slate-700 mb-1" %>
+      <%= f.date_field :expected_end_on, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+    </div>
+    <div>
+      <%= f.label :renewal_on, class: "block text-sm font-medium text-slate-700 mb-1" %>
+      <%= f.date_field :renewal_on, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+    </div>
+  </div>
+
+  <%= f.submit class: "rounded bg-slate-900 text-white px-4 py-2 text-sm cursor-pointer" %>
+<% end %>

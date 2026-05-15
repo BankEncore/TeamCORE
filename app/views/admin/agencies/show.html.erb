@@ -1,0 +1,8 @@
+<% content_for :title, "#{@agency.name} — Agency" %>
+<div class="mb-4"><%= link_to "← Agencies", admin_agencies_path, class: "text-sky-700 text-sm" %></div>
+<h1 class="text-2xl font-semibold mb-2"><%= @agency.name %></h1>
+<dl class="grid grid-cols-1 gap-2 text-sm mb-6">
+  <dt class="text-slate-500">Code</dt><dd><%= @agency.code %></dd>
+  <dt class="text-slate-500">Status</dt><dd><%= @agency.status %></dd>
+</dl>
+<%= link_to "Edit", edit_admin_agency_path(@agency), class: "rounded bg-slate-900 text-white px-3 py-2 text-sm" %>

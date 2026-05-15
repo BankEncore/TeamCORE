@@ -1,0 +1,8 @@
+<% content_for :title, "Supervision assignment" %>
+<div class="mb-4"><%= link_to "← Supervision", admin_engagement_supervision_assignments_path(@engagement), class: "text-sky-700 text-sm" %></div>
+<h1 class="text-2xl font-semibold mb-2">Assignment #<%= @assignment.id %></h1>
+<dl class="text-sm grid gap-2 mb-4">
+  <dt class="text-slate-500">Supervisor engagement</dt><dd><%= @assignment.supervisor_engagement_id %></dd>
+  <dt class="text-slate-500">Effective</dt><dd><%= @assignment.effective_start_on %> — <%= @assignment.effective_end_on %></dd>
+</dl>
+<%= link_to "Edit", edit_admin_engagement_supervision_assignment_path(@engagement, @assignment), class: "rounded bg-slate-900 text-white px-3 py-2 text-sm" %>

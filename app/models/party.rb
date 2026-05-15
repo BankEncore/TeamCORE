@@ -25,6 +25,9 @@ class Party < ApplicationRecord
     dependent: :restrict_with_exception
   )
 
+  accepts_nested_attributes_for :person_profile, update_only: true
+  accepts_nested_attributes_for :organization_profile, update_only: true
+
   validates :party_type, presence: true, inclusion: { in: PARTY_TYPES }
   validates :agency, presence: true
   validate :persisted_profiles_match_party_type

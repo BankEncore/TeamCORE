@@ -1,0 +1,17 @@
+<% content_for :title, "Departments — TeamCORE Admin" %>
+<div class="flex justify-between items-center mb-4">
+  <h1 class="text-2xl font-semibold">Departments</h1>
+  <%= link_to "New department", new_admin_department_path, class: "rounded bg-slate-900 text-white px-3 py-2 text-sm" %>
+</div>
+<table class="min-w-full text-sm border border-slate-200 bg-white rounded-lg overflow-hidden">
+  <thead class="bg-slate-100"><tr><th class="text-left p-2">Code</th><th class="text-left p-2">Name</th><th class="text-left p-2">Status</th></tr></thead>
+  <tbody>
+    <% @departments.each do |d| %>
+      <tr class="border-t border-slate-200">
+        <td class="p-2"><%= link_to d.code, admin_department_path(d), class: "text-sky-700 underline" %></td>
+        <td class="p-2"><%= d.name %></td>
+        <td class="p-2"><%= d.status %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

@@ -1,0 +1,33 @@
+<% content_for :title, "New organization party — TeamCORE Admin" %>
+<h1 class="text-2xl font-semibold mb-4">New organization party</h1>
+<%= render "shared/errors", model: @party %>
+<%= form_with model: @party, url: admin_organization_parties_path, method: :post, data: { turbo: false } do |f| %>
+  <div class="mb-3">
+    <%= f.label :display_name, class: "block text-sm font-medium text-slate-700 mb-1" %>
+    <%= f.text_field :display_name, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+  </div>
+  <div class="mb-3">
+    <%= f.label :external_reference, class: "block text-sm font-medium text-slate-700 mb-1" %>
+    <%= f.text_field :external_reference, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+  </div>
+  <div class="mb-3">
+    <%= f.label :notes, class: "block text-sm font-medium text-slate-700 mb-1" %>
+    <%= f.text_area :notes, rows: 2, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+  </div>
+  <h2 class="text-lg font-medium mt-6 mb-2">Organization profile</h2>
+  <%= fields_for "party[organization_profile]", @party.organization_profile do |of| %>
+    <div class="mb-3">
+      <%= of.label :legal_name, class: "block text-sm font-medium text-slate-700 mb-1" %>
+      <%= of.text_field :legal_name, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+    </div>
+    <div class="mb-3">
+      <%= of.label :trade_name, class: "block text-sm font-medium text-slate-700 mb-1" %>
+      <%= of.text_field :trade_name, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+    </div>
+    <div class="mb-3">
+      <%= of.label :organization_kind, class: "block text-sm font-medium text-slate-700 mb-1" %>
+      <%= of.select :organization_kind, OrganizationProfile::ORGANIZATION_KINDS, {}, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+    </div>
+  <% end %>
+  <%= f.submit "Create party", class: "rounded bg-slate-900 text-white px-4 py-2 text-sm cursor-pointer" %>
+<% end %>
