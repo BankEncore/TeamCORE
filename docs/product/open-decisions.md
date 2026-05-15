@@ -2,7 +2,7 @@
 
 This register tracks product and modeling decisions for TeamCORE. Not every item needs the same rigor: use the **decision handling model** below so Phase 0 can close without pretending Phase 4–6 design is final.
 
-**Companion docs:** [`domain-map.md`](domain-map.md), [`overview.md`](overview.md), [`roadmap-decision-log.md`](roadmap-decision-log.md), [`../roadmap/phase-1-readiness-checklist.md`](../roadmap/phase-1-readiness-checklist.md), [`employee-contractor-applicability-matrix.md`](employee-contractor-applicability-matrix.md), [`glossary.md`](glossary.md), [`../domain/party-team-member.md`](../domain/party-team-member.md), **[`../domain/engagement.md`](../domain/engagement.md)** (TC-03), **[`../domain/engagement-status.md`](../domain/engagement-status.md)** (TC-04), **[`../domain/documents-compliance.md`](../domain/documents-compliance.md)** (TC-06).
+**Companion docs:** [`domain-map.md`](domain-map.md), [`overview.md`](overview.md), [`roadmap-decision-log.md`](roadmap-decision-log.md), [`../roadmap/phase-1-readiness-checklist.md`](../roadmap/phase-1-readiness-checklist.md), [`employee-contractor-applicability-matrix.md`](employee-contractor-applicability-matrix.md), [`glossary.md`](glossary.md), [`../domain/party-team-member.md`](../domain/party-team-member.md), **[`../domain/engagement.md`](../domain/engagement.md)** (TC-03), **[`../domain/engagement-status.md`](../domain/engagement-status.md)** (TC-04), **[`../domain/documents-compliance.md`](../domain/documents-compliance.md)** (TC-06), **[`../domain/document-alerts.md`](../domain/document-alerts.md)** (TC-07).
 
 ---
 
@@ -55,10 +55,17 @@ This register tracks product and modeling decisions for TeamCORE. Not every item
 | OD-012 (detail) | Draw recovery / settlement application details | 3 |
 | OD-005 (impl) | Documents/Compliance module split | 3 |
 | OD-006 (rules) | Deterministic readiness rule set | 3 |
+| TC-07-D01 | Document alerts: virtual only (no persisted alert table) | 2 |
+| TC-07-D02 | Alert severities `blocking` / `warning` / `info` (`info` unused by default) | 2 |
+| TC-07-D03 | Expiring-soon window chain (requirement → type default → agency optional → hard 30) | 2 |
+| TC-07-D04 | No alert dismissal/snooze/waiver in TC-07 | 2 |
+| TC-07-D05 | No email/SMS/background alert jobs in TC-07 | 2 |
+| TC-07-D06 | Alerts only for `required: true` requirements | 2 |
+| TC-07-D07 | `Documents::AlertMessageBuilder` owns `AlertResult#message` | 2 |
+| TC-07-D08 | Default evaluator `as_of_date` is `Date.current` | 2 |
+| TC-07-D09 | Deterministic alert sort order (severity, type, expires_on, type code) | 2 |
+| TC-07-D10 | Engagement detail evaluates all statuses; alert index defaults non-terminal engagements | 2 |
 
----
-
-## Accepted decisions
 
 ### OD-001 — Party vs Team Member
 
@@ -242,7 +249,18 @@ Compliance — requirement rules, completeness, expirations, readiness signals, 
 - Readiness is a **deterministic signal** derived from configured requirements, document states, verification, expiration rules, and engagement status.
 - **Manual override**, if introduced, must be permission-controlled, reason-coded, and audit-tracked—not the default MVP behavior.
 
-**Follow-up:** Readiness rules backlog for Phase 2; glossary entry. **Document slice (TC-06):** readiness interpretation for configured document requirements lives in **`Documents::ReadinessEvaluator`** per [`../domain/documents-compliance.md`](../domain/documents-compliance.md); full multi-domain activation rules remain Phase 2+.
+**Follow-up:** Readiness rules backlog for Phase 2; glossary entry. **Document slice (TC-06):** readiness interpretation for configured document requirements lives in **`Documents::ReadinessEvaluator`** per [`../domain/documents-compliance.md`](../domain/documents-compliance.md); full multi-domain activation rules remain Phase 2+. **Virtual document alerts (TC-07)** extend evaluator output (`Documents::ReadinessResult#alerts`); authoritative detail **[`document-alerts.md`](../domain/document-alerts.md)** — **TC-07-D01–D10**.
+
+---
+
+### TC-07-D01 … TC-07-D10 — Document alerts presentation (TC-07)
+
+**Status:** Accepted for TC-07 implementation  
+**Tier:** 2  
+
+**Decision (summary):** TC-07 is **read-time alert presentation only** atop **`Documents::ReadinessEvaluator`**: no **`document_alerts`** table (**D01**); severities (**D02**); expiring-soon chain (**D03**); no dismissal/waiver (**D04**); no outbound notifications/jobs (**D05**); alerts only for **`required`** requirements (**D06**); **`Documents::AlertMessageBuilder`** centralizes **`message`** (**D07**); default **`Date.current`** as **`as_of_date`** (**D08**); deterministic sort (**D09**); engagement **show** always evaluates; cross-engagement index defaults **non-terminal** (**D10**).
+
+**Companion:** **[`domain/document-alerts.md`](../domain/document-alerts.md)**
 
 ---
 

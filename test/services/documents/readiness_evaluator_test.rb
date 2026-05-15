@@ -158,4 +158,276 @@ class DocumentsReadinessEvaluatorTest < ActiveSupport::TestCase
 
     assert_equal "pending_verification", w9_row.requirement_outcome
   end
+
+  test "no alerts when all required requirements satisfied without alert outcomes" do
+    DocumentRecord.create!(
+      agency: @agency,
+      document_type: @w9,
+      engagement: @engagement,
+      team_member: @team_member,
+      status: "verified",
+      submitted_on: Date.new(2025, 1, 5),
+      verified_by: @user,
+      verified_on: Date.new(2025, 1, 6),
+      filename: "w9.pdf",
+      content_type: "application/pdf"
+    )
+    DocumentRecord.create!(
+      agency: @agency,
+      document_type: @req_employee_only.document_type,
+      engagement: @engagement,
+      team_member: @team_member,
+      status: "submitted",
+      submitted_on: Date.new(2025, 1, 5),
+      filename: "ack.html",
+      content_type: "text/html"
+    )
+
+    result = Documents::ReadinessEvaluator.new(engagement: @engagement, as_of_date: Date.new(2025, 6, 1)).call
+
+    assert_equal "ready", result.readiness_status
+    assert_empty result.alerts
+  end
+
+  test "blocking pending_verification alert derived from requirement evaluation" do
+    DocumentRecord.create!(
+      agency: @agency,
+      document_type: @w9,
+      engagement: @engagement,
+      team_member: @team_member,
+      status: "submitted",
+      submitted_on: Date.new(2025, 1, 1),
+      filename: "w9.pdf",
+      content_type: "application/pdf"
+    )
+    DocumentRecord.create!(
+      agency: @agency,
+      document_type: @req_employee_only.document_type,
+      engagement: @engagement,
+      team_member: @team_member,
+      status: "submitted",
+      submitted_on: Date.new(2025, 1, 2),
+      filename: "ack.html",
+      content_type: "text/html"
+    )
+
+    result = Documents::ReadinessEvaluator.new(engagement: @engagement, as_of_date: Date.new(2025, 6, 1)).call
+
+    w9_alert = result.alerts.find { |a| a.document_requirement_id == @req_any.id }
+
+    assert_equal "pending_verification", w9_alert.alert_type
+    assert_equal "blocking", w9_alert.severity
+    assert_predicate w9_alert.message, :present?
+  end
+
+  test "missing alert has nil record id and record_review_status" do
+    DocumentRecord.create!(
+      agency: @agency,
+      document_type: @req_employee_only.document_type,
+      engagement: @engagement,
+      team_member: @team_member,
+      status: "submitted",
+      submitted_on: Date.new(2025, 1, 2),
+      filename: "ack.html",
+      content_type: "text/html"
+    )
+
+    result = Documents::ReadinessEvaluator.new(engagement: @engagement, as_of_date: Date.new(2025, 6, 1)).call
+
+    missing_alert = result.alerts.find { |a| a.alert_type == "missing" }
+
+    assert_equal "missing", missing_alert.alert_type
+    assert_nil missing_alert.document_record_id
+    assert_nil missing_alert.record_review_status
+    assert_equal @engagement.id, missing_alert.engagement_id
+    assert_equal @team_member.id, missing_alert.team_member_id
+  end
+
+  test "expired alert exposes negative days_until_expiration" do
+    DocumentRecord.create!(
+      agency: @agency,
+      document_type: @w9,
+      engagement: @engagement,
+      team_member: @team_member,
+      status: "verified",
+      submitted_on: Date.new(2025, 1, 1),
+      verified_by: @user,
+      verified_on: Date.new(2025, 1, 2),
+      expires_on: Date.new(2025, 5, 1),
+      filename: "w9.pdf",
+      content_type: "application/pdf"
+    )
+    DocumentRecord.create!(
+      agency: @agency,
+      document_type: @req_employee_only.document_type,
+      engagement: @engagement,
+      team_member: @team_member,
+      status: "submitted",
+      submitted_on: Date.new(2025, 1, 2),
+      filename: "ack.html",
+      content_type: "text/html"
+    )
+
+    result = Documents::ReadinessEvaluator.new(engagement: @engagement, as_of_date: Date.new(2025, 6, 1)).call
+
+    expired_alert = result.alerts.find { |a| a.alert_type == "expired" }
+
+    assert_equal Date.new(2025, 5, 1), expired_alert.expires_on
+    assert expired_alert.days_until_expiration.negative?
+
+    assert_equal "blocking", expired_alert.severity
+  end
+
+  test "optional requirement missing does not emit alert" do
+    optional_req = DocumentRequirement.create!(
+      agency: @agency,
+      document_type: DocumentType.create!(
+        agency: @agency,
+        code: "optional_cert",
+        name: "Optional cert",
+        category: "certification",
+        status: "active",
+        verification_required: false
+      ),
+      name: "Optional certification",
+      requirement_scope: "engagement",
+      relationship_type: "any",
+      required: false,
+      verification_required: false,
+      status: "active"
+    )
+
+    DocumentRecord.create!(
+      agency: @agency,
+      document_type: @w9,
+      engagement: @engagement,
+      team_member: @team_member,
+      status: "verified",
+      submitted_on: Date.new(2025, 1, 5),
+      verified_by: @user,
+      verified_on: Date.new(2025, 1, 6),
+      filename: "w9.pdf",
+      content_type: "application/pdf"
+    )
+    DocumentRecord.create!(
+      agency: @agency,
+      document_type: @req_employee_only.document_type,
+      engagement: @engagement,
+      team_member: @team_member,
+      status: "submitted",
+      submitted_on: Date.new(2025, 1, 5),
+      filename: "ack.html",
+      content_type: "text/html"
+    )
+
+    result = Documents::ReadinessEvaluator.new(engagement: @engagement, as_of_date: Date.new(2025, 6, 1)).call
+
+    refute result.alerts.any? { |a| a.document_requirement_id == optional_req.id },
+      "optional requirement should not produce alerts"
+  end
+
+  test "alerts sort blocking before warning and by document type code among missing" do
+    dt_early = DocumentType.create!(agency: @agency, code: "aaa_misc", name: "AAA", category: "other", status: "active")
+    dt_late = DocumentType.create!(agency: @agency, code: "zzz_misc", name: "ZZZ", category: "other", status: "active")
+    DocumentRequirement.create!(
+      agency: @agency,
+      document_type: dt_late,
+      name: "ZZZ req",
+      requirement_scope: "engagement",
+      relationship_type: "any",
+      required: true,
+      verification_required: false,
+      status: "active"
+    )
+    DocumentRequirement.create!(
+      agency: @agency,
+      document_type: dt_early,
+      name: "AAA req",
+      requirement_scope: "engagement",
+      relationship_type: "any",
+      required: true,
+      verification_required: false,
+      status: "active"
+    )
+
+    DocumentRecord.create!(
+      agency: @agency,
+      document_type: @w9,
+      engagement: @engagement,
+      team_member: @team_member,
+      status: "verified",
+      submitted_on: Date.new(2025, 1, 1),
+      verified_by: @user,
+      verified_on: Date.new(2025, 1, 2),
+      expires_on: Date.new(2025, 7, 1),
+      filename: "w9.pdf",
+      content_type: "application/pdf"
+    )
+    DocumentRecord.create!(
+      agency: @agency,
+      document_type: @req_employee_only.document_type,
+      engagement: @engagement,
+      team_member: @team_member,
+      status: "submitted",
+      submitted_on: Date.new(2025, 1, 2),
+      filename: "ack.html",
+      content_type: "text/html"
+    )
+
+    result = Documents::ReadinessEvaluator.new(engagement: @engagement, as_of_date: Date.new(2025, 6, 1)).call
+
+    missing_alerts = result.alerts.select { |a| a.alert_type == "missing" }
+    expiring = result.alerts.select { |a| a.alert_type == "expiring_soon" }
+
+    assert expiring.any?
+    assert missing_alerts.size >= 2
+
+    first_blocking_index = result.alerts.index { |a| a.alert_type == "missing" && a.document_type_id == dt_early.id }
+    first_warning_index = result.alerts.index { |a| a.alert_type == "expiring_soon" }
+
+    assert first_blocking_index < first_warning_index
+
+    zzz_index = result.alerts.index { |a| a.document_type_id == dt_late.id }
+    aaa_index = result.alerts.index { |a| a.document_type_id == dt_early.id }
+
+    assert aaa_index < zzz_index
+  end
+
+  test "subcontractor engagement still evaluated when requirements exist" do
+    sub_party = Party.create!(agency: @agency, party_type: "person", display_name: "Sub Person")
+    PersonProfile.create!(party: sub_party, first_name: "Sub", last_name: "Person")
+    sub_party.reload
+    sub_tm = TeamMember.create!(agency: @agency, party: sub_party)
+    sub_eng = Engagement.create!(
+      agency: @agency,
+      team_member: sub_tm,
+      relationship_type: "subcontractor",
+      status: "pending"
+    )
+    sub_eng.update!(status: "active", start_on: Date.new(2025, 1, 1))
+
+    sub_type = DocumentType.create!(
+      agency: @agency,
+      code: "sub_agreement",
+      name: "Sub agreement",
+      category: "contractor_agreement",
+      status: "active",
+      verification_required: false
+    )
+    DocumentRequirement.create!(
+      agency: @agency,
+      document_type: sub_type,
+      name: "Subcontractor agreement",
+      requirement_scope: "engagement",
+      relationship_type: "subcontractor",
+      required: true,
+      verification_required: false,
+      status: "active"
+    )
+
+    result = Documents::ReadinessEvaluator.new(engagement: sub_eng, as_of_date: Date.new(2025, 6, 1)).call
+
+    assert_equal "not_ready", result.readiness_status
+    assert result.alerts.any? { |a| a.alert_type == "missing" }
+  end
 end

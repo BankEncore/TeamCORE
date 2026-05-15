@@ -2,7 +2,7 @@
 
 **Epic / issue:** Document Configuration and Readiness Foundation — [GitHub issue #7](https://github.com/BankEncore/TeamCORE/issues/7) (**TC-06**).
 
-**Cross-links:** Product [**OD-005** / **OD-006**](../product/open-decisions.md); domain map [**Documents** / **Compliance**](../product/domain-map.md); [**Glossary**](../product/glossary.md) (document and compliance terms); [**Engagement**](./engagement.md) (applicability spine, `relationship_type`); [**Subcontractor relationships**](./subcontractor-relationships.md) (**TC-05**); engagement status semantics [`engagement-status.md`](engagement-status.md).
+**Cross-links:** Product [**OD-005** / **OD-006**](../product/open-decisions.md); domain map [**Documents** / **Compliance**](../product/domain-map.md); [**Glossary**](../product/glossary.md) (document and compliance terms); [**Engagement**](./engagement.md) (applicability spine, `relationship_type`); [**Subcontractor relationships**](./subcontractor-relationships.md) (**TC-05**); engagement status semantics [`engagement-status.md`](engagement-status.md); **TC-07 alerts** [`document-alerts.md`](document-alerts.md).
 
 ---
 
@@ -29,6 +29,8 @@ TC-06 is **not** legal determination, **not** full RBAC/audit ledger, **not** se
 **Compliance** in OD-005 terms is the **interpretation layer** (requirements + derived readiness signals). **Documents** own **records** and verification fields on those records.
 
 > **`Documents::ReadinessEvaluator`** is the **sole source of truth** for document readiness and derived alert semantics. Controllers, views, Team360, and reporting must **consume** evaluator output — they must not reimplement missing/expired/ready logic (**TC-06-D03**).
+
+**TC-07 — alert presentation:** Virtual **alerts** (`Documents::AlertResult[]` on **`Documents::ReadinessResult`**) are documented in [**`document-alerts.md`**](document-alerts.md). TC-07 surfaces evaluator output in admin (and later Team360/reporting); it does **not** add a persisted alert table or duplicate readiness rules.
 
 ---
 
