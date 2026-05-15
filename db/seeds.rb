@@ -5,7 +5,7 @@
 # Acceptance checklist (audit):
 # - Baseline agency: "Example Agency" (code: example).
 # - Baseline departments/locations/teams match epic TC-01.11 naming (generic demo labels).
-# - TC-04.12: additional engagement **status** examples (pending, suspended, ended) for
+# - TC-04.12: engagement **status** examples (employee pending/suspended/ended; suspended IC) for
 #   policy / predicate demos — generic demo actors only (no Party workforce status changes).
 # - Intentionally generic — not modeled on a single real-world company name or structure.
 #
@@ -287,4 +287,38 @@ PartyRelationship.where(
       eng.update!(status: "ended", end_on: end_d)
     end
   end
+end
+
+# Suspended individual contractor (TC-04.12) — separate from Robert’s active IC path.
+riley_party = Party.find_or_initialize_by(agency:, external_reference: "demo_riley_suspended_ic")
+riley_party.assign_attributes(party_type: "person", status: "active")
+riley_party.save!
+PersonProfile.find_or_initialize_by(party: riley_party).tap do |pp|
+  pp.assign_attributes(first_name: "Riley", last_name: "SuspendedIC")
+  pp.save!
+end
+riley_party.reload
+riley_tm = TeamMember.find_or_initialize_by(agency:, party: riley_party)
+riley_tm.assign_attributes(status: "active")
+riley_tm.save!
+
+riley_eng = Engagement.find_or_initialize_by(
+  agency:,
+  team_member: riley_tm,
+  relationship_type: "individual_contractor"
+)
+if riley_eng.new_record?
+  riley_eng.status = "draft"
+  riley_eng.save!
+end
+riley_eng.update!(status: "pending") if riley_eng.status == "draft"
+riley_eng.update!(status: "active", start_on: demo_start_on) unless riley_eng.status == "suspended"
+riley_eng.update!(status: "suspended") if riley_eng.status == "active"
+
+EngagementOrganizationPlacement.find_or_initialize_by(
+  engagement: riley_eng,
+  effective_start_on: demo_start_on
+).tap do |p|
+  p.assign_attributes(department: dept_cr, location: loc_virtual, team: contractor_team)
+  p.save!
 end

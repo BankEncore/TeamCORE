@@ -50,6 +50,7 @@ engagements.relationship_type
 - Separate `EmployeeStatus` / `ContractorStatus` tables or parallel status columns for MVP.
 - Documents/compliance **readiness engine** (**OD-006**).
 - Payroll, settlement, time, or leave **workflow implementation**.
+- Full **RBAC** / authorization engine or durable **audit ledger** (see **OD-009**, **OD-010**, **TC-29**, **TC-30**).
 
 ---
 
@@ -186,7 +187,7 @@ Terminal: **`ended`**, **`terminated`**, **`cancelled`** — no normal forward t
 
 ## Status reason codes (documentation only — TC-04-D02)
 
-Vocabulary for **human** status changes; **no** persisted `status_reason` in TC-04 unless product opens a spike (see **TC-04-D02**). When stored later, pair with **TC-30** (who/when/prior status).
+Vocabulary for **human** status changes; **no** persisted `status_reason` in TC-04 unless product opens a spike (see **TC-04-D02**). When stored later, pair with **TC-30** durable history: **who**, **when**, **prior status**, and **reason** (plus any notes policy requires).
 
 ### Suspension-oriented (illustrative)
 
@@ -222,6 +223,24 @@ Applies to **employee** and **contractor-class** engagements. **Suspended** reta
 - **Contractor-class path** (`individual_contractor`, `contractor_organization`, promoted **`subcontractor`):** **`active`** is the hinge for settlement/charges **eligibility hints**; **never** employee time/leave/payroll input in MVP.
 - **Mutual exclusivity** of payroll vs settlement **rails per engagement** remains a product invariant ([**applicability matrix** § Payroll vs settlement](../product/employee-contractor-applicability-matrix.md)).
 - **Readiness (**OD-006**):** May **gate** activation later; TC-04 documents posture only (**TC-03-D08**).
+
+---
+
+## `EngagementWorkflowEligibility` (Rails hints)
+
+Public helpers on **`Engagement`** (see `app/models/concerns/engagement_workflow_eligibility.rb`). Names reflect TC-04 acceptance / consumer contract; they do **not** enforce transitions (TC-03), **OD-006**, **OD-009**, or downstream engines.
+
+| Helper | Role |
+| --- | --- |
+| `employee_path?` / `employee_relationship?` | Employee `relationship_type`. |
+| `contractor_class?` / `contractor_class_relationship?` | Non-employee operational contractor family. |
+| `individual_contractor_path?`, `contractor_organization_path?`, `subcontractor_path?` | Narrow `relationship_type` checks. |
+| `terminal?`, `suspended?` | Status posture (terminals mirror `Engagement::TERMINAL_STATUSES`). |
+| `eligible_for_employee_operational_rails?` | Employee + **`active`** (time / leave / payroll-input hinge). |
+| `active_for_time_tracking?`, `active_for_leave?`, `active_for_payroll_input?` | Per-rail aliases of the employee hinge above. |
+| `eligible_for_contractor_class_operational_rails?` | Contractor-class + **`active`**. |
+| `active_for_contractor_settlement?` | Settlement eligibility hint — same hinge as contractor-class rails in MVP. |
+| `operational_forward_work_blocked_by_status?` | **`true`** when `status != active` (TC-04-D03 layer). |
 
 ---
 
@@ -271,16 +290,16 @@ Later epics **consume** `Engagement` + this policy doc as inputs: Documents/Comp
 
 Used for epic / PR **A** sign-off mapping:
 
-- [ ] `engagement-status.md` identifies **`engagements.status`** + **`relationship_type`** as source of truth (**TC-04-D05**).
-- [ ] TC-03 **mechanism** vs TC-04 **semantics** boundary is explicit.
-- [ ] Party / TeamMember **not** workforce relationship status carriers.
-- [ ] Meanings documented for employee, individual contractor, contractor organization, subcontractor.
-- [ ] Shared transition graph **confirmed** aligned with TC-03 (**TC-04-D01**); no duplicate enforcement spec.
-- [ ] Reason vocabulary documented; storage **deferred** (**TC-04-D02**).
-- [ ] Suspended paragraph locked (**TC-04-D03**).
-- [ ] Workflow effects documented; applicability matrix referenced.
-- [ ] Team360 + reporting + TC-12 / TC-10 / TC-11 references present.
-- [ ] Audit/permission sensitive actions and TC-29/TC-30 called out.
+- [x] `engagement-status.md` identifies **`engagements.status`** + **`relationship_type`** as source of truth (**TC-04-D05**).
+- [x] TC-03 **mechanism** vs TC-04 **semantics** boundary is explicit.
+- [x] Party / TeamMember **not** workforce relationship status carriers.
+- [x] Meanings documented for employee, individual contractor, contractor organization, subcontractor.
+- [x] Shared transition graph **confirmed** aligned with TC-03 (**TC-04-D01**); no duplicate enforcement spec.
+- [x] Reason vocabulary documented; storage **deferred** (**TC-04-D02**).
+- [x] Suspended paragraph locked (**TC-04-D03**).
+- [x] Workflow effects documented; applicability matrix referenced.
+- [x] Team360 + reporting + TC-12 / TC-10 / TC-11 references present.
+- [x] Audit/permission sensitive actions and TC-29/TC-30 called out.
 
 ---
 
