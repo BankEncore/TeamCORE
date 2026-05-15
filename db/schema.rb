@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_13_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_15_120000) do
   create_table "agencies", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
     t.string "code", null: false
     t.datetime "created_at", null: false
@@ -30,6 +30,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_13_120000) do
     t.string "status", default: "active", null: false
     t.datetime "updated_at", null: false
     t.index ["agency_id", "code"], name: "index_departments_on_agency_id_and_code", unique: true
+    t.index ["agency_id", "status"], name: "index_departments_on_agency_id_and_status"
     t.index ["agency_id"], name: "index_departments_on_agency_id"
     t.index ["parent_department_id"], name: "index_departments_on_parent_department_id"
   end
@@ -45,6 +46,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_13_120000) do
     t.string "timezone"
     t.datetime "updated_at", null: false
     t.index ["agency_id", "code"], name: "index_locations_on_agency_id_and_code", unique: true
+    t.index ["agency_id", "location_type"], name: "index_locations_on_agency_id_and_location_type"
+    t.index ["agency_id", "status"], name: "index_locations_on_agency_id_and_status"
     t.index ["agency_id"], name: "index_locations_on_agency_id"
   end
 
@@ -59,6 +62,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_13_120000) do
     t.string "status", default: "active", null: false
     t.datetime "updated_at", null: false
     t.index ["agency_id", "code"], name: "index_teams_on_agency_id_and_code", unique: true
+    t.index ["agency_id", "department_id"], name: "index_teams_on_agency_id_and_department_id"
+    t.index ["agency_id", "location_id"], name: "index_teams_on_agency_id_and_location_id"
+    t.index ["agency_id", "status"], name: "index_teams_on_agency_id_and_status"
     t.index ["agency_id"], name: "index_teams_on_agency_id"
     t.index ["department_id"], name: "index_teams_on_department_id"
     t.index ["location_id"], name: "index_teams_on_location_id"

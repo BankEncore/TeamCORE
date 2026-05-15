@@ -43,6 +43,12 @@ class DepartmentTest < ActiveSupport::TestCase
     assert_predicate Department.new(agency: other, name: "Other Ops", code: "OPS"), :valid?
   end
 
+  test "normalizes code to stripped lowercase before validation" do
+    department = Department.new(agency: @agency, name: "Legal", code: "  LEG  ")
+    department.valid?
+    assert_equal "leg", department.code
+  end
+
   test "inactive and archived excluded from active scope when mixed" do
     Department.create!(agency: @agency, name: "Live", code: "L#{SecureRandom.hex(2)}", status: "active")
     Department.create!(agency: @agency, name: "Stale", code: "S#{SecureRandom.hex(2)}", status: "inactive")

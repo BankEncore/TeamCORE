@@ -47,4 +47,17 @@ class AgencyTest < ActiveSupport::TestCase
     assert_not duplicate.valid?
     assert_includes duplicate.errors[:code], "has already been taken"
   end
+
+  test "normalizes code to stripped lowercase before validation" do
+    agency = Agency.new(name: "Corp", code: "  ExAmPlE  ")
+    agency.valid?
+    assert_equal "example", agency.code
+  end
+
+  test "normalized code collides with existing row differing only by case and whitespace" do
+    Agency.create!(name: "First", code: "acme")
+    duplicate = Agency.new(name: "Second", code: "  ACME  ")
+    assert_not duplicate.valid?
+    assert duplicate.errors[:code].present?
+  end
 end

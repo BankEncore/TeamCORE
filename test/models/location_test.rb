@@ -25,6 +25,12 @@ class LocationTest < ActiveSupport::TestCase
     assert_predicate loc, :persisted?
   end
 
+  test "normalizes code to stripped lowercase before validation" do
+    loc = Location.new(agency: @agency, name: "HQ", code: "  Main_OFFICE  ", location_type: "office")
+    loc.valid?
+    assert_equal "main_office", loc.code
+  end
+
   test "code uniqueness scoped to agency" do
     Location.create!(agency: @agency, name: "Office", code: "MAIN", location_type: "office")
     other_agency = Agency.create!(name: "X", code: "x#{SecureRandom.hex(4)}")

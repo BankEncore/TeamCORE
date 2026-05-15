@@ -56,6 +56,12 @@ class TeamTest < ActiveSupport::TestCase
     assert_equal 2, Team.where(agency: @agency).count
   end
 
+  test "normalizes code to stripped lowercase before validation" do
+    team = Team.new(agency: @agency, name: "Ops", code: "  OPS_UNIT  ")
+    team.valid?
+    assert_equal "ops_unit", team.code
+  end
+
   test "team code uniqueness per agency only" do
     Team.create!(agency: @agency, name: "Ops", code: "OPS")
     elsewhere = Agency.create!(name: "Else", code: "e#{SecureRandom.hex(4)}")

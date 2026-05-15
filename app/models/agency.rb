@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class Agency < ApplicationRecord
+  include NormalizesCode
   include LifecycleStatusable
 
   has_many :departments, inverse_of: :agency, dependent: :restrict_with_exception

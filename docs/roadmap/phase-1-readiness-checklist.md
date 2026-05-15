@@ -90,26 +90,28 @@ Phase 0 is **product and domain framing only** — no production feature deliver
 
 ## Pre–Phase 1 checklist (executable)
 
+**Stakeholder status:** Signed off (**2026-05**). Checked items confirm product/program acceptance of artifacts and gates below.
+
 ### Product artifacts
 
-- [ ] Product overview accepted (or signed-off exception recorded).  
-- [ ] Domain map accepted.  
-- [ ] Glossary accepted for Phase 1–touching terms (or explicit “good enough for now” in **TC-00** discussion).  
-- [ ] MVP scope accepted.  
-- [ ] Roadmap decision log created and current (**RD-xxx**).  
-- [ ] Open decision register created and current (**OD-xxx**).  
-- [ ] Employee vs contractor applicability matrix accepted.  
-- [ ] Party / Team Member / Engagement terminology stable (**modeling note** + glossary entries as needed).
+- [x] Product overview accepted (or signed-off exception recorded).  
+- [x] Domain map accepted.  
+- [x] Glossary accepted for Phase 1–touching terms (or explicit “good enough for now” in **TC-00** discussion).  
+- [x] MVP scope accepted.  
+- [x] Roadmap decision log created and current (**RD-xxx**).  
+- [x] Open decision register created and current (**OD-xxx**).  
+- [x] Employee vs contractor applicability matrix accepted.  
+- [x] Party / Team Member / Engagement terminology stable (**modeling note** + glossary entries as needed).
 
 ### Decisions
 
-- [ ] Subcontractor modeling — MVP rule **Accepted** per **OD-004**; advanced cases **explicitly deferred** (not a startup blocker).  
-- [ ] **OD-011** — **Implementation pattern chosen** (ADR or modeling note) **before irreversible migrations**.
+- [x] Subcontractor modeling — MVP rule **Accepted** per **OD-004**; advanced cases **explicitly deferred** (not a startup blocker).  
+- [x] **OD-011** — **Implementation pattern chosen** (ADR or modeling note) **before irreversible migrations**.
 
 ### Epics and governance
 
-- [ ] Phase 1 epic issues confirmed — [#2](https://github.com/BankEncore/TeamCORE/issues/2) … [#6](https://github.com/BankEncore/TeamCORE/issues/6) (**TC-01…TC-05**).  
-- [ ] TC0 exit criteria met; program agrees to start **TC-01** implementation.
+- [x] Phase 1 epic issues confirmed — [#2](https://github.com/BankEncore/TeamCORE/issues/2) … [#6](https://github.com/BankEncore/TeamCORE/issues/6) (**TC-01…TC-05**).  
+- [x] TC0 exit criteria met; program agrees to start **TC-01** implementation.
 
 ---
 

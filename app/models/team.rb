@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class Team < ApplicationRecord
+  include NormalizesCode
   include LifecycleStatusable
 
   belongs_to :agency

@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class Location < ApplicationRecord
+  include NormalizesCode
   include LifecycleStatusable
 
   LOCATION_TYPES = %w[office branch remote virtual client_site other].freeze
