@@ -69,3 +69,88 @@ teams.each do |row|
   )
   t.save!
 end
+
+# Identity & party substrate (TC-02.13) — generic demo actors for TC-03+.
+agency = Agency.find_by!(code: "example")
+
+jane_party = Party.find_or_initialize_by(agency:, external_reference: "demo_jane_employee")
+jane_party.assign_attributes(party_type: "person", status: "active")
+jane_party.save!
+PersonProfile.find_or_initialize_by(party: jane_party).tap do |pp|
+  pp.assign_attributes(first_name: "Jane", last_name: "Employee")
+  pp.save!
+end
+jane_party.reload
+
+robert_party = Party.find_or_initialize_by(agency:, external_reference: "demo_robert_contractor")
+robert_party.assign_attributes(party_type: "person", status: "active")
+robert_party.save!
+PersonProfile.find_or_initialize_by(party: robert_party).tap do |pp|
+  pp.assign_attributes(first_name: "Robert", last_name: "Contractor")
+  pp.save!
+end
+robert_party.reload
+
+maria_party = Party.find_or_initialize_by(agency:, external_reference: "demo_maria_subcontractor")
+maria_party.assign_attributes(party_type: "person", status: "active")
+maria_party.save!
+PersonProfile.find_or_initialize_by(party: maria_party).tap do |pp|
+  pp.assign_attributes(first_name: "Maria", last_name: "Subcontractor")
+  pp.save!
+end
+maria_party.reload
+
+sam_party = Party.find_or_initialize_by(agency:, external_reference: "demo_sam_contact")
+sam_party.assign_attributes(party_type: "person", status: "active")
+sam_party.save!
+PersonProfile.find_or_initialize_by(party: sam_party).tap do |pp|
+  pp.assign_attributes(first_name: "Sam", last_name: "Contact")
+  pp.save!
+end
+sam_party.reload
+
+contractor_org_party = Party.find_or_initialize_by(agency:, external_reference: "demo_contractor_organization")
+contractor_org_party.assign_attributes(party_type: "organization", status: "active")
+contractor_org_party.save!
+OrganizationProfile.find_or_initialize_by(party: contractor_org_party).tap do |op|
+  op.assign_attributes(
+    legal_name: "Example Contractor Organization LLC",
+    trade_name: "Example Contractor Organization",
+    organization_kind: "contractor_organization"
+  )
+  op.save!
+end
+contractor_org_party.reload
+
+vendor_party = Party.find_or_initialize_by(agency:, external_reference: "demo_vendor_organization")
+vendor_party.assign_attributes(party_type: "organization", status: "active")
+vendor_party.save!
+OrganizationProfile.find_or_initialize_by(party: vendor_party).tap do |op|
+  op.assign_attributes(
+    legal_name: "Example Vendor Organization Inc",
+    trade_name: "Example Vendor Organization",
+    organization_kind: "vendor"
+  )
+  op.save!
+end
+vendor_party.reload
+
+[ jane_party, robert_party, contractor_org_party ].each do |p|
+  tm = TeamMember.find_or_initialize_by(agency:, party: p)
+  tm.assign_attributes(status: "active")
+  tm.save!
+end
+
+PartyRelationship.where(
+  agency:,
+  source_party: contractor_org_party,
+  target_party: sam_party,
+  relationship_type: "primary_contact"
+).first_or_create!(status: "active")
+
+PartyRelationship.where(
+  agency:,
+  source_party: contractor_org_party,
+  target_party: maria_party,
+  relationship_type: "subcontractor"
+).first_or_create!(status: "active")

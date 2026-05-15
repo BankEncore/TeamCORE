@@ -132,7 +132,7 @@ A party may be:
 
 Party is the identity layer. It should not, by itself, determine employee or contractor workflow behavior.
 
----
+Implementation and TC-02 rules: [`party-team-member.md`](../domain/party-team-member.md).
 
 ### Team Member
 
@@ -141,6 +141,8 @@ Team Member represents workforce participation.
 A team member is linked to a party and is the operational profile used by TeamCORE when that party participates in the agency’s workforce.
 
 A party may exist before becoming a team member. A team member should normally be linked to one party.
+
+Data model (**TC-02**): [`party-team-member.md`](../domain/party-team-member.md).
 
 ---
 
