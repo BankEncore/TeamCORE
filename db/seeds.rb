@@ -5,9 +5,8 @@
 # Acceptance checklist (audit):
 # - Baseline agency: "Example Agency" (code: example).
 # - Baseline departments/locations/teams match epic TC-01.11 naming (generic demo labels).
-# - TC-03: demo engagements (employee / individual_contractor / contractor_organization),
-#   placements (ops vs contractor-aligned teams & main_office vs virtual locations),
-#   plus Jane supervising Robert as primary_reports_to.
+# - TC-04.12: engagement **status** examples (employee pending/suspended/ended; suspended IC) for
+#   policy / predicate demos — generic demo actors only (no Party workforce status changes).
 # - Intentionally generic — not modeled on a single real-world company name or structure.
 #
 # Run: bin/rails db:seed   (inside Docker per project README if applicable)
@@ -239,3 +238,87 @@ PartyRelationship.where(
   target_party: maria_party,
   relationship_type: "subcontractor"
 ).first_or_create!(status: "active")
+
+# TC-04.12 — Engagement status examples (pending / suspended / ended).
+[
+  [ "demo_alex_pending_employee", "Alex", "PendingEmployee" ],
+  [ "demo_taylor_suspended_employee", "Taylor", "SuspendedEmployee" ],
+  [ "demo_casey_ended_employee", "Casey", "EndedEmployee" ]
+].each do |external_reference, first_name, last_name|
+  party = Party.find_or_initialize_by(agency:, external_reference:)
+  party.assign_attributes(party_type: "person", status: "active")
+  party.save!
+  PersonProfile.find_or_initialize_by(party:).tap do |pp|
+    pp.assign_attributes(first_name:, last_name:)
+    pp.save!
+  end
+  party.reload
+
+  tm = TeamMember.find_or_initialize_by(agency:, party:)
+  tm.assign_attributes(status: "active")
+  tm.save!
+
+  eng = Engagement.find_or_initialize_by(agency:, team_member: tm, relationship_type: "employee")
+  case external_reference
+  when "demo_alex_pending_employee"
+    if eng.new_record?
+      eng.status = "pending"
+      eng.save!
+    elsif eng.status == "draft"
+      eng.update!(status: "pending")
+    end
+  when "demo_taylor_suspended_employee"
+    if eng.new_record?
+      eng.status = "draft"
+      eng.save!
+    end
+    eng.update!(status: "pending") if eng.status == "draft"
+    eng.update!(status: "active", start_on: demo_start_on) unless eng.status == "suspended"
+    eng.update!(status: "suspended") if eng.status == "active"
+  when "demo_casey_ended_employee"
+    if eng.new_record?
+      eng.status = "draft"
+      eng.save!
+    end
+    eng.update!(status: "pending") if eng.status == "draft"
+    if %w[pending active].include?(eng.status)
+      eng.update!(status: "active", start_on: demo_start_on) if eng.status == "pending"
+      end_d = demo_start_on + 6.months
+      eng.update!(status: "ended", end_on: end_d)
+    end
+  end
+end
+
+# Suspended individual contractor (TC-04.12) — separate from Robert’s active IC path.
+riley_party = Party.find_or_initialize_by(agency:, external_reference: "demo_riley_suspended_ic")
+riley_party.assign_attributes(party_type: "person", status: "active")
+riley_party.save!
+PersonProfile.find_or_initialize_by(party: riley_party).tap do |pp|
+  pp.assign_attributes(first_name: "Riley", last_name: "SuspendedIC")
+  pp.save!
+end
+riley_party.reload
+riley_tm = TeamMember.find_or_initialize_by(agency:, party: riley_party)
+riley_tm.assign_attributes(status: "active")
+riley_tm.save!
+
+riley_eng = Engagement.find_or_initialize_by(
+  agency:,
+  team_member: riley_tm,
+  relationship_type: "individual_contractor"
+)
+if riley_eng.new_record?
+  riley_eng.status = "draft"
+  riley_eng.save!
+end
+riley_eng.update!(status: "pending") if riley_eng.status == "draft"
+riley_eng.update!(status: "active", start_on: demo_start_on) unless riley_eng.status == "suspended"
+riley_eng.update!(status: "suspended") if riley_eng.status == "active"
+
+EngagementOrganizationPlacement.find_or_initialize_by(
+  engagement: riley_eng,
+  effective_start_on: demo_start_on
+).tap do |p|
+  p.assign_attributes(department: dept_cr, location: loc_virtual, team: contractor_team)
+  p.save!
+end

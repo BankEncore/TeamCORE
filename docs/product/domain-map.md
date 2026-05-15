@@ -150,7 +150,8 @@ Data model (**TC-02**): [`party-team-member.md`](../domain/party-team-member.md)
 
 Engagement defines the relationship between the agency and the team member.
 
-**TC-03 data model:** [`../domain/engagement.md`](../domain/engagement.md).
+**TC-03 data model:** [`../domain/engagement.md`](../domain/engagement.md).  
+**TC-04 policy:** status meanings and consumer contract — [`../domain/engagement-status.md`](../domain/engagement-status.md).
 
 The engagement determines:
 
