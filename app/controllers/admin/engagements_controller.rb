@@ -17,6 +17,17 @@ module Admin
     def show
       @placement_rows = @engagement.engagement_organization_placements.order(:effective_start_on)
       @supervision_rows = @engagement.engagement_supervision_assignments.order(:effective_start_on)
+      if @engagement.relationship_type == "subcontractor"
+        @subcontractor_context_rels =
+          PartyRelationship
+            .where(
+              agency_id: current_agency.id,
+              target_party_id: @engagement.team_member.party_id,
+              relationship_type: "subcontractor"
+            )
+            .includes(:source_party)
+            .order(effective_start_date: :desc, id: :desc)
+      end
     end
 
     def new

@@ -5,8 +5,7 @@
 # Acceptance checklist (audit):
 # - Baseline agency: "Example Agency" (code: example).
 # - Baseline departments/locations/teams match epic TC-01.11 naming (generic demo labels).
-# - TC-04.12: engagement **status** examples (employee pending/suspended/ended; suspended IC) for
-#   policy / predicate demos — generic demo actors only (no Party workforce status changes).
+# - TC-05.08: Maria remains related-only (PartyRelationship); Alex is promoted (TeamMember + subcontractor Engagement).
 # - Intentionally generic — not modeled on a single real-world company name or structure.
 #
 # Run: bin/rails db:seed   (inside Docker per project README if applicable)
@@ -238,6 +237,37 @@ PartyRelationship.where(
   target_party: maria_party,
   relationship_type: "subcontractor"
 ).first_or_create!(status: "active")
+
+# TC-05.08 — Promoted subcontractor (Alex): same PartyRelationship spine plus workforce row.
+alex_party = Party.find_or_initialize_by(agency:, external_reference: "demo_alex_subcontractor_promoted")
+alex_party.assign_attributes(party_type: "person", status: "active")
+alex_party.save!
+PersonProfile.find_or_initialize_by(party: alex_party).tap do |pp|
+  pp.assign_attributes(first_name: "Alex", last_name: "PromotedSub")
+  pp.save!
+end
+alex_party.reload
+
+PartyRelationship.where(
+  agency:,
+  source_party: contractor_org_party,
+  target_party: alex_party,
+  relationship_type: "subcontractor"
+).first_or_create!(status: "active")
+
+alex_tm = TeamMember.find_or_initialize_by(agency:, party: alex_party)
+alex_tm.assign_attributes(status: "active")
+alex_tm.save!
+
+alex_sub_eng = Engagement.find_or_initialize_by(
+  agency:,
+  team_member: alex_tm,
+  relationship_type: "subcontractor"
+)
+if alex_sub_eng.new_record?
+  alex_sub_eng.status = "draft"
+  alex_sub_eng.save!
+end
 
 # TC-04.12 — Engagement status examples (pending / suspended / ended).
 [

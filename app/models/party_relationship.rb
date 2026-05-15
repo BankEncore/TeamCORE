@@ -24,6 +24,9 @@ class PartyRelationship < ApplicationRecord
   validate :parties_share_agency
   validate :primary_contact_party_kinds
   validate :single_active_primary_contact_for_source
+  validate :subcontractor_effective_date_order, if: :subcontractor?
+  validate :subcontractor_source_eligible, if: :subcontractor?
+  validate :subcontractor_no_overlapping_active_pair, if: :subcontractor?
 
   def currently_effective_on?(check_date = Date.current)
     return false unless active?
@@ -32,7 +35,74 @@ class PartyRelationship < ApplicationRecord
       (effective_end_date.nil? || effective_end_date >= check_date)
   end
 
+  def subcontractor?
+    relationship_type == "subcontractor"
+  end
+
+  # Person source that qualified via IC must still be contractor-capable on write; history rows stay persisted.
+  def subcontractor_person_source_stale_for_display?
+    return false unless subcontractor?
+    return false unless source_party&.person?
+
+    !source_party.subcontractor_source_contractor_capable_for_agency?(agency)
+  end
+
+  def promotion_eligible?(check_date = Date.current)
+    subcontractor? && active? && currently_effective_on?(check_date) &&
+      source_party&.subcontractor_source_contractor_capable_for_agency?(agency) &&
+      target_party&.identity_complete?
+  end
+
   private
+
+  def date_bounds_overlap?(start_a, end_a, start_b, end_b)
+    s1 = start_a || Date.new(1, 1, 1)
+    e1 = end_a || Date.new(9999, 12, 31)
+    s2 = start_b || Date.new(1, 1, 1)
+    e2 = end_b || Date.new(9999, 12, 31)
+    s1 <= e2 && s2 <= e1
+  end
+
+  def subcontractor_effective_date_order
+    return if effective_start_date.blank? || effective_end_date.blank?
+    return if effective_end_date >= effective_start_date
+
+    errors.add(:effective_end_date, "must be on or after effective start date")
+  end
+
+  def subcontractor_source_eligible
+    return if source_party.blank? || agency.blank?
+
+    unless source_party.subcontractor_source_contractor_capable_for_agency?(agency)
+      errors.add(:source_party, "must be a contractor organization or a person with an active individual contractor engagement for this agency")
+    end
+  end
+
+  def subcontractor_no_overlapping_active_pair
+    return unless active?
+
+    others = PartyRelationship.where(
+      agency_id: agency_id,
+      source_party_id: source_party_id,
+      target_party_id: target_party_id,
+      relationship_type: "subcontractor",
+      status: "active"
+    )
+    others = others.where.not(id: id) if persisted?
+
+    conflict = others.any? do |o|
+      date_bounds_overlap?(
+        effective_start_date, effective_end_date,
+        o.effective_start_date, o.effective_end_date
+      )
+    end
+    return unless conflict
+
+    errors.add(
+      :base,
+      "another active subcontractor relationship for this source and target overlaps these effective dates"
+    )
+  end
 
   def no_self_reference
     return if source_party_id.blank? || target_party_id.blank?

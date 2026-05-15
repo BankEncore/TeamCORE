@@ -1,0 +1,48 @@
+<% content_for :title, "Subcontractor relationships — #{@source_party.display_name.presence || 'Party'}" %>
+<div class="mb-4 flex flex-wrap gap-3 items-center justify-between">
+  <%= link_to "← Party", admin_party_path(@source_party), class: "text-sky-700 text-sm" %>
+  <%= link_to "New subcontractor relationship", new_admin_party_party_relationship_path(@source_party), class: "rounded bg-slate-900 text-white px-3 py-2 text-sm" %>
+</div>
+<h1 class="text-2xl font-semibold mb-2"><%= outbound_subcontractors_panel_title(@source_party) %></h1>
+<p class="text-sm text-slate-600 mb-4">Source party: <%= @source_party.display_name.presence || "Party ##{@source_party.id}" %> (subcontractor PartyRelationships only).</p>
+
+<% if @party_relationships.empty? %>
+  <p class="text-sm text-slate-600">No subcontractor relationships yet.</p>
+<% else %>
+  <ul class="divide-y divide-slate-200 border border-slate-200 rounded bg-white">
+    <% @party_relationships.each do |rel| %>
+      <li class="p-4 text-sm">
+        <div class="flex flex-wrap gap-2 justify-between items-start">
+          <div>
+            <div class="font-medium">
+              <span class="text-slate-500">Source → Target:</span>
+              <%= @source_party.display_name %> → <%= rel.target_party.display_name.presence || "Party ##{rel.target_party_id}" %>
+            </div>
+            <div class="text-slate-600 mt-1">
+              Status <%= rel.status %>
+              <% if rel.effective_start_date || rel.effective_end_date %>
+                · effective <%= rel.effective_start_date || "—" %> — <%= rel.effective_end_date || "—" %>
+              <% end %>
+            </div>
+            <div class="text-slate-600 mt-1">
+              <%= subcontractor_workforce_tier_label(rel.target_party, current_agency) %>
+            </div>
+            <% if rel.subcontractor_person_source_stale_for_display? %>
+              <p class="text-amber-800 bg-amber-50 border border-amber-200 rounded px-2 py-1 mt-2 text-xs">
+                Warning: person source is no longer contractor-capable (no active individual contractor engagement). Existing history remains; edits require a current eligible source or end-dating this relationship.
+              </p>
+            <% end %>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <%= link_to "Edit", edit_admin_party_party_relationship_path(@source_party, rel), class: "rounded border border-slate-300 px-2 py-1 text-xs" %>
+            <% if rel.promotion_eligible? %>
+              <%= button_to "Promote", promote_admin_party_party_relationship_path(@source_party, rel), method: :post, class: "rounded bg-emerald-700 text-white px-2 py-1 text-xs cursor-pointer border-0" %>
+            <% elsif rel.subcontractor? %>
+              <span class="text-xs text-slate-500" title="Requires active/effective relationship, eligible source, complete target identity">Promote unavailable</span>
+            <% end %>
+          </div>
+        </div>
+      </li>
+    <% end %>
+  </ul>
+<% end %>

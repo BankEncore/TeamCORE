@@ -53,6 +53,25 @@ class Party < ApplicationRecord
     end
   end
 
+  # Phase 1 subcontractor source: contractor org party, or person with same-agency active IC engagement.
+  def subcontractor_source_contractor_capable_for_agency?(agency_or_id)
+    aid = agency_or_id.is_a?(Agency) ? agency_or_id.id : agency_or_id.to_i
+    return false unless aid == agency_id
+
+    if organization?
+      organization_profile&.organization_kind == "contractor_organization"
+    elsif person?
+      Engagement.joins(:team_member).exists?(
+        agency_id: aid,
+        relationship_type: "individual_contractor",
+        status: "active",
+        team_members: { party_id: id }
+      )
+    else
+      false
+    end
+  end
+
   private
 
   def default_display_name_from_profile_if_blank

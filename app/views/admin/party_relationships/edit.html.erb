@@ -1,0 +1,4 @@
+<% content_for :title, "Edit subcontractor relationship" %>
+<div class="mb-4"><%= link_to "← Subcontractor relationships", admin_party_party_relationships_path(@source_party), class: "text-sky-700 text-sm" %></div>
+<h1 class="text-2xl font-semibold mb-4">Edit subcontractor relationship</h1>
+<%= render "form", party_relationship: @party_relationship, source_party: @source_party, target_parties: @target_parties %>

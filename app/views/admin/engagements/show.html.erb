@@ -7,6 +7,28 @@
   <dt class="text-slate-500">Status</dt><dd><%= @engagement.status %></dd>
   <dt class="text-slate-500">Dates</dt><dd class="font-mono text-xs">start <%= @engagement.start_on %> · end <%= @engagement.end_on %> · expected <%= @engagement.expected_end_on %></dd>
 </dl>
+<% if @engagement.relationship_type == "subcontractor" %>
+  <div class="border border-slate-200 rounded p-4 bg-white mb-4">
+    <h2 class="font-medium mb-2 text-sm">Contractor association context (PartyRelationship)</h2>
+    <p class="text-xs text-slate-600 mb-2">Workflow state is on this engagement; listed rows are subcontractor PartyRelationships targeting this team member&apos;s party.</p>
+    <% if @subcontractor_context_rels.blank? %>
+      <p class="text-sm text-slate-600">No matching subcontractor PartyRelationship rows for this party in this agency.</p>
+    <% else %>
+      <ul class="text-sm space-y-2 list-disc pl-5">
+        <% @subcontractor_context_rels.each do |rel| %>
+          <li>
+            <span class="font-mono text-xs text-slate-500">source → target</span>
+            <%= rel.source_party.display_name.presence || "Party ##{rel.source_party_id}" %> → <%= @engagement.team_member.party.display_name %>
+            · <%= rel.status %>
+            <% if rel.effective_start_date || rel.effective_end_date %>
+              · eff. <%= rel.effective_start_date || "—" %> — <%= rel.effective_end_date || "—" %>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    <% end %>
+  </div>
+<% end %>
 <% if @engagement.title.present? || @engagement.notes.present? %>
   <p class="text-sm mb-2"><%= @engagement.title %></p>
   <p class="text-sm text-slate-600 mb-4"><%= simple_format(@engagement.notes) if @engagement.notes.present? %></p>

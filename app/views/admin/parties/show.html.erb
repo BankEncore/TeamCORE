@@ -15,4 +15,53 @@
   <h2 class="font-medium mb-2">Organization</h2>
   <p class="text-sm text-slate-700"><%= @party.organization_profile.trade_name.presence || @party.organization_profile.legal_name %></p>
 <% end %>
+
+<div class="mt-8 border-t border-slate-200 pt-6 space-y-8">
+  <% if @can_source_subcontractor_relationships %>
+    <section>
+      <div class="flex flex-wrap gap-2 justify-between items-center mb-2">
+        <h2 class="font-medium"><%= outbound_subcontractors_panel_title(@party) %></h2>
+        <%= link_to "Manage", admin_party_party_relationships_path(@party), class: "text-sky-700 text-sm underline" %>
+      </div>
+      <% if @outgoing_subcontractors.empty? %>
+        <p class="text-sm text-slate-600">No outbound subcontractor relationships.</p>
+      <% else %>
+        <ul class="text-sm space-y-2 list-disc pl-5 text-slate-800">
+          <% @outgoing_subcontractors.each do |rel| %>
+            <li>
+              <span class="font-mono text-xs text-slate-500">source → target</span>
+              <%= @party.display_name %> → <%= rel.target_party.display_name.presence || "Party ##{rel.target_party_id}" %>
+              · <%= rel.status %>
+              <% if rel.effective_start_date || rel.effective_end_date %>
+                · <%= rel.effective_start_date || "—" %> — <%= rel.effective_end_date || "—" %>
+              <% end %>
+              · <%= subcontractor_workforce_tier_label(rel.target_party, current_agency) %>
+            </li>
+          <% end %>
+        </ul>
+      <% end %>
+    </section>
+  <% end %>
+
+  <section>
+    <h2 class="font-medium mb-2">Subcontractor relationships for this party (incoming)</h2>
+    <% if @incoming_subcontractors.empty? %>
+      <p class="text-sm text-slate-600">No incoming subcontractor relationships.</p>
+    <% else %>
+      <ul class="text-sm space-y-2 list-disc pl-5 text-slate-800">
+        <% @incoming_subcontractors.each do |rel| %>
+          <li>
+            <span class="font-mono text-xs text-slate-500">source → target</span>
+            <%= rel.source_party.display_name.presence || "Party ##{rel.source_party_id}" %> → <%= @party.display_name %>
+            · <%= rel.status %>
+            <% if rel.subcontractor_person_source_stale_for_display? %>
+              <span class="text-amber-800 text-xs">(source no longer contractor-capable — see subcontractor hub)</span>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    <% end %>
+  </section>
+</div>
+
 <div class="mt-4"><%= link_to "Edit", edit_admin_party_path(@party), class: "rounded bg-slate-900 text-white px-3 py-2 text-sm" %></div>
