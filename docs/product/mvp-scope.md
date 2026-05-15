@@ -195,7 +195,7 @@ Later MVP phases MUST NOT claim production readiness until **Phase 1** clears th
 
 Phase 2+ prerequisites are sequenced further in **`domain-map.md`**; the table above gates **everything** else in the MVP roadmap.
 
----
+For executable checkboxes (Phase 0 sign-off, OD-011 gate, epic links), use **[`../roadmap/phase-1-readiness-checklist.md`](../roadmap/phase-1-readiness-checklist.md)** (**GH-40**).
 
 ## Acceptance criteria (**GH-36 / TC-scope** checklist)
 
@@ -215,7 +215,7 @@ Derived from GitHub issue #36:
 
 | Document | Purpose |
 | --- | --- |
-| [`roadmap-decision-log.md`](roadmap-decision-log.md) | Accepted phased roadmap intents (GH-37; RD-xxx) |
+| [`../roadmap/phase-1-readiness-checklist.md`](../roadmap/phase-1-readiness-checklist.md) | TC0 exit + OD-011 gate + epic sanity (**GH-40**) |
 | [`overview.md`](overview.md) | Narrative MVP operating decisions |
 | [`domain-map.md`](domain-map.md) | Phases 0–6 domain ordering |
 | [`open-decisions.md`](open-decisions.md) | OD-007, OD-008, OD-011, OD-012, OD-009, OD-010 |

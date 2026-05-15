@@ -12,7 +12,7 @@ This log records **roadmap-level decisions that have already been made**. The go
 
 | Register | Holds |
 | --- | --- |
-| **This log** (`roadmap-decision-log.md`) | Sequencing, milestones, epic numbering, phased delivery intent—accepted for roadmap execution. |
+| **This log** (`roadmap-decision-log.md`) | Sequencing, milestones, epic numbering, phased delivery intent—accepted for roadmap execution. Phase 1 start gate lives in **`../roadmap/phase-1-readiness-checklist.md`**. |
 | [`open-decisions.md`](open-decisions.md) | OD-items: modeling choices, glossary locks, provisional MVP defaults—especially schema blockers (**OD-001–OD-012**). |
 | [`mvp-scope.md`](mvp-scope.md) | Inclusion/exclusion charter and slippery boundaries (**GH-36**). |
 | [`domain-map.md`](domain-map.md) | Domain list and phased domain placement. |

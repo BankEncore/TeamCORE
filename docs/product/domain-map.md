@@ -732,10 +732,12 @@ This domain map is complete enough for `TC-00.02` when:
 ## References
 
 * [`overview.md`](overview.md) — Product overview, MVP scope narrative, roadmap framing.
+* [`roadmap-decision-log.md`](roadmap-decision-log.md) — Settled roadmap intents (**GH-37**).
+* [`../roadmap/phase-1-readiness-checklist.md`](../roadmap/phase-1-readiness-checklist.md) — Phase 1 implementation gate (**GH-40**).
 * [`mvp-scope.md`](mvp-scope.md) — MVP inclusion/exclusion charter and risky boundaries (**GH-36**).
 * [`gloassry.md`](gloassry.md) — Working glossary filename (canonical terminology; sync OD-007/008 when updated).
 * [`open-decisions.md`](open-decisions.md) — Decision register with OD-001–OD-012 status and tiers.
 * [`modeling-notes/party-team-member-engagement.md`](modeling-notes/party-team-member-engagement.md) — Modeling note for OD-001.
-* [`roadmap-decision-log.md`](roadmap-decision-log.md) — Settled roadmap decisions (sequencing, epics, phased intent; **GH-37**).
+* [`employee-contractor-applicability-matrix.md`](employee-contractor-applicability-matrix.md) — Employee vs contractor vs subcontractor capabilities (**GH-39**).
 * GitHub issue **TC-00.02** — Draft TeamCORE domain map (#34).
 
