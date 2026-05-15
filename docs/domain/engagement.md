@@ -1,8 +1,14 @@
 # Engagement domain — TeamCORE
 
-Modeling notes for **TC-03 — Engagement Lifecycle** ([GitHub epic #4](https://github.com/BankEncore/TeamCORE/issues/4)). Glossary ([`../product/glossary.md`](../product/glossary.md)); decisions ([`../product/open-decisions.md`](../product/open-decisions.md) — **TC-03-D01…D10**); identity substrate [`party-team-member.md`](party-team-member.md); TC-01 placement/supervision concepts [`organization.md`](organization.md); applicability matrix [`employee-contractor-applicability-matrix.md`](../product/employee-contractor-applicability-matrix.md).
+Modeling notes for **TC-03 — Engagement Lifecycle** ([GitHub epic #4](https://github.com/BankEncore/TeamCORE/issues/4)) and cross-reference **TC-04 — Engagement status semantics** ([`engagement-status.md`](engagement-status.md)). Glossary ([`../product/glossary.md`](../product/glossary.md)); decisions ([`../product/open-decisions.md`](../product/open-decisions.md) — **TC-03-D01…D10**, **TC-04-D01…D05**); identity substrate [`party-team-member.md`](party-team-member.md); TC-01 placement/supervision concepts [`organization.md`](organization.md); applicability matrix [`employee-contractor-applicability-matrix.md`](../product/employee-contractor-applicability-matrix.md).
 
 **Spine:** `Party → TeamMember → Engagement(s)`. Engagement is **workflow authority** for employee vs contractor semantics and lifecycle (not Party or TeamMember). See **OD-001**, **OD-002**, **OD-003**.
+
+---
+
+## TC-04 — Status semantics (policy)
+
+**Mechanism (TC-03)** — transitions, validators, placement, supervision — lives in **this** document. **Meanings** of `engagements.status` by `relationship_type`, workflow-effect matrices (documentation until later epics), reason-code vocabulary, Team360/reporting expectations, and audit posture are in **[`engagement-status.md`](engagement-status.md)**.
 
 ---
 
@@ -23,7 +29,7 @@ Modeling notes for **TC-03 — Engagement Lifecycle** ([GitHub epic #4](https://
 
 ## Implementation-lock decisions
 
-Formal register summaries: **`open-decisions.md`** (**TC-03-D01…D10**). This section mirrors the authoritative rules for migrations and validators.
+Formal register summaries: **`open-decisions.md`** (**TC-03-D01…D10**, **TC-04-D01…D05**). This section mirrors the authoritative rules for migrations and validators; **TC-04** semantics and consumer contract are summarized in **`engagement-status.md`**.
 
 ### Index
 

@@ -2,7 +2,7 @@
 
 This register tracks product and modeling decisions for TeamCORE. Not every item needs the same rigor: use the **decision handling model** below so Phase 0 can close without pretending Phase 4–6 design is final.
 
-**Companion docs:** [`domain-map.md`](domain-map.md), [`overview.md`](overview.md), [`roadmap-decision-log.md`](roadmap-decision-log.md), [`../roadmap/phase-1-readiness-checklist.md`](../roadmap/phase-1-readiness-checklist.md), [`employee-contractor-applicability-matrix.md`](employee-contractor-applicability-matrix.md), [`glossary.md`](glossary.md), [`../domain/party-team-member.md`](../domain/party-team-member.md), **[`../domain/engagement.md`](../domain/engagement.md)** (TC-03).
+**Companion docs:** [`domain-map.md`](domain-map.md), [`overview.md`](overview.md), [`roadmap-decision-log.md`](roadmap-decision-log.md), [`../roadmap/phase-1-readiness-checklist.md`](../roadmap/phase-1-readiness-checklist.md), [`employee-contractor-applicability-matrix.md`](employee-contractor-applicability-matrix.md), [`glossary.md`](glossary.md), [`../domain/party-team-member.md`](../domain/party-team-member.md), **[`../domain/engagement.md`](../domain/engagement.md)** (TC-03), **[`../domain/engagement-status.md`](../domain/engagement-status.md)** (TC-04).
 
 ---
 
@@ -40,6 +40,11 @@ This register tracks product and modeling decisions for TeamCORE. Not every item
 | TC-03-D08 | `pending` / activation (no OD-006 engine in TC-03) | 1 |
 | TC-03-D09 | Correction / history posture | 1 |
 | TC-03-D10 | ADR vs domain doc (#72) | 1 |
+| TC-04-D01 | Same engagement transition graph for all `relationship_type` (MVP) | 1 |
+| TC-04-D02 | Defer `status_reason` / event history persistence (doc-only vocabulary in TC-04) | 1 |
+| TC-04-D03 | Suspended: no new forward operational work by default | 1 |
+| TC-04-D04 | Lightweight workflow eligibility predicates (hints; not engines) | 1 |
+| TC-04-D05 | `engagements.status` sole workforce relationship lifecycle SOT | 1 |
 | OD-005 | Documents vs Compliance boundary | 2 |
 | OD-006 | Activation readiness | 2 |
 | OD-007 | Payroll input vs payroll run | 2 |
@@ -104,7 +109,7 @@ Engagement = specific employee/contractor relationship
 
 **Rationale:** A party is not “active” in the abstract; activity is always in the context of a relationship.
 
-**Follow-up:** **TC-03-D01** refines the **persisted operational** `relationship_type` set (`employee`, `individual_contractor`, `contractor_organization`, `subcontractor`) and business statuses — see [`../domain/engagement.md`](../domain/engagement.md) and **TC-03-D01…D10** below. Enumerations and transition rules are implemented in Rails per that doc.
+**Follow-up:** **TC-03-D01** refines the **persisted operational** `relationship_type` set (`employee`, `individual_contractor`, `contractor_organization`, `subcontractor`) and business statuses — see [`../domain/engagement.md`](../domain/engagement.md) and **TC-03-D01…D10** below. **Per-type status semantics** and downstream consumer contract: [`../domain/engagement-status.md`](../domain/engagement-status.md) (**TC-04-D01…D05**). Enumerations and transition rules are implemented in Rails per the engagement doc.
 
 ---
 
@@ -187,6 +192,24 @@ Engagement = specific employee/contractor relationship
 | **TC-03-D10** | Domain doc + this register suffice; ADR only if architecture materially changes. |
 
 **Same-agency:** Enforced for engagement, placement targets, and supervision (see domain doc).
+
+---
+
+### TC-04 implementation lock (TC-04-D01…D05)
+
+**Status:** Accepted for TC-04 documentation and later predicate work  
+**Tier:** 1  
+**Authoritative detail:** [`../domain/engagement-status.md`](../domain/engagement-status.md)
+
+| ID | Decision (summary) |
+| --- | --- |
+| **TC-04-D01** | **Same** MVP transition graph for **all** `relationship_type` values; **TC-03** / `Engagement` authoritative for enforcement; no per-type edge restrictions in MVP unless product requires them. |
+| **TC-04-D02** | Reason-code **vocabulary** documented in domain only; **no** `status_reason` / notes / status-event tables in TC-04 — defer to avoid pulling **TC-30** forward; separate spike if persistent reasons are needed soon. |
+| **TC-04-D03** | **Suspended:** not eligible for **new** forward operational work **by default**; history, correction, review, finalization, permissioned exceptions = later epics (see engagement-status doc normative paragraph). |
+| **TC-04-D04** | **Lightweight** eligibility helpers on `Engagement` (TC-04.09 / separate PR): **hints** only — not **OD-006** readiness, payroll run, settlement run, time, or leave engines; **not** a substitute for **OD-009** permission checks. |
+| **TC-04-D05** | **`engagements.status`** is the **only** persisted workforce **relationship lifecycle** status on this spine; **Party** / **TeamMember** use **record** lifecycle (`LifecycleStatusable`) — not employment/contract operational status. |
+
+**No migration** in the TC-04 doc-only PR; predicate implementation and optional seeds follow in a separate change set.
 
 ---
 
