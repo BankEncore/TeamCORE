@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class Engagement < ApplicationRecord
+  include EngagementWorkflowEligibility
+
   RELATIONSHIP_TYPES = %w[
     employee
     individual_contractor

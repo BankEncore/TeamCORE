@@ -2,7 +2,7 @@
 
 **Epic:** TC-04 — Employee and Contractor Status Models.
 
-**Purpose:** Define **what** each `engagements.status` value **means** for each `engagements.relationship_type`, how status affects **downstream workflow eligibility** (documentation only until those epics ship), and expectations for **Team360**, **operational reporting**, **audit**, and **permissions**. Add **lightweight eligibility predicates** in code under **TC-04.09** (separate PR) — not payroll/settlement/time/leave engines.
+**Purpose:** Define **what** each `engagements.status` value **means** for each `engagements.relationship_type`, how status affects **downstream workflow eligibility** (documentation until those epics ship), and expectations for **Team360**, **operational reporting**, **audit**, and **permissions**. Lightweight eligibility predicates live in **`EngagementWorkflowEligibility`** on **`Engagement`** (**TC-04.11** / implementation) — not payroll/settlement/time/leave engines.
 
 **Companion docs:** lifecycle **mechanism** — [`engagement.md`](engagement.md) (TC-03); decisions — [`../product/open-decisions.md`](../product/open-decisions.md) (**TC-04-D01…D05**); applicability — [`../product/employee-contractor-applicability-matrix.md`](../product/employee-contractor-applicability-matrix.md); Team360/reporting tables — [`organization.md`](organization.md) § Team360 and operational reporting (TC-01.10).
 
@@ -17,7 +17,7 @@ Formal register: **`open-decisions.md`**. This section is the domain mirror.
 | **TC-04-D01** | Transition graph | **Same** MVP transition graph for **all** `relationship_type` values. **TC-03** / [`Engagement`](../../app/models/engagement.rb) remains **authoritative** for allowed transitions and business-date rules. TC-04 does **not** duplicate transition enforcement. Per-type **edge** restrictions are **deferred** unless product requires them. |
 | **TC-04-D02** | Status reason storage | Reason-code **vocabulary** is documented **below** only. **`status_reason`**, **`status_reason_notes`**, and **status event history** tables are **deferred** in TC-04 to avoid pulling **TC-30** forward; persistent storage requires a **separate** UX/audit spike if needed soon. |
 | **TC-04-D03** | Suspended | See **normative paragraph** under [Suspended behavior](#suspended-behavior-tc-04-d03). |
-| **TC-04-D04** | Workflow predicates | **Lightweight** helpers on `Engagement` (TC-04.09) — **hints** for later epics. They are **not** readiness (**OD-006**), payroll, settlement, time, or leave engines, and **not** a substitute for **OD-009** permission checks. |
+| **TC-04-D04** | Workflow predicates | **Lightweight** helpers on `Engagement` via **`EngagementWorkflowEligibility`** (**TC-04.11**) — **hints** for later epics. They are **not** readiness (**OD-006**), payroll, settlement, time, or leave engines, and **not** a substitute for **OD-009** permission checks. |
 | **TC-04-D05** | Source of truth | **`engagements.status`** is the **only** persisted workforce **relationship lifecycle** status for this spine. **`Party`** and **`TeamMember`** use their own **record** lifecycle (`LifecycleStatusable`) — **not** employment/contract operational status. |
 
 ---
@@ -90,7 +90,7 @@ Semantic **interpretation** varies by `relationship_type` in the sections below;
 ¹ **Eligibility only** — period locks, approvals, readiness (**OD-006**), and **OD-009** gates apply in later epics.  
 ² **Default:** block **new** forward work; corrections and permissioned exceptions are **later** epics (**TC-30**).
 
- **`active`** is the sole status where **employee-only** rails (time, leave, payroll **input** in MVP framing) are **intended** to attach; predicates in TC-04.09 encode this hint.
+ **`active`** is the sole status where **employee-only** rails (time, leave, payroll **input** in MVP framing) are **intended** to attach; predicates in **`EngagementWorkflowEligibility`** encode this hint.
 
 ---
 

@@ -206,10 +206,10 @@ Engagement = specific employee/contractor relationship
 | **TC-04-D01** | **Same** MVP transition graph for **all** `relationship_type` values; **TC-03** / `Engagement` authoritative for enforcement; no per-type edge restrictions in MVP unless product requires them. |
 | **TC-04-D02** | Reason-code **vocabulary** documented in domain only; **no** `status_reason` / notes / status-event tables in TC-04 — defer to avoid pulling **TC-30** forward; separate spike if persistent reasons are needed soon. |
 | **TC-04-D03** | **Suspended:** not eligible for **new** forward operational work **by default**; history, correction, review, finalization, permissioned exceptions = later epics (see engagement-status doc normative paragraph). |
-| **TC-04-D04** | **Lightweight** eligibility helpers on `Engagement` (TC-04.09 / separate PR): **hints** only — not **OD-006** readiness, payroll run, settlement run, time, or leave engines; **not** a substitute for **OD-009** permission checks. |
+| **TC-04-D04** | **Lightweight** eligibility helpers on `Engagement` (`EngagementWorkflowEligibility`; **TC-04.11**): **hints** only — not **OD-006** readiness, payroll run, settlement run, time, or leave engines; **not** a substitute for **OD-009** permission checks. |
 | **TC-04-D05** | **`engagements.status`** is the **only** persisted workforce **relationship lifecycle** status on this spine; **Party** / **TeamMember** use **record** lifecycle (`LifecycleStatusable`) — not employment/contract operational status. |
 
-**No migration** in the TC-04 doc-only PR; predicate implementation and optional seeds follow in a separate change set.
+**No migration** for TC-04 status reasons (**TC-04-D02**). **TC-04.11** implements `EngagementWorkflowEligibility` predicates; **TC-04.12** extends `db/seeds.rb` with pending / suspended / ended examples.
 
 ---
 
