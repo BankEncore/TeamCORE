@@ -37,6 +37,7 @@ Rails.application.routes.draw do
     resources :document_types
     resources :document_requirements, except: %i[show destroy]
     resources :document_records
+    resources :document_alerts, only: %i[index]
   end
 
   root "home#index"

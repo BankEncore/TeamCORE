@@ -30,6 +30,8 @@ module Admin
       end
 
       @document_readiness = Documents::ReadinessEvaluator.new(engagement: @engagement).call
+      type_ids = @document_readiness.alerts.map(&:document_type_id).uniq
+      @alert_document_types_by_id = DocumentType.where(id: type_ids).index_by(&:id)
     end
 
     def new

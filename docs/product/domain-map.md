@@ -364,11 +364,9 @@ Examples:
 
 **Boundary — verification:** Verification **reviews a document artifact** against policy (often surfaced from document-admin UX). **Compliance** **consumes** verification outcomes to calculate **activation readiness**, requirement satisfaction, exception handling, or obligation state—avoid treating verification as wholly owned by either side alone without this split (**OD-005**, Phase 2 implementation detail).
 
-**TC-06 implementation hub:** [`documents-compliance.md`](../domain/documents-compliance.md) — types, requirements, records, **`Documents::ReadinessEvaluator`**, persisted vs derived status, subcontractor applicability.
+**TC-06 implementation hub:** [`documents-compliance.md`](../domain/documents-compliance.md) — types, requirements, records, **`Documents::ReadinessEvaluator`**, persisted vs derived status, subcontractor applicability. **TC-07 document alerts (virtual, read-time):** [`document-alerts.md`](../domain/document-alerts.md).
 
 ---
-
-### Engagement and Compensation
 
 Compensation describes what the agency may owe the team member under the engagement.
 

@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 module Documents
-  # Single source of truth for engagement document readiness (TC-06 / OD-006 document slice).
+  # Single source of truth for engagement document readiness (TC-06 / OD-006 document slice)
+  # and derived document alerts (TC-07).
   class ReadinessEvaluator
     REQUIREMENT_OUTCOMES = %w[
       missing pending_verification satisfied rejected expired expiring_soon not_applicable
@@ -10,6 +11,8 @@ module Documents
     READINESS_STATUSES = %w[ready not_ready warning not_applicable].freeze
 
     BLOCKING_OUTCOMES = %w[missing rejected expired pending_verification].freeze
+
+    ALERT_OUTCOMES = %w[missing expired expiring_soon rejected pending_verification].freeze
 
     RequirementEvaluation = Data.define(
       :document_requirement_id,
@@ -24,7 +27,15 @@ module Documents
       :expires_on
     )
 
-    Result = Data.define(:readiness_status, :as_of_date, :engagement_id, :requirements)
+    SEVERITY_RANK = { "blocking" => 0, "warning" => 1, "info" => 2 }.freeze
+
+    ALERT_TYPE_RANK = {
+      "missing" => 0,
+      "expired" => 1,
+      "rejected" => 2,
+      "pending_verification" => 3,
+      "expiring_soon" => 4
+    }.freeze
 
     def initialize(engagement:, as_of_date: Date.current)
       @engagement = engagement
@@ -38,15 +49,107 @@ module Documents
         evaluate_requirement(req)
       end
 
-      Result.new(
+      alerts = sort_alerts(build_alerts(rows))
+
+      ReadinessResult.new(
         readiness_status: aggregate_readiness(rows),
         as_of_date: @as_of_date,
         engagement_id: @engagement.id,
-        requirements: rows
+        requirements: rows,
+        alerts: alerts
       )
     end
 
     private
+
+    def build_alerts(rows)
+      req_ids = rows.map(&:document_requirement_id).uniq
+      reqs_by_id =
+        DocumentRequirement
+          .includes(:document_type)
+          .where(id: req_ids)
+          .index_by(&:id)
+
+      rec_ids = rows.filter_map(&:document_record_id).uniq
+      records_by_id =
+        DocumentRecord.where(id: rec_ids).index_by(&:id)
+
+      rows.filter_map do |row|
+        next unless row.required
+
+        outcome = row.requirement_outcome
+        next unless ALERT_OUTCOMES.include?(outcome)
+
+        requirement = reqs_by_id[row.document_requirement_id]
+        next unless requirement
+
+        record =
+          if row.document_record_id.present?
+            records_by_id[row.document_record_id]
+          end
+
+        expires_on = row.expires_on
+        days_until =
+          expires_on.present? ? (expires_on - @as_of_date).to_i : nil
+
+        rejection_reason =
+          outcome == "rejected" ? record&.rejection_reason : nil
+
+        severity = outcome == "expiring_soon" ? "warning" : "blocking"
+
+        message = AlertMessageBuilder.build(
+          outcome:,
+          requirement:,
+          as_of_date: @as_of_date,
+          rejection_reason:,
+          expires_on:,
+          days_until_expiration: days_until
+        )
+
+        AlertResult.new(
+          alert_type: outcome,
+          severity:,
+          requirement_outcome: outcome,
+          record_review_status: row.record_review_status,
+          document_requirement_id: requirement.id,
+          document_type_id: requirement.document_type_id,
+          document_record_id: row.document_record_id,
+          engagement_id: @engagement.id,
+          team_member_id: @engagement.team_member_id,
+          expires_on:,
+          days_until_expiration: days_until,
+          rejection_reason:,
+          message:
+        )
+      end
+    end
+
+    def sort_alerts(alerts)
+      type_ids = alerts.map(&:document_type_id).uniq
+      codes =
+        DocumentType
+          .where(id: type_ids)
+          .pluck(:id, :code)
+          .to_h
+
+      alerts.sort_by do |a|
+        expires_jd =
+          if a.expires_on.present?
+            a.expires_on.jd.to_f
+          else
+            Float::INFINITY
+          end
+
+        [
+          SEVERITY_RANK.fetch(a.severity, 99),
+          ALERT_TYPE_RANK.fetch(a.alert_type, 99),
+          expires_jd,
+          codes.fetch(a.document_type_id, "").to_s.downcase,
+          a.document_requirement_id,
+          a.alert_type.to_s # stable tie-break
+        ]
+      end
+    end
 
     def applicable_requirements
       DocumentRequirement
@@ -129,9 +232,7 @@ module Documents
     def derive_outcome(record, requirement)
       return "missing" if record.blank?
 
-      if expired?(record)
-        return "expired"
-      end
+      return "expired" if expired?(record)
 
       case record.status
       when "verified"
@@ -171,9 +272,7 @@ module Documents
 
       required_rows = applicable.select(&:required)
 
-      if required_rows.empty?
-        return "ready"
-      end
+      return "ready" if required_rows.empty?
 
       if required_rows.any? { |r| BLOCKING_OUTCOMES.include?(r.requirement_outcome) }
         return "not_ready"

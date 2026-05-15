@@ -35,7 +35,13 @@
 <% end %>
 <div class="border border-slate-200 rounded p-4 bg-white mb-4">
   <h2 class="font-medium mb-2">Document readiness (TC-06)</h2>
-  <p class="text-xs text-slate-600 mb-2">Derived from <code class="font-mono">Documents::ReadinessEvaluator</code> — <code class="font-mono">readiness_status</code>: <%= @document_readiness.readiness_status %> · as of <%= @document_readiness.as_of_date %></p>
+  <p class="text-xs text-slate-600 mb-2">
+    Requirement grid from <code class="font-mono">Documents::ReadinessEvaluator</code> —
+    <code class="font-mono">readiness_status</code>: <%= @document_readiness.readiness_status %> · as of <%= @document_readiness.as_of_date %>
+  </p>
+  <%= render partial: "document_alerts",
+        locals: { readiness: @document_readiness, document_types_by_id: @alert_document_types_by_id } %>
+  <h3 class="text-sm font-medium text-slate-800 mb-2 mt-6">Requirements (evaluation rows)</h3>
   <table class="min-w-full text-xs border border-slate-200 bg-white mt-2">
     <thead class="bg-slate-100"><tr>
       <th class="text-left p-2">Req</th>

@@ -1,0 +1,71 @@
+<%# locals: readiness — Documents::ReadinessResult, document_types_by_id — Hash<Integer, DocumentType> %>
+<section class="border border-slate-200 rounded p-4 bg-white mb-4">
+  <h2 class="font-medium mb-2">Document alerts (TC-07)</h2>
+  <p class="text-xs text-slate-600 mb-3">
+    Derived alerts from <code class="font-mono">Documents::ReadinessEvaluator</code> —
+    <code class="font-mono">readiness_status</code>: <%= readiness.readiness_status %> · evaluated as of <%= readiness.as_of_date %>
+  </p>
+
+  <% if readiness.alerts.empty? %>
+    <p class="text-sm text-slate-600">No active document alerts for this engagement.</p>
+  <% else %>
+    <% grouped = readiness.alerts.group_by(&:severity) %>
+    <% [["blocking", "Blocking"], ["warning", "Warnings"], ["info", "Info"]].each do |sev, label| %>
+      <% rows = grouped[sev] || [] %>
+      <% next if rows.empty? %>
+      <div class="mb-4 last:mb-0">
+        <h3 class="text-sm font-medium text-slate-800 mb-2"><%= label %></h3>
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-xs border border-slate-200 bg-white">
+            <thead class="bg-slate-100">
+              <tr>
+                <th class="text-left p-2">Message</th>
+                <th class="text-left p-2">Alert type</th>
+                <th class="text-left p-2">Requirement</th>
+                <th class="text-left p-2">Document type</th>
+                <th class="text-left p-2">Record</th>
+                <th class="text-left p-2">Expires</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% rows.each do |alert| %>
+                <% dtype = document_types_by_id[alert.document_type_id] %>
+                <tr class="border-t border-slate-200">
+                  <td class="p-2 align-top"><%= alert.message %></td>
+                  <td class="p-2 font-mono align-top"><%= alert.alert_type %></td>
+                  <td class="p-2 align-top">
+                    <%= link_to "Req ##{alert.document_requirement_id}", edit_admin_document_requirement_path(alert.document_requirement_id), class: "text-sky-700 underline" %>
+                  </td>
+                  <td class="p-2 align-top">
+                    <% if dtype %>
+                      <%= link_to "#{dtype.name} (#{dtype.code})", admin_document_type_path(dtype), class: "text-sky-700 underline" %>
+                    <% else %>
+                      <span class="font-mono">type #<%= alert.document_type_id %></span>
+                    <% end %>
+                  </td>
+                  <td class="p-2 align-top">
+                    <% if alert.document_record_id.present? %>
+                      <%= link_to "Record ##{alert.document_record_id}", admin_document_record_path(alert.document_record_id), class: "text-sky-700 underline" %>
+                    <% else %>
+                      —
+                    <% end %>
+                  </td>
+                  <td class="p-2 font-mono align-top">
+                    <% if alert.expires_on.present? %>
+                      <%= alert.expires_on %>
+                      <% if alert.days_until_expiration.present? %>
+                        <span class="text-slate-500">(<%= alert.days_until_expiration %> d)</span>
+                      <% end %>
+                    <% else %>
+                      —
+                    <% end %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    <% end %>
+  <% end %>
+</section>

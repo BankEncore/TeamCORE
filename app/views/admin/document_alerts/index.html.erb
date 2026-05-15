@@ -1,0 +1,141 @@
+<% content_for :title, "Document alerts" %>
+<div class="mb-4"><%= link_to "← Dashboard", admin_root_path, class: "text-sky-700 text-sm" %></div>
+<h1 class="text-2xl font-semibold mb-2">Document alerts</h1>
+<p class="text-sm text-slate-600 mb-4">
+  Exception list across engagements (virtual, read-time). Default scope excludes terminal engagements
+  (<code class="font-mono">ended</code>, <code class="font-mono">terminated</code>, <code class="font-mono">cancelled</code>).
+  Use <span class="font-mono">include_terminal</span> to include them.
+</p>
+
+<%= form_with url: admin_document_alerts_path, method: :get, data: { turbo: false }, class: "border border-slate-200 rounded p-4 bg-white mb-6 space-y-3 text-sm" do %>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+    <div>
+      <%= label_tag :as_of_date, "As of date (ISO)", class: "block text-slate-600 text-xs mb-1" %>
+      <%= text_field_tag :as_of_date, params[:as_of_date].presence || @as_of_date.iso8601, class: "w-full border border-slate-300 rounded px-2 py-1" %>
+    </div>
+    <div>
+      <%= label_tag :alert_type, "Alert type", class: "block text-slate-600 text-xs mb-1" %>
+      <%= select_tag :alert_type,
+            options_for_select(
+              [
+                [ "— any —", "" ],
+                %w[missing missing],
+                %w[expired expired],
+                %w[expiring_soon expiring_soon],
+                %w[rejected rejected],
+                %w[pending_verification pending_verification]
+              ],
+              params[:alert_type]
+            ),
+            class: "w-full border border-slate-300 rounded px-2 py-1" %>
+    </div>
+    <div>
+      <%= label_tag :severity, "Severity", class: "block text-slate-600 text-xs mb-1" %>
+      <%= select_tag :severity,
+            options_for_select(
+              [
+                [ "— any —", "" ],
+                %w[blocking blocking],
+                %w[warning warning],
+                %w[info info]
+              ],
+              params[:severity]
+            ),
+            class: "w-full border border-slate-300 rounded px-2 py-1" %>
+    </div>
+    <div>
+      <%= label_tag :relationship_type, "Relationship type", class: "block text-slate-600 text-xs mb-1" %>
+      <%= select_tag :relationship_type,
+            options_for_select(
+              [ [ "— any —", "" ] ] + Engagement::RELATIONSHIP_TYPES.map { |rt| [ rt, rt ] },
+              params[:relationship_type]
+            ),
+            class: "w-full border border-slate-300 rounded px-2 py-1" %>
+    </div>
+    <div>
+      <%= label_tag :engagement_status, "Engagement status", class: "block text-slate-600 text-xs mb-1" %>
+      <%= select_tag :engagement_status,
+            options_for_select(
+              [ [ "— any —", "" ] ] + Engagement::STATUSES.map { |s| [ s, s ] },
+              params[:engagement_status]
+            ),
+            class: "w-full border border-slate-300 rounded px-2 py-1" %>
+    </div>
+    <div>
+      <%= label_tag :document_type_id, "Document type id", class: "block text-slate-600 text-xs mb-1" %>
+      <%= text_field_tag :document_type_id, params[:document_type_id], class: "w-full border border-slate-300 rounded px-2 py-1", placeholder: "numeric id" %>
+    </div>
+    <div>
+      <%= label_tag :team_member_id, "Team member id", class: "block text-slate-600 text-xs mb-1" %>
+      <%= text_field_tag :team_member_id, params[:team_member_id], class: "w-full border border-slate-300 rounded px-2 py-1", placeholder: "numeric id" %>
+    </div>
+    <div>
+      <%= label_tag :expires_on_or_before, "Expires on or before (ISO)", class: "block text-slate-600 text-xs mb-1" %>
+      <%= text_field_tag :expires_on_or_before, params[:expires_on_or_before], class: "w-full border border-slate-300 rounded px-2 py-1" %>
+    </div>
+    <div class="flex items-end gap-2">
+      <label class="flex items-center gap-2 text-slate-700">
+        <%= check_box_tag :include_terminal, "1", params[:include_terminal].present? %>
+        Include terminal engagements
+      </label>
+    </div>
+  </div>
+  <div>
+    <%= submit_tag "Apply filters", class: "rounded bg-slate-900 text-white px-3 py-2 text-sm cursor-pointer" %>
+    <%= link_to "Reset", admin_document_alerts_path, class: "ml-2 text-sky-700 text-sm" %>
+  </div>
+<% end %>
+
+<% if @flat_alert_rows.empty? %>
+  <p class="text-sm text-slate-600">No alerts match the current filters.</p>
+<% else %>
+  <div class="overflow-x-auto border border-slate-200 rounded bg-white">
+    <table class="min-w-full text-xs">
+      <thead class="bg-slate-100">
+        <tr>
+          <th class="text-left p-2">Engagement</th>
+          <th class="text-left p-2">Team member</th>
+          <th class="text-left p-2">Relationship</th>
+          <th class="text-left p-2">Severity</th>
+          <th class="text-left p-2">Type</th>
+          <th class="text-left p-2">Message</th>
+          <th class="text-left p-2">Requirement</th>
+          <th class="text-left p-2">Doc type</th>
+          <th class="text-left p-2">Record</th>
+          <th class="text-left p-2">Expires</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @flat_alert_rows.each do |row| %>
+          <% eg = row.engagement %>
+          <% alert = row.alert %>
+          <% dtype = @document_types_by_id[alert.document_type_id] %>
+          <tr class="border-t border-slate-200">
+            <td class="p-2"><%= link_to "##{eg.id}", admin_engagement_path(eg), class: "text-sky-700 underline" %></td>
+            <td class="p-2"><%= link_to eg.team_member.party.display_name, admin_team_member_path(eg.team_member), class: "text-sky-700 underline" %></td>
+            <td class="p-2 font-mono"><%= eg.relationship_type %></td>
+            <td class="p-2 font-mono"><%= alert.severity %></td>
+            <td class="p-2 font-mono"><%= alert.alert_type %></td>
+            <td class="p-2 align-top"><%= alert.message %></td>
+            <td class="p-2"><%= link_to "Req ##{alert.document_requirement_id}", edit_admin_document_requirement_path(alert.document_requirement_id), class: "text-sky-700 underline" %></td>
+            <td class="p-2">
+              <% if dtype %>
+                <%= link_to dtype.code, admin_document_type_path(dtype), class: "text-sky-700 underline" %>
+              <% else %>
+                <span class="font-mono">#<%= alert.document_type_id %></span>
+              <% end %>
+            </td>
+            <td class="p-2">
+              <% if alert.document_record_id.present? %>
+                <%= link_to "##{alert.document_record_id}", admin_document_record_path(alert.document_record_id), class: "text-sky-700 underline" %>
+              <% else %>
+                —
+              <% end %>
+            </td>
+            <td class="p-2 font-mono"><%= alert.expires_on&.iso8601 || "—" %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% end %>
