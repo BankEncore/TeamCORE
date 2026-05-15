@@ -55,9 +55,9 @@ A party may be:
 
 A party is an identity record. It does not, by itself, determine whether someone is an employee, contractor, subcontractor, or active team member.
 
----
+**Schema and rules (Phase 1 / TC-02):** [`party-team-member.md`](../domain/party-team-member.md).
 
-### Team Member
+---
 
 A **Team Member** is a party that participates in the agency’s workforce operations through one or more engagements.
 

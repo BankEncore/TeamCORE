@@ -1,6 +1,6 @@
 # Modeling note — Party, Team Member, and Engagement
 
-**Related:** OD-001 in [`open-decisions.md`](../open-decisions.md).  
+**Related:** OD-001 in [`open-decisions.md`](../open-decisions.md). TC-02 domain specification: [`docs/domain/party-team-member.md`](../../domain/party-team-member.md).  
 **Status:** Accepted  
 **Supersedes:** Informal ambiguity in earlier domain-map drafts.
 

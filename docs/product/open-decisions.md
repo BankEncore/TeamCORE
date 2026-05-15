@@ -2,7 +2,7 @@
 
 This register tracks product and modeling decisions for TeamCORE. Not every item needs the same rigor: use the **decision handling model** below so Phase 0 can close without pretending Phase 4–6 design is final.
 
-**Companion docs:** [`domain-map.md`](domain-map.md), [`overview.md`](overview.md), [`roadmap-decision-log.md`](roadmap-decision-log.md), [`../roadmap/phase-1-readiness-checklist.md`](../roadmap/phase-1-readiness-checklist.md), [`employee-contractor-applicability-matrix.md`](employee-contractor-applicability-matrix.md), [`glossary.md`](glossary.md).
+**Companion docs:** [`domain-map.md`](domain-map.md), [`overview.md`](overview.md), [`roadmap-decision-log.md`](roadmap-decision-log.md), [`../roadmap/phase-1-readiness-checklist.md`](../roadmap/phase-1-readiness-checklist.md), [`employee-contractor-applicability-matrix.md`](employee-contractor-applicability-matrix.md), [`glossary.md`](glossary.md), [`../domain/party-team-member.md`](../domain/party-team-member.md).
 
 ---
 
@@ -25,6 +25,11 @@ This register tracks product and modeling decisions for TeamCORE. Not every item
 | OD-003 | Employee vs contractor status | 1 |
 | OD-004 | Subcontractor relationship (MVP) | 1 |
 | OD-011 | Agency vs Organization (concept + Phase 1 implementation / **ADR-0001**) | 1 |
+| TC-02-D01 | Team member number optional + unique when present | 1 |
+| TC-02-D02 | Party/profile draft-tolerant; TeamMember requires complete identity | 1 |
+| TC-02-D03 | One active primary contact per org (effective dating + status) | 1 |
+| TC-02-D04 | Organization Party not auto–TeamMember | 1 |
+| TC-02-D05 | Party.display_name authoritative; default from profile | 1 |
 | OD-005 | Documents vs Compliance boundary | 2 |
 | OD-006 | Activation readiness | 2 |
 | OD-007 | Payroll input vs payroll run | 2 |
@@ -112,6 +117,43 @@ Engagement = specific employee/contractor relationship
 | Team360 profile | Team Member |
 
 **Follow-up:** Glossary + product rule checklist issue.
+
+---
+
+### TC-02-D01 — Team member number
+
+**Status:** Accepted  
+**Tier:** 1 — TC-02 implementation
+
+**Decision:** `team_member_number` is optional in MVP. When present, it is unique within the agency (multiple NULLs allowed in MySQL). It is normalized strip + uppercase as an agency internal identifier, not the **`NormalizesCode`** concern used for lowercase org codes.
+
+### TC-02-D02 — Party / profile completeness
+
+**Status:** Accepted  
+**Tier:** 1
+
+**Decision:** Party persistence is draft-tolerant (Party may exist before matching PersonProfile or OrganizationProfile). Creating a TeamMember requires `identity_complete?` for that party type.
+
+### TC-02-D03 — Active primary contact
+
+**Status:** Accepted  
+**Tier:** 1
+
+**Decision:** At most one **currently effective** `primary_contact` relationship per source party (`status` active + effective date window per [`party-team-member.md`](../domain/party-team-member.md)).
+
+### TC-02-D04 — Organization Party vs Team Member
+
+**Status:** Accepted  
+**Tier:** 1
+
+**Decision:** Organization-type parties are not automatically TeamMembers; add TeamMember only when the org participates directly as workforce participant (paths consumed by TC-03+).
+
+### TC-02-D05 — Party display name
+
+**Status:** Accepted  
+**Tier:** 1
+
+**Decision:** `Party.display_name` is the authoritative UI label; may default from profile when blank and is required when identity is complete; ongoing sync from profile updates is **not** required.
 
 ---
 
