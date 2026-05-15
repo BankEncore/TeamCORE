@@ -2,7 +2,7 @@
 
 This register tracks product and modeling decisions for TeamCORE. Not every item needs the same rigor: use the **decision handling model** below so Phase 0 can close without pretending Phase 4–6 design is final.
 
-**Companion docs:** [`domain-map.md`](domain-map.md), [`overview.md`](overview.md), [`roadmap-decision-log.md`](roadmap-decision-log.md), [`../roadmap/phase-1-readiness-checklist.md`](../roadmap/phase-1-readiness-checklist.md), [`employee-contractor-applicability-matrix.md`](employee-contractor-applicability-matrix.md), [`gloassry.md`](gloassry.md) (working glossary filename).
+**Companion docs:** [`domain-map.md`](domain-map.md), [`overview.md`](overview.md), [`roadmap-decision-log.md`](roadmap-decision-log.md), [`../roadmap/phase-1-readiness-checklist.md`](../roadmap/phase-1-readiness-checklist.md), [`employee-contractor-applicability-matrix.md`](employee-contractor-applicability-matrix.md), [`glossary.md`](glossary.md).
 
 ---
 
@@ -24,7 +24,7 @@ This register tracks product and modeling decisions for TeamCORE. Not every item
 | OD-002 | Multiple engagements | 1 |
 | OD-003 | Employee vs contractor status | 1 |
 | OD-004 | Subcontractor relationship (MVP) | 1 |
-| OD-011 | Agency vs Organization (concept + schema fork) | 1 |
+| OD-011 | Agency vs Organization (concept + Phase 1 implementation / **ADR-0001**) | 1 |
 | OD-005 | Documents vs Compliance boundary | 2 |
 | OD-006 | Activation readiness | 2 |
 | OD-007 | Payroll input vs payroll run | 2 |
@@ -203,19 +203,20 @@ TeamCORE prepares inputs and records results; it is **not** the payroll processo
 
 ### OD-011 — Agency vs Organization (concept)
 
-**Status:** Accepted (concept); implementation choice open  
-**Tier:** 1 concept, **Needs ADR** for schema pattern
+**Status:** Accepted (concept + Phase 1 implementation)  
+**Tier:** 1 schema pattern — **ADR-0001** documents the implementation choice  
+**Companion:** [`domain/organization.md`](../domain/organization.md), **[`adr/adr-0001-agency-organization-schema.md`](../adr/adr-0001-agency-organization-schema.md)**
 
 **Decision (product language):**
 
 ```text
 Agency = the business using TeamCORE (top-level operating context)
-Organization = the agency's internal structure
+Organization = the agency's internal structure (domain term — not an AR model in TC-01)
 ```
 
-Conceptually **distinct**. Implementation may use a standalone **Agency** model, an **Organization** root with `organization_type`, or equivalent—**must be chosen before Phase 1 schema freezes**.
+**Implementation (Phase 1 / TC-01):** Standalone **`Agency`** model; **`Department`**, **`Location`**, and **`Team`** belong to **`Agency`**. No polymorphic **`Organization`** table.
 
-**Follow-up:** Modeling note or ADR selecting implementation option.
+**Resolved:** ~~Modeling note or ADR selecting implementation option.~~ Completed with **ADR-0001**.
 
 ---
 
@@ -270,7 +271,6 @@ Items accepted at concept level elsewhere; detailed design waits for phased deli
 | OD-007 / OD-008 | Implementation naming in APIs and DB column terminology | Phase 4–5 |
 | OD-009 | Full permission model ADR | Phase 3–6 |
 | OD-010 | Formal audit ADR if policy gaps | Phase 6 |
-| OD-011 | Agency multi-tenancy row strategy | Phase 1 (before schema freeze) |
 | OD-012 | Settlement calculation vs compensation engine boundaries | Phase 4 |
 | OD-004 | Advanced subcontractor / multi-party graph | Post-MVP |
 
@@ -280,6 +280,6 @@ Items accepted at concept level elsewhere; detailed design waits for phased deli
 
 These should be **accepted** (as above) before treating Phase 1 schema as unblocked:
 
-- OD-001, OD-002, OD-003, OD-004 (MVP rule), OD-011 (concept—and schedule implementation ADR/note)
+- OD-001, OD-002, OD-003, OD-004 (MVP rule), OD-011 (concept + **ADR-0001** implementation)
 
 The remainder supply **language and direction** so issues stay consistent without front-loading every implementation detail.

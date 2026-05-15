@@ -34,7 +34,7 @@ These artifacts should be **accepted** (or explicitly waived by product lead in 
 | --- | --- | --- |
 | Product overview | [`docs/product/overview.md`](../product/overview.md) | Boundary, MVP operating decisions. |
 | Domain map | [`docs/product/domain-map.md`](../product/domain-map.md) | Phases, dependencies, domain list. |
-| Glossary (working filename) | [`docs/product/gloassry.md`](../product/gloassry.md) | Stabilize conflicting terms; payroll/settlement language per **OD-007/OD-008**. |
+| Glossary | [`docs/product/glossary.md`](../product/glossary.md) | Stabilize conflicting terms; payroll/settlement language per **OD-007/OD-008**. |
 | MVP scope | [`docs/product/mvp-scope.md`](../product/mvp-scope.md) | Firm **includes/excludes** and risky seams. |
 | Roadmap decision log | [`docs/product/roadmap-decision-log.md`](../product/roadmap-decision-log.md) | RD-001–RD-008 and epic numbering **TC-00…TC-31**. |
 | Open decision register | [`docs/product/open-decisions.md`](../product/open-decisions.md) | OD-001–OD-012; tiered follow-ups. |
@@ -49,7 +49,7 @@ These must be **closed** (Accepted + documented) or have an **explicit waiver** 
 
 | OD | Topic | Why blocking | Required output |
 | --- | --- | --- | --- |
-| **OD-011** | Agency vs Organization **implementation** | Partitions every FK and tenancy story; cannot be retrofitted cheaply if wrong. | **ADR** or **Phase 1 modeling note** choosing pattern (standalone Agency model vs org-root vs other) **before schema freeze**. Concept is already Accepted in register. |
+| **OD-011** | Agency vs Organization **implementation** | Partitions every FK and tenancy story; cannot be retrofitted cheaply if wrong. | **ADR-0001** — standalone `Agency` with `Department` / `Location` / `Team`; see [`docs/adr/adr-0001-agency-organization-schema.md`](../adr/adr-0001-agency-organization-schema.md). |
 | **OD-001** | Party vs Team Member vs Engagement | Already **Accepted** — ensure team has read modeling note. | — |
 | **OD-002** | Multiple engagements | Accepted with constraints — embed in schema uniqueness/index design. | Capture in schema design note or epic TC-03/TC-04 criteria. |
 | **OD-003** | Status on Engagement | Accepted — state machine design for Phase 1. | Same. |
@@ -90,26 +90,28 @@ Phase 0 is **product and domain framing only** — no production feature deliver
 
 ## Pre–Phase 1 checklist (executable)
 
+**Stakeholder status:** Signed off (**2026-05**). Checked items confirm product/program acceptance of artifacts and gates below.
+
 ### Product artifacts
 
-- [ ] Product overview accepted (or signed-off exception recorded).  
-- [ ] Domain map accepted.  
-- [ ] Glossary accepted for Phase 1–touching terms (or explicit “good enough for now” in **TC-00** discussion).  
-- [ ] MVP scope accepted.  
-- [ ] Roadmap decision log created and current (**RD-xxx**).  
-- [ ] Open decision register created and current (**OD-xxx**).  
-- [ ] Employee vs contractor applicability matrix accepted.  
-- [ ] Party / Team Member / Engagement terminology stable (**modeling note** + glossary entries as needed).
+- [x] Product overview accepted (or signed-off exception recorded).  
+- [x] Domain map accepted.  
+- [x] Glossary accepted for Phase 1–touching terms (or explicit “good enough for now” in **TC-00** discussion).  
+- [x] MVP scope accepted.  
+- [x] Roadmap decision log created and current (**RD-xxx**).  
+- [x] Open decision register created and current (**OD-xxx**).  
+- [x] Employee vs contractor applicability matrix accepted.  
+- [x] Party / Team Member / Engagement terminology stable (**modeling note** + glossary entries as needed).
 
 ### Decisions
 
-- [ ] Subcontractor modeling — MVP rule **Accepted** per **OD-004**; advanced cases **explicitly deferred** (not a startup blocker).  
-- [ ] **OD-011** — **Implementation pattern chosen** (ADR or modeling note) **before irreversible migrations**.
+- [x] Subcontractor modeling — MVP rule **Accepted** per **OD-004**; advanced cases **explicitly deferred** (not a startup blocker).  
+- [x] **OD-011** — **Implementation pattern chosen** (ADR or modeling note) **before irreversible migrations**.
 
 ### Epics and governance
 
-- [ ] Phase 1 epic issues confirmed — [#2](https://github.com/BankEncore/TeamCORE/issues/2) … [#6](https://github.com/BankEncore/TeamCORE/issues/6) (**TC-01…TC-05**).  
-- [ ] TC0 exit criteria met; program agrees to start **TC-01** implementation.
+- [x] Phase 1 epic issues confirmed — [#2](https://github.com/BankEncore/TeamCORE/issues/2) … [#6](https://github.com/BankEncore/TeamCORE/issues/6) (**TC-01…TC-05**).  
+- [x] TC0 exit criteria met; program agrees to start **TC-01** implementation.
 
 ---
 

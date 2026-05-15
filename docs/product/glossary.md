@@ -111,7 +111,7 @@ Subcontractor support should clarify whether the subcontractor needs their own e
 
 ### Agency
 
-An **Agency** is the primary operating organization using TeamCORE.
+An **Agency** is the primary operating organization using TeamCORE and, in Phase 1 schema, the top-level **`Agency`** model (`agencies` table). All departments, locations, and teams in TC-01 belong to one agency.
 
 The agency is the business context in which team members, engagements, documents, compensation, payroll inputs, contractor settlements, and reports are managed.
 
@@ -119,11 +119,15 @@ The agency is the business context in which team members, engagements, documents
 
 ### Organization
 
-An **Organization** is a structured business entity represented in TeamCORE.
+**Organization** refers to the agency’s **internal structure**: departments, locations, teams, placements, supervision, and authority relationships.
 
-The term may refer to the agency itself, an internal organizational unit, or an organization-type party such as a contractor organization.
+In product language “organization” can also mean a **structured business entity** elsewhere (for example a **Contractor Organization** as a party). When precision is needed:
 
-When precision is needed, use more specific terms such as **Agency**, **Department**, **Location**, **Team**, or **Contractor Organization**.
+- Use **`Agency`** for the TeamCORE tenant / operating context (**OD-011**, **ADR-0001**).
+- Use **Department**, **Location**, **Team** for internal structure **models**.
+- Use **Contractor Organization** (or **organization party**) when the party is not the internal structure.
+
+TC-01 does **not** use a catch-all Active Record model named `Organization` for internal structure. Details: [`domain/organization.md`](../domain/organization.md).
 
 ---
 
@@ -133,6 +137,8 @@ A **Department** is an internal organizational grouping within the agency.
 
 Departments may be used for reporting, management structure, approvals, permissions, team member assignment, or operational filtering.
 
+Field list, lifecycle, placement/reporting hooks, and **code**/naming conventions: **[`organization.md` § Department (TC-01.02)](../domain/organization.md#department-tc-0102)**.
+
 ---
 
 ### Location
@@ -140,6 +146,8 @@ Departments may be used for reporting, management structure, approvals, permissi
 A **Location** is a physical or operational place where team members may work or be assigned.
 
 Locations may support reporting, team assignment, time tracking, document rules, or operational visibility.
+
+Field list, **`location_type`** vocabulary, address/timezone posture, remote/virtual semantics, placement/reporting hooks: **[`organization.md` § Location (TC-01.03)](../domain/organization.md#location-tc-0103)**.
 
 ---
 
@@ -149,6 +157,8 @@ A **Team** is an internal group of team members organized for management, report
 
 A team may belong to a department, location, or other organizational structure depending on implementation decisions.
 
+Field list, **department**/location FKs (optional), deferred **team lead** posture (engagement supervisor instead), placement + **Team360** context contract: **[`organization.md` § Team (TC-01.04)](../domain/organization.md#team-tc-0104)**.
+
 ---
 
 ### Reporting Line
@@ -156,6 +166,8 @@ A team may belong to a department, location, or other organizational structure d
 A **Reporting Line** describes a supervisory or management relationship between team members or organizational roles.
 
 Reporting lines may support approvals, manager visibility, operational reporting, escalation, and permission decisions.
+
+**TC-01 posture:** reporting lines are **anchored on Engagements** (not Team Member alone); planned persistence **`EngagementSupervisionAssignment`** (**TC-03**). Full spec: **[`organization.md` § Reporting line (TC-01.05)](../domain/organization.md#reporting-line-tc-0105)**.
 
 ---
 

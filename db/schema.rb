@@ -10,5 +10,70 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 0) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_15_120000) do
+  create_table "agencies", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.string "code", null: false
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.string "status", default: "active", null: false
+    t.datetime "updated_at", null: false
+    t.index ["code"], name: "index_agencies_on_code", unique: true
+  end
+
+  create_table "departments", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.bigint "agency_id", null: false
+    t.string "code", null: false
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.string "name", null: false
+    t.bigint "parent_department_id"
+    t.string "status", default: "active", null: false
+    t.datetime "updated_at", null: false
+    t.index ["agency_id", "code"], name: "index_departments_on_agency_id_and_code", unique: true
+    t.index ["agency_id", "status"], name: "index_departments_on_agency_id_and_status"
+    t.index ["agency_id"], name: "index_departments_on_agency_id"
+    t.index ["parent_department_id"], name: "index_departments_on_parent_department_id"
+  end
+
+  create_table "locations", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.bigint "agency_id", null: false
+    t.string "code", null: false
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.string "location_type", null: false
+    t.string "name", null: false
+    t.string "status", default: "active", null: false
+    t.string "timezone"
+    t.datetime "updated_at", null: false
+    t.index ["agency_id", "code"], name: "index_locations_on_agency_id_and_code", unique: true
+    t.index ["agency_id", "location_type"], name: "index_locations_on_agency_id_and_location_type"
+    t.index ["agency_id", "status"], name: "index_locations_on_agency_id_and_status"
+    t.index ["agency_id"], name: "index_locations_on_agency_id"
+  end
+
+  create_table "teams", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.bigint "agency_id", null: false
+    t.string "code", null: false
+    t.datetime "created_at", null: false
+    t.bigint "department_id"
+    t.text "description"
+    t.bigint "location_id"
+    t.string "name", null: false
+    t.string "status", default: "active", null: false
+    t.datetime "updated_at", null: false
+    t.index ["agency_id", "code"], name: "index_teams_on_agency_id_and_code", unique: true
+    t.index ["agency_id", "department_id"], name: "index_teams_on_agency_id_and_department_id"
+    t.index ["agency_id", "location_id"], name: "index_teams_on_agency_id_and_location_id"
+    t.index ["agency_id", "status"], name: "index_teams_on_agency_id_and_status"
+    t.index ["agency_id"], name: "index_teams_on_agency_id"
+    t.index ["department_id"], name: "index_teams_on_department_id"
+    t.index ["location_id"], name: "index_teams_on_location_id"
+  end
+
+  add_foreign_key "departments", "agencies"
+  add_foreign_key "departments", "departments", column: "parent_department_id"
+  add_foreign_key "locations", "agencies"
+  add_foreign_key "teams", "agencies"
+  add_foreign_key "teams", "departments"
+  add_foreign_key "teams", "locations"
 end
