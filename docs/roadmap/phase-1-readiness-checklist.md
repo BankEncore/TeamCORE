@@ -34,7 +34,7 @@ These artifacts should be **accepted** (or explicitly waived by product lead in 
 | --- | --- | --- |
 | Product overview | [`docs/product/overview.md`](../product/overview.md) | Boundary, MVP operating decisions. |
 | Domain map | [`docs/product/domain-map.md`](../product/domain-map.md) | Phases, dependencies, domain list. |
-| Glossary (working filename) | [`docs/product/gloassry.md`](../product/gloassry.md) | Stabilize conflicting terms; payroll/settlement language per **OD-007/OD-008**. |
+| Glossary | [`docs/product/glossary.md`](../product/glossary.md) | Stabilize conflicting terms; payroll/settlement language per **OD-007/OD-008**. |
 | MVP scope | [`docs/product/mvp-scope.md`](../product/mvp-scope.md) | Firm **includes/excludes** and risky seams. |
 | Roadmap decision log | [`docs/product/roadmap-decision-log.md`](../product/roadmap-decision-log.md) | RD-001–RD-008 and epic numbering **TC-00…TC-31**. |
 | Open decision register | [`docs/product/open-decisions.md`](../product/open-decisions.md) | OD-001–OD-012; tiered follow-ups. |
@@ -49,7 +49,7 @@ These must be **closed** (Accepted + documented) or have an **explicit waiver** 
 
 | OD | Topic | Why blocking | Required output |
 | --- | --- | --- | --- |
-| **OD-011** | Agency vs Organization **implementation** | Partitions every FK and tenancy story; cannot be retrofitted cheaply if wrong. | **ADR** or **Phase 1 modeling note** choosing pattern (standalone Agency model vs org-root vs other) **before schema freeze**. Concept is already Accepted in register. |
+| **OD-011** | Agency vs Organization **implementation** | Partitions every FK and tenancy story; cannot be retrofitted cheaply if wrong. | **ADR-0001** — standalone `Agency` with `Department` / `Location` / `Team`; see [`docs/adr/adr-0001-agency-organization-schema.md`](../adr/adr-0001-agency-organization-schema.md). |
 | **OD-001** | Party vs Team Member vs Engagement | Already **Accepted** — ensure team has read modeling note. | — |
 | **OD-002** | Multiple engagements | Accepted with constraints — embed in schema uniqueness/index design. | Capture in schema design note or epic TC-03/TC-04 criteria. |
 | **OD-003** | Status on Engagement | Accepted — state machine design for Phase 1. | Same. |

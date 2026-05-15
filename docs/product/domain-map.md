@@ -47,12 +47,12 @@ Canonical entries, acceptance status, OD-IDs, and follow-ups live in **`open-dec
 | Domain | What it owns |
 |---|---|
 | **Agency** | The top-level operating context for TeamCORE data, configuration, workforce records, reporting, and permissions. |
-| **Organization** | Internal agency structure, including departments, locations, teams, reporting lines, supervisory hierarchy, and authority structure. |
+| **Organization** | Internal agency structure and placement **vocabulary** — departments, locations, teams; **reporting-line** concepts, supervisory concepts, authority-structure concepts. **Concrete Phase 1 (TC‑01) models** are **`Department`**, **`Location`**, **`Team`** on **`Agency`** — no polymorphic **`Organization`** table; see **`domain/organization.md`**. Engagement placement and supervision are **specified conceptually**, **persisted from TC‑03** onward. |
 | **Party** | Identity records for people and organizations the agency interacts with, including individuals, contractor organizations, vendors, and related contacts. |
 | **Team Member** | Workforce participant profile linked to a party and used by TeamCORE operational workflows. |
 | **Engagement** | Employment or contractor relationship between a team member and the agency, including lifecycle, status, relationship type, supervisor, placement, renewal, and expiry semantics. |
-| **Documents** | Document types, uploaded files or file references, metadata, versions, expiration dates, and document verification state. |
-| **Compliance** | Requirement sets, completeness checks, missing/expired/expiring-soon indicators, activation readiness, and contractor classification support records. |
+| **Documents** | Document types; uploaded artifacts and file references; document metadata; versions; and expiration dates associated with artifact records. |
+| **Compliance** | Requirement sets, completeness checks, readiness interpretation; missing/expired/expiring-soon indicators; activation readiness; and contractor classification support records. |
 | **Team360** | Permission-aware aggregated profile/read model for one team member, backed by authoritative records in other domains. |
 | **Operational Reporting** | Filterable lists, summaries, exception views, and drill-through reporting surfaces. |
 | **Compensation** | What the agency may owe a team member, including salary, hourly rate, commission rate, compensation plan assignment, draws, and draw recovery rules. |
@@ -69,23 +69,28 @@ Canonical entries, acceptance status, OD-IDs, and follow-ups live in **`open-dec
 
 ## Conceptual Spine
 
-TeamCORE’s core data model should generally follow this conceptual spine:
+TeamCORE’s core model should generally follow this conceptual spine:
 
 ```text
 Agency
-  ↓
-Organization
-  ↓
-Party
-  ↓
-Team Member
-  ↓
-Engagement
-  ↓
-Operational Domains
-  ↓
-Team360 / Reporting
-````
+  ├─ Organization Structure
+  │    ├─ Department
+  │    ├─ Location
+  │    └─ Team
+  └─ Party
+       ↓
+     Team Member
+       ↓
+     Engagement
+       ↓
+     Operational Domains
+       ↓
+     Team360 / Reporting
+```
+
+**Organization structure** and **party identity** both belong to agency context (**Agency → Organization** vs **Agency → Party** in the diagram below are separate paths).
+
+**Engagement** is where workforce participation becomes operational for relationship type, status, placements, workflows, payroll vs settlement rails, Team360 sourcing, etc.
 
 ### Agency
 
@@ -98,6 +103,8 @@ It may eventually support tenant-like behavior, but this domain map does not ass
 ### Organization
 
 Organization describes the agency’s internal structure.
+
+**Implementation (TC-01 / OD-011 / ADR-0001):** The **domain** “Organization” maps to concrete models **`Department`**, **`Location`**, and **`Team`**, each belonging to an **`Agency`**. There is **no** polymorphic `Organization` Active Record type; see [`domain/organization.md`](../domain/organization.md).
 
 It answers questions such as:
 
@@ -150,7 +157,9 @@ The engagement determines:
 * Whether time and leave workflows apply
 * Whether payroll input or contractor settlement applies
 * Which Team360 panels are relevant
-* Which organization placement, supervisor, or authority structure applies
+* **Organization placement context** (**department**, **location**, **team**) and **related** supervisor / reporting-line context — see **§ Engagement and Organization Placement**
+
+**Authority** is **not** “where” an engagement sits: it defines **who may approve, waive, verify**, etc., and **may consume** placement and reporting-line data without being a placement field (see **`../domain/organization.md`** — Authority structure).
 
 Engagement is the main operational anchor for downstream domains.
 
@@ -249,6 +258,8 @@ flowchart TB
 
 Diagram edges represent conceptual dependency and information flow. They do **not** prescribe database foreign keys, Rails namespaces, service boundaries, or table structure.
 
+**Diagram note (`Organization` → `Engagement`):** Organization **influences** engagement via **placement** (**department**, **location**, **team**) and **supervision / reporting-line** assignments. **Persistent** placement and supervision tables attach to **Engagement** beginning in **TC‑03**. **TC‑01** establishes only the **`Agency`**, **`Department`**, **`Location`**, **`Team`** substrate (**[`domain/organization.md`](../domain/organization.md)**).
+
 ---
 
 ## Domain Relationships
@@ -257,7 +268,7 @@ Diagram edges represent conceptual dependency and information flow. They do **no
 
 The agency is the top-level operating entity using TeamCORE.
 
-Organization describes the agency’s internal structure, including departments, locations, teams, reporting lines, and authority relationships.
+**Organization** is **domain vocabulary** for internal structure (placement dimensions, supervisory concepts, authority concepts **as product language**)—see Canonical Domain List. **Operational structure** tables in MVP are **`Department`**, **`Location`**, **`Team`**, anchored on **`Agency`** (**ADR-0001**).
 
 Agency-level configuration may eventually affect:
 
@@ -307,24 +318,27 @@ Engagement 2: Prior contractor engagement, ended
 
 ### Engagement and Organization Placement
 
-An engagement may be placed within the organization structure.
+An engagement may be placed within the organization structure **using department, location, and team**.
 
-That placement may include:
+**Placement may specify:**
 
-* Department
-* Location
-* Team
-* Supervisor
-* Reporting line
-* Authority structure
+* Department  
+* Location  
+* Team  
 
-This allows TeamCORE to answer:
+**Related engagement organization context may also reference (persisted primarily with engagement lifecycle — TC‑03):**
 
-* Where does this person work?
-* Who supervises this engagement?
-* Which approvals apply?
-* Which manager should see this record?
-* Which organizational filters should include this engagement?
+* Supervisor  
+* Reporting line (**[`domain/organization.md`](../domain/organization.md)** § Reporting line).
+
+**Authority structure** is **not** a placement field: it defines **controlled-action permissions** and **may use** placement and reporting-line facts as inputs in workflow and permission engines (**later phases**).
+
+This framing allows TeamCORE to answer:
+
+* Where does this person work? (**placement**)  
+* Who supervises this engagement? (**supervision**)  
+* Which approvals apply? (**authority**, distinct from geography)  
+* Which organizational filters include this engagement? (**reporting**)
 
 ---
 
@@ -339,9 +353,11 @@ Examples:
 * A tax form may be required for a contractor or employee.
 * A policy acknowledgment may be required for all active team members.
 
-Compliance owns the rules and readiness signals.
+**Compliance** owns configured **rules** and **readiness interpretation**, including signals for missing, expired, or expiring requirements.
 
-Documents own the uploaded artifacts and verification state.
+**Documents** owns **uploaded artifacts** (or authoritative file references), **document-instance metadata**, **versions**, **expiration tracking on the artifact record**, and the **verification action** tied to evaluating a submission.
+
+**Boundary — verification:** Verification **reviews a document artifact** against policy (often surfaced from document-admin UX). **Compliance** **consumes** verification outcomes to calculate **activation readiness**, requirement satisfaction, exception handling, or obligation state—avoid treating verification as wholly owned by either side alone without this split (**OD-005**, Phase 2 implementation detail).
 
 ---
 
@@ -674,6 +690,8 @@ Permissions and audit should be considered earlier, but Phase 6 finalizes and ha
 
 The following areas are intentionally outside the MVP unless later roadmap decisions change the scope.
 
+**Deferred here does not mean irrelevant to the domain model.** It means the MVP deliberately avoids **dedicated workflows** or full product surfaces for these areas unless a future roadmap decision expands scope—even when related concerns (documents, compliance, reporting) touch them later.
+
 | Deferred Area                      | Reason                                                                                            |
 | ---------------------------------- | ------------------------------------------------------------------------------------------------- |
 | Benefits                           | Requires plan complexity, enrollment rules, carrier workflows, and deeper payroll/HR integration. |
@@ -706,7 +724,7 @@ The table below remains a quick index—**full decision text lives in the regist
 | OD-008 | 2 | Settlement naming — Accepted |
 | OD-009 | 2 (Provisional) | MVP RBAC + domain checks; defer field-level depth |
 | OD-010 | 2–3 | Audit categories — policy direction Accepted; formal ADR if needed Phase 6 |
-| OD-011 | 1 | Agency vs Organization — concept Accepted; implementation **Needs ADR** before Phase 1 freeze |
+| OD-011 | 1 | Agency vs Organization — **ADR-0001**; `Agency` + `Department` / `Location` / `Team`; see [`domain/organization.md`](../domain/organization.md) |
 | OD-012 | 2–3 | Compensation / Charges / Settlement split — concept Accepted; detail Phase 4 |
 
 ---
@@ -735,7 +753,7 @@ This domain map is complete enough for `TC-00.02` when:
 * [`roadmap-decision-log.md`](roadmap-decision-log.md) — Settled roadmap intents (**GH-37**).
 * [`../roadmap/phase-1-readiness-checklist.md`](../roadmap/phase-1-readiness-checklist.md) — Phase 1 implementation gate (**GH-40**).
 * [`mvp-scope.md`](mvp-scope.md) — MVP inclusion/exclusion charter and risky boundaries (**GH-36**).
-* [`gloassry.md`](gloassry.md) — Working glossary filename (canonical terminology; sync OD-007/008 when updated).
+* [`glossary.md`](glossary.md) — Canonical terminology (sync OD-007/008 when updated).
 * [`open-decisions.md`](open-decisions.md) — Decision register with OD-001–OD-012 status and tiers.
 * [`modeling-notes/party-team-member-engagement.md`](modeling-notes/party-team-member-engagement.md) — Modeling note for OD-001.
 * [`employee-contractor-applicability-matrix.md`](employee-contractor-applicability-matrix.md) — Employee vs contractor vs subcontractor capabilities (**GH-39**).
