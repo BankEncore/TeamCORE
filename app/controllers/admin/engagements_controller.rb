@@ -103,7 +103,7 @@ module Admin
 
       cur = engagement.status
       nxt = Engagement::ALLOWED_STATUS_TRANSITIONS[cur] || []
-      ([cur] + nxt).uniq
+      ([ cur ] + nxt).uniq
     end
   end
 end
