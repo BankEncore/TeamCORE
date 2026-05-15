@@ -1,6 +1,6 @@
 # TeamCORE
 
-TeamCORE is a workforce operations platform for travel agencies—supporting employees, independent contractors, contractor organizations, and related relationships in one unified system. Product goals, domains, and terminology are documented in **[`docs/product/overview.md`](docs/product/overview.md)**.
+TeamCORE is a workforce operations platform for travel agencies—supporting employees, independent contractors, contractor organizations, and related relationships in one unified system. Product goals, domains, and terminology are documented in **[`docs/product/overview.md`](docs/product/overview.md)**. Structural planning uses **[`docs/product/domain-map.md`](docs/product/domain-map.md)** and the **[open decisions register](docs/product/open-decisions.md)** (OD-001–OD-012).
 
 This repository hosts the TeamCORE web application built with **Ruby on Rails**.
 
