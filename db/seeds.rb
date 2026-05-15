@@ -5,8 +5,9 @@
 # Acceptance checklist (audit):
 # - Baseline agency: "Example Agency" (code: example).
 # - Baseline departments/locations/teams match epic TC-01.11 naming (generic demo labels).
-# - Supports TC-03 engagement placement smoke tests (ops vs contractor-aligned teams &
-#   main_office / remote / virtual locations for employee vs contractor demos).
+# - TC-03: demo engagements (employee / individual_contractor / contractor_organization),
+#   placements (ops vs contractor-aligned teams & main_office vs virtual locations),
+#   plus Jane supervising Robert as primary_reports_to.
 # - Intentionally generic — not modeled on a single real-world company name or structure.
 #
 # Run: bin/rails db:seed   (inside Docker per project README if applicable)
@@ -139,6 +140,90 @@ vendor_party.reload
   tm = TeamMember.find_or_initialize_by(agency:, party: p)
   tm.assign_attributes(status: "active")
   tm.save!
+end
+
+# TC-03 engagement lifecycle demos (Jane employee, Robert IC, contractor org shell).
+demo_start_on = Date.new(2024, 1, 1)
+jane_tm = TeamMember.find_by!(agency:, party: jane_party)
+robert_tm = TeamMember.find_by!(agency:, party: robert_party)
+contractor_org_tm = TeamMember.find_by!(agency:, party: contractor_org_party)
+
+jane_eng = Engagement.find_or_initialize_by(agency:, team_member: jane_tm, relationship_type: "employee")
+if jane_eng.new_record?
+  jane_eng.status = "draft"
+  jane_eng.save!
+end
+unless jane_eng.status == "active"
+  jane_eng.update!(status: "pending") if jane_eng.status == "draft"
+  jane_eng.update!(status: "active", start_on: demo_start_on)
+end
+
+robert_eng = Engagement.find_or_initialize_by(
+  agency:,
+  team_member: robert_tm,
+  relationship_type: "individual_contractor"
+)
+if robert_eng.new_record?
+  robert_eng.status = "draft"
+  robert_eng.save!
+end
+unless robert_eng.status == "active"
+  robert_eng.update!(status: "pending") if robert_eng.status == "draft"
+  robert_eng.update!(status: "active", start_on: demo_start_on)
+end
+
+co_eng = Engagement.find_or_initialize_by(
+  agency:,
+  team_member: contractor_org_tm,
+  relationship_type: "contractor_organization"
+)
+if co_eng.new_record?
+  co_eng.status = "draft"
+  co_eng.save!
+end
+unless co_eng.status == "active"
+  co_eng.update!(status: "pending") if co_eng.status == "draft"
+  co_eng.update!(status: "active", start_on: demo_start_on)
+end
+
+ops_team = Team.find_by!(agency:, code: "employee_operations")
+contractor_team = Team.find_by!(agency:, code: "contractor_support")
+dept_ops = departments_by_code["operations"]
+loc_main = locations_by_code["main_office"]
+loc_virtual = locations_by_code["virtual"]
+dept_cr = departments_by_code["contractor_relations"]
+
+EngagementOrganizationPlacement.find_or_initialize_by(
+  engagement: jane_eng,
+  effective_start_on: demo_start_on
+).tap do |p|
+  p.assign_attributes(department: dept_ops, location: loc_main, team: ops_team)
+  p.save!
+end
+
+EngagementOrganizationPlacement.find_or_initialize_by(
+  engagement: robert_eng,
+  effective_start_on: demo_start_on
+).tap do |p|
+  p.assign_attributes(department: dept_cr, location: loc_virtual, team: contractor_team)
+  p.save!
+end
+
+EngagementOrganizationPlacement.find_or_initialize_by(
+  engagement: co_eng,
+  effective_start_on: demo_start_on
+).tap do |p|
+  p.assign_attributes(department: dept_cr, location: loc_virtual, team: contractor_team)
+  p.save!
+end
+
+EngagementSupervisionAssignment.find_or_initialize_by(
+  engagement: robert_eng,
+  supervisor_engagement: jane_eng,
+  relationship_type: "primary_reports_to",
+  effective_start_on: demo_start_on
+).tap do |s|
+  s.save! if s.new_record? || s.changed?
 end
 
 PartyRelationship.where(

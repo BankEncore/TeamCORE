@@ -185,6 +185,8 @@ Authority structure may be based on role, reporting line, department, location, 
 
 An **Engagement** is the formal relationship between a team member and the agency for a defined workforce purpose.
 
+**TC-03 domain spec:** [`../domain/engagement.md`](../domain/engagement.md).
+
 An engagement determines how the team member participates in TeamCORE workflows. It may identify whether the relationship is employment-based, contractor-based, active, inactive, pending, terminated, or otherwise status-controlled.
 
 A person or organization may potentially have more than one engagement over time.

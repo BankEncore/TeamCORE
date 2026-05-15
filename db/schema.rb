@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_14_120100) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_14_130200) do
   create_table "agencies", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
     t.string "code", null: false
     t.datetime "created_at", null: false
@@ -33,6 +33,61 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_14_120100) do
     t.index ["agency_id", "status"], name: "index_departments_on_agency_id_and_status"
     t.index ["agency_id"], name: "index_departments_on_agency_id"
     t.index ["parent_department_id"], name: "index_departments_on_parent_department_id"
+  end
+
+  create_table "engagement_organization_placements", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.bigint "agency_id", null: false
+    t.datetime "created_at", null: false
+    t.bigint "department_id"
+    t.date "effective_end_on"
+    t.date "effective_start_on", null: false
+    t.bigint "engagement_id", null: false
+    t.bigint "location_id"
+    t.text "notes"
+    t.bigint "team_id"
+    t.datetime "updated_at", null: false
+    t.index ["agency_id"], name: "index_engagement_organization_placements_on_agency_id"
+    t.index ["department_id"], name: "index_engagement_organization_placements_on_department_id"
+    t.index ["engagement_id", "effective_start_on"], name: "index_eop_on_engagement_and_effective_start"
+    t.index ["engagement_id"], name: "index_engagement_organization_placements_on_engagement_id"
+    t.index ["location_id"], name: "index_engagement_organization_placements_on_location_id"
+    t.index ["team_id"], name: "index_engagement_organization_placements_on_team_id"
+  end
+
+  create_table "engagement_supervision_assignments", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.bigint "agency_id", null: false
+    t.datetime "created_at", null: false
+    t.date "effective_end_on"
+    t.date "effective_start_on", null: false
+    t.bigint "engagement_id", null: false
+    t.text "notes"
+    t.string "relationship_type", default: "primary_reports_to", null: false
+    t.bigint "supervisor_engagement_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["agency_id"], name: "index_engagement_supervision_assignments_on_agency_id"
+    t.index ["engagement_id", "effective_start_on"], name: "index_esa_on_engagement_and_effective_start"
+    t.index ["engagement_id"], name: "index_engagement_supervision_assignments_on_engagement_id"
+    t.index ["supervisor_engagement_id"], name: "idx_on_supervisor_engagement_id_434e66448a"
+  end
+
+  create_table "engagements", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.bigint "agency_id", null: false
+    t.datetime "created_at", null: false
+    t.date "end_on"
+    t.date "expected_end_on"
+    t.text "notes"
+    t.string "relationship_type", null: false
+    t.date "renewal_on"
+    t.date "start_on"
+    t.string "status", default: "draft", null: false
+    t.bigint "team_member_id", null: false
+    t.string "title"
+    t.datetime "updated_at", null: false
+    t.index ["agency_id", "relationship_type", "status"], name: "idx_on_agency_id_relationship_type_status_5288784361"
+    t.index ["agency_id", "team_member_id", "relationship_type"], name: "idx_on_agency_id_team_member_id_relationship_type_4125b72122"
+    t.index ["agency_id", "team_member_id"], name: "index_engagements_on_agency_id_and_team_member_id"
+    t.index ["agency_id"], name: "index_engagements_on_agency_id"
+    t.index ["team_member_id"], name: "index_engagements_on_team_member_id"
   end
 
   create_table "locations", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
@@ -153,6 +208,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_14_120100) do
 
   add_foreign_key "departments", "agencies"
   add_foreign_key "departments", "departments", column: "parent_department_id"
+  add_foreign_key "engagement_organization_placements", "agencies"
+  add_foreign_key "engagement_organization_placements", "departments"
+  add_foreign_key "engagement_organization_placements", "engagements"
+  add_foreign_key "engagement_organization_placements", "locations"
+  add_foreign_key "engagement_organization_placements", "teams"
+  add_foreign_key "engagement_supervision_assignments", "agencies"
+  add_foreign_key "engagement_supervision_assignments", "engagements"
+  add_foreign_key "engagement_supervision_assignments", "engagements", column: "supervisor_engagement_id"
+  add_foreign_key "engagements", "agencies"
+  add_foreign_key "engagements", "team_members"
   add_foreign_key "locations", "agencies"
   add_foreign_key "organization_profiles", "parties"
   add_foreign_key "parties", "agencies"
