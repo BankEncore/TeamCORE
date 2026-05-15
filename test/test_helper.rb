@@ -1,11 +1,26 @@
+require "etc"
+
 ENV["RAILS_ENV"] ||= "test"
+
+unless ENV.key?("PARALLEL_WORKERS")
+  ENV["PARALLEL_WORKERS"] =
+    case
+    when ENV["CI"] == "true"
+      Etc.nprocessors.to_s
+    when ENV.fetch("DB_HOST", "") == "mariadb"
+      # Docker Compose + forked MRI workers intermittently overwhelm / race MariaDB handshakes locally.
+      "1"
+    else
+      Etc.nprocessors.to_s
+    end
+end
+
 require_relative "../config/environment"
 require "rails/test_help"
 
 module ActiveSupport
   class TestCase
-    # Run tests in parallel with specified workers
-    parallelize(workers: :number_of_processors)
+    parallelize(workers: Integer(ENV.fetch("PARALLEL_WORKERS")))
 
     # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.
     fixtures :all

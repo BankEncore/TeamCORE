@@ -1,6 +1,6 @@
 # Party and Team Member domain — TeamCORE
 
-Modeling notes for **TC-02 — Team Member / Party Foundation**. Glossary cross-refs in [`../product/glossary.md`](../product/glossary.md); decisions in [`../product/open-decisions.md`](../product/open-decisions.md) (**OD-001**, **OD-002**, **OD-004**, **TC-02-D01…D05**); internal org substrate in **[`organization.md`](organization.md)** / **ADR-0001**; Party↔Engagement spine in [`../product/modeling-notes/party-team-member-engagement.md`](../product/modeling-notes/party-team-member-engagement.md).
+Modeling notes for **TC-02 — Team Member / Party Foundation**. Glossary cross-refs in [`../product/glossary.md`](../product/glossary.md); decisions in [`../product/open-decisions.md`](../product/open-decisions.md) (**OD-001**, **OD-002**, **OD-004**, **TC-02-D01…D05**); **TC-03 Engagement** in **[`engagement.md`](engagement.md)**; internal org substrate in **[`organization.md`](organization.md)** / **ADR-0001**; Party↔Engagement spine in [`../product/modeling-notes/party-team-member-engagement.md`](../product/modeling-notes/party-team-member-engagement.md).
 
 ---
 
@@ -28,8 +28,8 @@ Summaries below; formal register entries: **`open-decisions.md`** (TC-02-D01…D
 | **TeamMember** | `team_members` | Yes |
 | **PartyContactMethod** | `party_contact_methods` | Yes |
 | **PartyRelationship** | `party_relationships` | Yes |
-| **Engagement** | Future `engagements` (or equivalent) | No — **TC-03** |
-| **Employee vs contractor authority** | Engagement + status | No — **TC-03** / **OD-003** |
+| **Engagement** | `engagements` + placement/supervision children | Yes — **[`engagement.md`](engagement.md)** (TC-03) |
+| **Employee vs contractor authority** | Engagement + status | Yes — **TC-03** / **OD-003** (`relationship_type` per domain doc) |
 | **Team360 identity UI** | Read model | No — **TC-10** |
 | **Permission / audit ledger** | Policy + TC-30 | No — **TC-29/TC-30** |
 
@@ -217,7 +217,7 @@ Sensitive actions (future **TC-29/TC-30**): create/update Party; change `party_t
 ## Related epics
 
 - **TC-01** — Agency / internal org substrate
-- **TC-03** — Engagements
+- **TC-03** — [**`engagement.md`**](engagement.md) — engagements, placement, supervision
 - **TC-10** — Team360 shell
 - **TC-29 / TC-30** — Permissions and audit
 

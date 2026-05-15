@@ -2,7 +2,7 @@
 
 This register tracks product and modeling decisions for TeamCORE. Not every item needs the same rigor: use the **decision handling model** below so Phase 0 can close without pretending Phase 4–6 design is final.
 
-**Companion docs:** [`domain-map.md`](domain-map.md), [`overview.md`](overview.md), [`roadmap-decision-log.md`](roadmap-decision-log.md), [`../roadmap/phase-1-readiness-checklist.md`](../roadmap/phase-1-readiness-checklist.md), [`employee-contractor-applicability-matrix.md`](employee-contractor-applicability-matrix.md), [`glossary.md`](glossary.md), [`../domain/party-team-member.md`](../domain/party-team-member.md).
+**Companion docs:** [`domain-map.md`](domain-map.md), [`overview.md`](overview.md), [`roadmap-decision-log.md`](roadmap-decision-log.md), [`../roadmap/phase-1-readiness-checklist.md`](../roadmap/phase-1-readiness-checklist.md), [`employee-contractor-applicability-matrix.md`](employee-contractor-applicability-matrix.md), [`glossary.md`](glossary.md), [`../domain/party-team-member.md`](../domain/party-team-member.md), **[`../domain/engagement.md`](../domain/engagement.md)** (TC-03).
 
 ---
 
@@ -30,6 +30,16 @@ This register tracks product and modeling decisions for TeamCORE. Not every item
 | TC-02-D03 | One active primary contact per org (effective dating + status) | 1 |
 | TC-02-D04 | Organization Party not auto–TeamMember | 1 |
 | TC-02-D05 | Party.display_name authoritative; default from profile | 1 |
+| TC-03-D01 | Engagement `relationship_type` enum + Party constraints | 1 |
+| TC-03-D02 | Engagement business statuses + MVP transitions | 1 |
+| TC-03-D03 | One `active` engagement per type + concurrency posture | 1 |
+| TC-03-D04 | Placement + overlap rules | 1 |
+| TC-03-D05 | Supervision MVP (`primary_reports_to`) | 1 |
+| TC-03-D06 | Subcontractor PartyRelationship vs Engagement | 1 |
+| TC-03-D07 | Engagement business dates (`*_on`) | 1 |
+| TC-03-D08 | `pending` / activation (no OD-006 engine in TC-03) | 1 |
+| TC-03-D09 | Correction / history posture | 1 |
+| TC-03-D10 | ADR vs domain doc (#72) | 1 |
 | OD-005 | Documents vs Compliance boundary | 2 |
 | OD-006 | Activation readiness | 2 |
 | OD-007 | Payroll input vs payroll run | 2 |
@@ -94,7 +104,7 @@ Engagement = specific employee/contractor relationship
 
 **Rationale:** A party is not “active” in the abstract; activity is always in the context of a relationship.
 
-**Follow-up:** Enumerations and transition rules in Phase 1 schema notes.
+**Follow-up:** **TC-03-D01** refines the **persisted operational** `relationship_type` set (`employee`, `individual_contractor`, `contractor_organization`, `subcontractor`) and business statuses — see [`../domain/engagement.md`](../domain/engagement.md) and **TC-03-D01…D10** below. Enumerations and transition rules are implemented in Rails per that doc.
 
 ---
 
@@ -154,6 +164,29 @@ Engagement = specific employee/contractor relationship
 **Tier:** 1
 
 **Decision:** `Party.display_name` is the authoritative UI label; may default from profile when blank and is required when identity is complete; ongoing sync from profile updates is **not** required.
+
+---
+
+### TC-03 implementation lock (TC-03-D01…D10)
+
+**Status:** Accepted for Phase 1 TC-03 schema and validation  
+**Tier:** 1  
+**Authoritative detail:** [`../domain/engagement.md`](../domain/engagement.md)
+
+| ID | Decision (summary) |
+| --- | --- |
+| **TC-03-D01** | Persist **`employee` \| `individual_contractor` \| `contractor_organization` \| `subcontractor`**; constrain to Party `party_type` per engagement doc. |
+| **TC-03-D02** | Seven business statuses; MVP transition graph; **not** `LifecycleStatusable`; suspended retains placement/supervision context. |
+| **TC-03-D03** | At most one **`status = active`** per `(agency_id, team_member_id, relationship_type)` via app validation + tests; concurrency limitation documented. |
+| **TC-03-D04** | Effective-dated **`engagement_organization_placements`** with inclusive overlap rules; back-to-back segment handoff. |
+| **TC-03-D05** | **`engagement_supervision_assignments`** with **`primary_reports_to`**; active supervisor; no **`contractor_organization`** as supervisor in MVP. |
+| **TC-03-D06** | Subcontractor **`PartyRelationship`** vs promoted **`Engagement`** workflow authority. |
+| **TC-03-D07** | **`start_on` / `end_on` / `expected_end_on` / `renewal_on`** invariants by status. |
+| **TC-03-D08** | **`pending`** semantics; TC-03 activation without full **OD-006** engine. |
+| **TC-03-D09** | History on child rows; no engagement version table in TC-03. |
+| **TC-03-D10** | Domain doc + this register suffice; ADR only if architecture materially changes. |
+
+**Same-agency:** Enforced for engagement, placement targets, and supervision (see domain doc).
 
 ---
 
