@@ -1,5 +1,10 @@
 #!/bin/bash -e
 
+# Bind-mounted Gemfile.lock can be newer than the image's /usr/local/bundle (adds gems like bcrypt).
+if [ "${RAILS_ENV:-development}" = "development" ] || [ "${RAILS_ENV}" = "test" ]; then
+  bundle check || bundle install --jobs 4 --retry 3
+fi
+
 joined="$(printf '%s ' "$@")"
 
 # Ensure schema exists before Puma boots or Sidekiq loads app code against the DB.

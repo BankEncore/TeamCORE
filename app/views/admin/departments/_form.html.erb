@@ -1,0 +1,26 @@
+<%= render "shared/errors", model: @department %>
+<%= form_with model: [:admin, @department], data: { turbo: false } do |f| %>
+  <div class="mb-3">
+    <%= f.label :code, class: "block text-sm font-medium text-slate-700 mb-1" %>
+    <%= f.text_field :code, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+  </div>
+  <div class="mb-3">
+    <%= f.label :name, class: "block text-sm font-medium text-slate-700 mb-1" %>
+    <%= f.text_field :name, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+  </div>
+  <div class="mb-3">
+    <%= f.label :description, class: "block text-sm font-medium text-slate-700 mb-1" %>
+    <%= f.text_area :description, rows: 3, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+  </div>
+  <div class="mb-3">
+    <%= f.label :status, class: "block text-sm font-medium text-slate-700 mb-1" %>
+    <%= f.select :status, LifecycleStatusable::STATUSES, {}, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+  </div>
+  <div class="mb-4">
+    <%= f.label :parent_department_id, "Parent department", class: "block text-sm font-medium text-slate-700 mb-1" %>
+    <% parents = Department.where(agency_id: current_agency.id).order(:code) %>
+    <% parents = parents.where.not(id: @department.id) if @department.persisted? %>
+    <%= f.collection_select :parent_department_id, parents, :id, :name, { include_blank: "— none —" }, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+  </div>
+  <%= f.submit class: "rounded bg-slate-900 text-white px-4 py-2 text-sm cursor-pointer" %>
+<% end %>

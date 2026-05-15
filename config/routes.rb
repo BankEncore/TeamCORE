@@ -1,14 +1,33 @@
-Rails.application.routes.draw do
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
+# frozen_string_literal: true
 
-  # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
-  # Can be used by load balancers and uptime monitors to verify that the app is live.
+Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
 
-  # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
-  # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
-  # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
+  get "login", to: "sessions#new"
+  post "login", to: "sessions#create"
+  delete "logout", to: "sessions#destroy", as: :logout
 
-  # Defines the root path route ("/")
-  # root "posts#index"
+  namespace :admin do
+    root "dashboard#show"
+    resource :agency_context, only: %i[show update], controller: "agency_context"
+
+    resources :agencies, only: %i[index show edit update]
+    resources :departments, only: %i[index show new create edit update]
+    resources :locations, only: %i[index show new create edit update]
+    resources :teams, only: %i[index show new create edit update]
+
+    resources :parties, only: %i[index show edit update]
+    get "parties/new/person", to: "parties#new_person", as: :new_person_party
+    post "parties/person", to: "parties#create_person", as: :person_parties
+    get "parties/new/organization", to: "parties#new_organization", as: :new_organization_party
+    post "parties/organization", to: "parties#create_organization", as: :organization_parties
+
+    resources :team_members, only: %i[index show new create edit update]
+    resources :engagements, only: %i[index show new create edit update] do
+      resources :placements, controller: "engagement_placements", only: %i[index show new create edit update]
+      resources :supervision_assignments, controller: "engagement_supervisions", only: %i[index show new create edit update]
+    end
+  end
+
+  root "home#index"
 end

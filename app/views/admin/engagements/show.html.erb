@@ -1,0 +1,38 @@
+<% content_for :title, "Engagement ##{@engagement.id}" %>
+<div class="mb-4"><%= link_to "← Engagements", admin_engagements_path, class: "text-sky-700 text-sm" %></div>
+<h1 class="text-2xl font-semibold mb-2">Engagement #<%= @engagement.id %></h1>
+<dl class="grid grid-cols-1 gap-2 text-sm mb-4">
+  <dt class="text-slate-500">Team member</dt><dd><%= link_to @engagement.team_member.party.display_name, admin_team_member_path(@engagement.team_member), class: "text-sky-700 underline" %></dd>
+  <dt class="text-slate-500">Relationship type</dt><dd><%= @engagement.relationship_type %></dd>
+  <dt class="text-slate-500">Status</dt><dd><%= @engagement.status %></dd>
+  <dt class="text-slate-500">Dates</dt><dd class="font-mono text-xs">start <%= @engagement.start_on %> · end <%= @engagement.end_on %> · expected <%= @engagement.expected_end_on %></dd>
+</dl>
+<% if @engagement.title.present? || @engagement.notes.present? %>
+  <p class="text-sm mb-2"><%= @engagement.title %></p>
+  <p class="text-sm text-slate-600 mb-4"><%= simple_format(@engagement.notes) if @engagement.notes.present? %></p>
+<% end %>
+<div class="border border-slate-200 rounded p-4 bg-white mb-4">
+  <h2 class="font-medium mb-2">Workflow eligibility (hints)</h2>
+  <ul class="text-sm space-y-1 text-slate-700">
+    <li>employee path? <%= @engagement.employee_path? %> · contractor class? <%= @engagement.contractor_class? %></li>
+    <li>suspended? <%= @engagement.suspended? %> · terminal? <%= @engagement.terminal? %></li>
+    <li>blocked forward (status layer)? <%= @engagement.operational_forward_work_blocked_by_status? %></li>
+  </ul>
+</div>
+<div class="flex flex-wrap gap-2 mb-6">
+  <%= link_to "Placements", admin_engagement_placements_path(@engagement), class: "rounded bg-slate-100 border border-slate-300 px-3 py-2 text-sm" %>
+  <%= link_to "Supervision", admin_engagement_supervision_assignments_path(@engagement), class: "rounded bg-slate-100 border border-slate-300 px-3 py-2 text-sm" %>
+  <%= link_to "Edit", edit_admin_engagement_path(@engagement), class: "rounded bg-slate-900 text-white px-3 py-2 text-sm" %>
+</div>
+<h3 class="font-medium mb-2">Current placements</h3>
+<ul class="text-sm mb-4 list-disc pl-5">
+  <% @placement_rows.each do |p| %>
+    <li><%= p.effective_start_on %> — <%= p.effective_end_on %> · dept <%= p.department_id %> · loc <%= p.location_id %> · team <%= p.team_id %></li>
+  <% end %>
+</ul>
+<h3 class="font-medium mb-2">Supervision assignments</h3>
+<ul class="text-sm list-disc pl-5">
+  <% @supervision_rows.each do |s| %>
+    <li><%= s.relationship_type %> supervisor engagement <%= s.supervisor_engagement_id %> · <%= s.effective_start_on %> — <%= s.effective_end_on %></li>
+  <% end %>
+</ul>

@@ -1,0 +1,9 @@
+<% content_for :title, "TM ##{@team_member.id} — Team member" %>
+<div class="mb-4"><%= link_to "← Team members", admin_team_members_path, class: "text-sky-700 text-sm" %></div>
+<h1 class="text-2xl font-semibold mb-2">Team member #<%= @team_member.id %></h1>
+<dl class="grid grid-cols-1 gap-2 text-sm mb-4">
+  <dt class="text-slate-500">Party</dt><dd><%= link_to (@team_member.party.display_name.presence || "Party ##{@team_member.party_id}"), admin_party_path(@team_member.party), class: "text-sky-700 underline" %></dd>
+  <dt class="text-slate-500">Team member number</dt><dd><%= @team_member.team_member_number.presence || "—" %></dd>
+  <dt class="text-slate-500">Status</dt><dd><%= @team_member.status %></dd>
+</dl>
+<%= link_to "Edit", edit_admin_team_member_path(@team_member), class: "rounded bg-slate-900 text-white px-3 py-2 text-sm" %>

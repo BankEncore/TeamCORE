@@ -1,0 +1,13 @@
+<% content_for :title, "Supervision — Engagement ##{@engagement.id}" %>
+<div class="mb-4 flex flex-wrap gap-2">
+  <%= link_to "← Engagement", admin_engagement_path(@engagement), class: "text-sky-700 text-sm" %>
+  <%= link_to "New supervision", new_admin_engagement_supervision_assignment_path(@engagement), class: "rounded bg-slate-900 text-white px-3 py-2 text-sm" %>
+</div>
+<h1 class="text-2xl font-semibold mb-4">Supervision</h1>
+<ul class="divide-y border border-slate-200 rounded bg-white">
+  <% @assignments.each do |a| %>
+    <li class="px-4 py-3 text-sm">
+      <%= link_to "Reports to Engagement ##{a.supervisor_engagement_id} (#{a.effective_start_on})", admin_engagement_supervision_assignment_path(@engagement, a), class: "text-sky-700 underline" %>
+    </li>
+  <% end %>
+</ul>

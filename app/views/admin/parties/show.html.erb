@@ -1,0 +1,18 @@
+<% content_for :title, "#{@party.display_name.presence || 'Party'} — TeamCORE Admin" %>
+<div class="mb-4"><%= link_to "← Parties", admin_parties_path, class: "text-sky-700 text-sm" %></div>
+<h1 class="text-2xl font-semibold mb-2"><%= @party.display_name.presence || "Party ##{@party.id}" %></h1>
+<dl class="grid grid-cols-1 gap-2 text-sm mb-4">
+  <dt class="text-slate-500">Type</dt><dd><%= @party.party_type %></dd>
+  <dt class="text-slate-500">Status</dt><dd><%= @party.status %></dd>
+  <% if @party.external_reference.present? %>
+    <dt class="text-slate-500">External ref</dt><dd><%= @party.external_reference %></dd>
+  <% end %>
+</dl>
+<% if @party.person? && @party.person_profile %>
+  <h2 class="font-medium mb-2">Person</h2>
+  <p class="text-sm text-slate-700"><%= [@party.person_profile.first_name, @party.person_profile.last_name].compact.join(" ") %></p>
+<% elsif @party.organization? && @party.organization_profile %>
+  <h2 class="font-medium mb-2">Organization</h2>
+  <p class="text-sm text-slate-700"><%= @party.organization_profile.trade_name.presence || @party.organization_profile.legal_name %></p>
+<% end %>
+<div class="mt-4"><%= link_to "Edit", edit_admin_party_path(@party), class: "rounded bg-slate-900 text-white px-3 py-2 text-sm" %></div>

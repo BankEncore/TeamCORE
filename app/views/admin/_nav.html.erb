@@ -1,0 +1,35 @@
+<% return unless defined?(current_user) && current_user %>
+
+<header class="border-b border-slate-200 bg-white">
+  <div class="max-w-5xl mx-auto px-4 py-3 flex flex-wrap gap-4 items-center justify-between">
+    <div class="font-semibold text-slate-800">TeamCORE Admin</div>
+    <nav class="flex flex-wrap gap-3 text-sm">
+      <%= link_to "Dashboard", admin_root_path, class: "text-sky-700 hover:underline" %>
+      <%= link_to "Agencies", admin_agencies_path, class: "text-sky-700 hover:underline" %>
+      <% if current_agency.present? %>
+        <%= link_to "Departments", admin_departments_path, class: "text-sky-700 hover:underline" %>
+        <%= link_to "Locations", admin_locations_path, class: "text-sky-700 hover:underline" %>
+        <%= link_to "Teams", admin_teams_path, class: "text-sky-700 hover:underline" %>
+        <%= link_to "Parties", admin_parties_path, class: "text-sky-700 hover:underline" %>
+        <%= link_to "Team members", admin_team_members_path, class: "text-sky-700 hover:underline" %>
+        <%= link_to "Engagements", admin_engagements_path, class: "text-sky-700 hover:underline" %>
+      <% end %>
+    </nav>
+    <div class="flex flex-wrap items-center gap-3 text-sm">
+      <% if current_user.agencies.many? %>
+        <%= form_with url: admin_agency_context_path, method: :patch, data: { turbo: false }, class: "flex items-center gap-2" do %>
+          <%= hidden_field_tag :return_to, request.fullpath %>
+          <%= label_tag :agency_id, "Agency", class: "text-slate-600" %>
+          <%= select_tag :agency_id,
+                options_from_collection_for_select(current_user.agencies.order(:name), :id, :name, current_agency&.id),
+                class: "border border-slate-300 rounded px-2 py-1 text-sm" %>
+          <%= submit_tag "Switch", class: "rounded bg-slate-800 text-white px-2 py-1 text-sm cursor-pointer" %>
+        <% end %>
+      <% elsif current_agency.present? %>
+        <span class="text-slate-600"><%= current_agency.name %></span>
+      <% end %>
+      <span class="text-slate-500"><%= current_user.email %></span>
+      <%= button_to "Log out", logout_path, method: :delete, class: "text-sky-700 hover:underline bg-transparent border-0 cursor-pointer p-0" %>
+    </div>
+  </div>
+</header>
