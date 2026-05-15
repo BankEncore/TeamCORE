@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_14_130200) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_14_150000) do
   create_table "agencies", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
     t.string "code", null: false
     t.datetime "created_at", null: false
@@ -33,6 +33,80 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_14_130200) do
     t.index ["agency_id", "status"], name: "index_departments_on_agency_id_and_status"
     t.index ["agency_id"], name: "index_departments_on_agency_id"
     t.index ["parent_department_id"], name: "index_departments_on_parent_department_id"
+  end
+
+  create_table "document_records", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.bigint "agency_id", null: false
+    t.bigint "byte_size"
+    t.string "content_type"
+    t.datetime "created_at", null: false
+    t.string "display_name"
+    t.bigint "document_type_id", null: false
+    t.bigint "engagement_id"
+    t.date "expires_on"
+    t.string "filename"
+    t.date "issued_on"
+    t.bigint "party_id"
+    t.text "rejection_reason"
+    t.string "status", default: "submitted", null: false
+    t.string "storage_key"
+    t.date "submitted_on"
+    t.bigint "team_member_id"
+    t.datetime "updated_at", null: false
+    t.text "verification_notes"
+    t.bigint "verified_by_id"
+    t.date "verified_on"
+    t.index ["agency_id", "document_type_id"], name: "index_document_records_on_agency_id_and_document_type_id"
+    t.index ["agency_id", "engagement_id"], name: "index_document_records_on_agency_id_and_engagement_id"
+    t.index ["agency_id", "expires_on"], name: "index_document_records_on_agency_id_and_expires_on"
+    t.index ["agency_id", "status"], name: "index_document_records_on_agency_id_and_status"
+    t.index ["agency_id", "team_member_id"], name: "index_document_records_on_agency_id_and_team_member_id"
+    t.index ["agency_id"], name: "index_document_records_on_agency_id"
+    t.index ["document_type_id"], name: "index_document_records_on_document_type_id"
+    t.index ["engagement_id"], name: "index_document_records_on_engagement_id"
+    t.index ["party_id"], name: "index_document_records_on_party_id"
+    t.index ["team_member_id"], name: "index_document_records_on_team_member_id"
+    t.index ["verified_by_id"], name: "index_document_records_on_verified_by_id"
+  end
+
+  create_table "document_requirements", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.bigint "agency_id", null: false
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.bigint "document_type_id", null: false
+    t.boolean "expiration_required", default: false, null: false
+    t.integer "expiring_soon_days"
+    t.string "name"
+    t.string "relationship_type", default: "any", null: false
+    t.boolean "required", default: true, null: false
+    t.string "requirement_scope", null: false
+    t.string "status", default: "active", null: false
+    t.datetime "updated_at", null: false
+    t.boolean "verification_required", default: false, null: false
+    t.index ["agency_id", "document_type_id", "requirement_scope", "relationship_type"], name: "idx_document_requirements_agency_type_scope_rel", unique: true
+    t.index ["agency_id", "relationship_type"], name: "index_document_requirements_on_agency_id_and_relationship_type"
+    t.index ["agency_id", "requirement_scope"], name: "index_document_requirements_on_agency_id_and_requirement_scope"
+    t.index ["agency_id", "status"], name: "index_document_requirements_on_agency_id_and_status"
+    t.index ["agency_id"], name: "index_document_requirements_on_agency_id"
+    t.index ["document_type_id"], name: "index_document_requirements_on_document_type_id"
+  end
+
+  create_table "document_types", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.bigint "agency_id", null: false
+    t.string "category", null: false
+    t.string "code", null: false
+    t.datetime "created_at", null: false
+    t.integer "default_expiring_soon_days"
+    t.text "description"
+    t.string "name", null: false
+    t.boolean "requires_expiration_date", default: false, null: false
+    t.string "status", default: "active", null: false
+    t.datetime "updated_at", null: false
+    t.boolean "verification_required", default: false, null: false
+    t.index ["agency_id", "category"], name: "index_document_types_on_agency_id_and_category"
+    t.index ["agency_id", "code"], name: "index_document_types_on_agency_id_and_code", unique: true
+    t.index ["agency_id", "status"], name: "index_document_types_on_agency_id_and_status"
+    t.index ["agency_id"], name: "index_document_types_on_agency_id"
   end
 
   create_table "engagement_organization_placements", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
@@ -226,6 +300,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_14_130200) do
 
   add_foreign_key "departments", "agencies"
   add_foreign_key "departments", "departments", column: "parent_department_id"
+  add_foreign_key "document_records", "agencies"
+  add_foreign_key "document_records", "document_types"
+  add_foreign_key "document_records", "engagements"
+  add_foreign_key "document_records", "parties"
+  add_foreign_key "document_records", "team_members"
+  add_foreign_key "document_records", "users", column: "verified_by_id"
+  add_foreign_key "document_requirements", "agencies"
+  add_foreign_key "document_requirements", "document_types"
+  add_foreign_key "document_types", "agencies"
   add_foreign_key "engagement_organization_placements", "agencies"
   add_foreign_key "engagement_organization_placements", "departments"
   add_foreign_key "engagement_organization_placements", "engagements"

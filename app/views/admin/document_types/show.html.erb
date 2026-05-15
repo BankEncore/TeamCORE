@@ -1,0 +1,26 @@
+<% content_for :title, "Document type — TeamCORE Admin" %>
+<div class="mb-4"><%= link_to "← Document types", admin_document_types_path, class: "text-sky-700 text-sm" %></div>
+<h1 class="text-2xl font-semibold mb-2"><%= @document_type.name %></h1>
+<dl class="grid grid-cols-1 gap-2 text-sm mb-4">
+  <dt class="text-slate-500">Code</dt><dd class="font-mono text-xs"><%= @document_type.code %></dd>
+  <dt class="text-slate-500">Category</dt><dd><%= @document_type.category %></dd>
+  <dt class="text-slate-500">Status</dt><dd><%= @document_type.status %></dd>
+  <dt class="text-slate-500">Verification default</dt><dd><%= @document_type.verification_required %></dd>
+  <dt class="text-slate-500">Requires expiration date</dt><dd><%= @document_type.requires_expiration_date %></dd>
+  <dt class="text-slate-500">Default expiring-soon window</dt><dd><%= @document_type.default_expiring_soon_days || "—" %></dd>
+</dl>
+<% if @document_type.description.present? %>
+  <p class="text-sm text-slate-600 mb-4"><%= simple_format(@document_type.description) %></p>
+<% end %>
+<div class="flex gap-2 mb-6">
+  <%= link_to "Edit", edit_admin_document_type_path(@document_type), class: "rounded bg-slate-900 text-white px-3 py-2 text-sm" %>
+</div>
+<h2 class="font-medium mb-2">Requirements using this type</h2>
+<ul class="text-sm list-disc pl-5 mb-4">
+  <% @document_type.document_requirements.order(:id).each do |req| %>
+    <li>
+      <%= link_to(req.name.presence || "Requirement ##{req.id}", edit_admin_document_requirement_path(req), class: "text-sky-700 underline") %>
+      · <%= req.requirement_scope %> · <%= req.relationship_type %>
+    </li>
+  <% end %>
+</ul>

@@ -7,6 +7,7 @@ class TeamMember < ApplicationRecord
   belongs_to :agency
   belongs_to :party, inverse_of: :team_members
   has_many :engagements, inverse_of: :team_member, dependent: :restrict_with_exception
+  has_many :document_records, inverse_of: :team_member, dependent: :restrict_with_exception
 
   validates :agency_id, presence: true
   validates :party_id, presence: true

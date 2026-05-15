@@ -42,6 +42,7 @@ class Engagement < ApplicationRecord
     foreign_key: :supervisor_engagement_id,
     inverse_of: :supervisor_engagement,
     dependent: :restrict_with_exception
+  has_many :document_records, inverse_of: :engagement, dependent: :restrict_with_exception
 
   validates :relationship_type, presence: true, inclusion: { in: RELATIONSHIP_TYPES }
   validates :status, presence: true, inclusion: { in: STATUSES }

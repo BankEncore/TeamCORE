@@ -1,0 +1,44 @@
+<%= render "shared/errors", model: @document_requirement %>
+<%= form_with model: [:admin, @document_requirement], data: { turbo: false } do |f| %>
+  <div class="mb-3">
+    <%= f.label :document_type_id, "Document type", class: "block text-sm font-medium text-slate-700 mb-1" %>
+    <%= f.collection_select :document_type_id, @document_types, :id, :name, {}, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+  </div>
+  <div class="mb-3">
+    <%= f.label :name, class: "block text-sm font-medium text-slate-700 mb-1" %>
+    <%= f.text_field :name, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+  </div>
+  <div class="mb-3">
+    <%= f.label :description, class: "block text-sm font-medium text-slate-700 mb-1" %>
+    <%= f.text_area :description, rows: 2, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+  </div>
+  <div class="mb-3">
+    <%= f.label :requirement_scope, class: "block text-sm font-medium text-slate-700 mb-1" %>
+    <%= f.select :requirement_scope, DocumentRequirement::REQUIREMENT_SCOPES, {}, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+  </div>
+  <div class="mb-3">
+    <%= f.label :relationship_type, class: "block text-sm font-medium text-slate-700 mb-1" %>
+    <%= f.select :relationship_type, DocumentRequirement::RELATIONSHIP_TYPES, {}, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+  </div>
+  <div class="mb-3 flex items-center gap-2">
+    <%= f.check_box :required, class: "rounded border-slate-300" %>
+    <%= f.label :required, class: "text-sm text-slate-700" %>
+  </div>
+  <div class="mb-3 flex items-center gap-2">
+    <%= f.check_box :verification_required, class: "rounded border-slate-300" %>
+    <%= f.label :verification_required, class: "text-sm text-slate-700" %>
+  </div>
+  <div class="mb-3 flex items-center gap-2">
+    <%= f.check_box :expiration_required, class: "rounded border-slate-300" %>
+    <%= f.label :expiration_required, class: "text-sm text-slate-700" %>
+  </div>
+  <div class="mb-3">
+    <%= f.label :expiring_soon_days, "Expiring-soon override (days)", class: "block text-sm font-medium text-slate-700 mb-1" %>
+    <%= f.number_field :expiring_soon_days, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+  </div>
+  <div class="mb-3">
+    <%= f.label :status, class: "block text-sm font-medium text-slate-700 mb-1" %>
+    <%= f.select :status, DocumentRequirement::STATUSES, {}, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+  </div>
+  <%= f.submit class: "rounded bg-slate-900 text-white px-4 py-2 text-sm cursor-pointer" %>
+<% end %>

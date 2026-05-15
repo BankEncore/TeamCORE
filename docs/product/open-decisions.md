@@ -2,7 +2,7 @@
 
 This register tracks product and modeling decisions for TeamCORE. Not every item needs the same rigor: use the **decision handling model** below so Phase 0 can close without pretending Phase 4–6 design is final.
 
-**Companion docs:** [`domain-map.md`](domain-map.md), [`overview.md`](overview.md), [`roadmap-decision-log.md`](roadmap-decision-log.md), [`../roadmap/phase-1-readiness-checklist.md`](../roadmap/phase-1-readiness-checklist.md), [`employee-contractor-applicability-matrix.md`](employee-contractor-applicability-matrix.md), [`glossary.md`](glossary.md), [`../domain/party-team-member.md`](../domain/party-team-member.md), **[`../domain/engagement.md`](../domain/engagement.md)** (TC-03), **[`../domain/engagement-status.md`](../domain/engagement-status.md)** (TC-04).
+**Companion docs:** [`domain-map.md`](domain-map.md), [`overview.md`](overview.md), [`roadmap-decision-log.md`](roadmap-decision-log.md), [`../roadmap/phase-1-readiness-checklist.md`](../roadmap/phase-1-readiness-checklist.md), [`employee-contractor-applicability-matrix.md`](employee-contractor-applicability-matrix.md), [`glossary.md`](glossary.md), [`../domain/party-team-member.md`](../domain/party-team-member.md), **[`../domain/engagement.md`](../domain/engagement.md)** (TC-03), **[`../domain/engagement-status.md`](../domain/engagement-status.md)** (TC-04), **[`../domain/documents-compliance.md`](../domain/documents-compliance.md)** (TC-06).
 
 ---
 
@@ -227,7 +227,7 @@ Compliance — requirement rules, completeness, expirations, readiness signals, 
 
 **Rationale:** An artifact is not the same thing as interpretation of requirements.
 
-**Follow-up:** Phase 2 module/bounded-context boundary; update glossary definitions.
+**Follow-up:** Phase 2 module/bounded-context boundary; update glossary definitions. **TC-06 hub:** [`../domain/documents-compliance.md`](../domain/documents-compliance.md) (models + `Documents::ReadinessEvaluator`; **OD-005** implementation detail).
 
 ---
 
@@ -242,7 +242,7 @@ Compliance — requirement rules, completeness, expirations, readiness signals, 
 - Readiness is a **deterministic signal** derived from configured requirements, document states, verification, expiration rules, and engagement status.
 - **Manual override**, if introduced, must be permission-controlled, reason-coded, and audit-tracked—not the default MVP behavior.
 
-**Follow-up:** Readiness rules backlog for Phase 2; glossary entry.
+**Follow-up:** Readiness rules backlog for Phase 2; glossary entry. **Document slice (TC-06):** readiness interpretation for configured document requirements lives in **`Documents::ReadinessEvaluator`** per [`../domain/documents-compliance.md`](../domain/documents-compliance.md); full multi-domain activation rules remain Phase 2+.
 
 ---
 

@@ -1,0 +1,36 @@
+<%= render "shared/errors", model: @document_type %>
+<%= form_with model: [:admin, @document_type], data: { turbo: false } do |f| %>
+  <div class="mb-3">
+    <%= f.label :code, class: "block text-sm font-medium text-slate-700 mb-1" %>
+    <%= f.text_field :code, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+  </div>
+  <div class="mb-3">
+    <%= f.label :name, class: "block text-sm font-medium text-slate-700 mb-1" %>
+    <%= f.text_field :name, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+  </div>
+  <div class="mb-3">
+    <%= f.label :description, class: "block text-sm font-medium text-slate-700 mb-1" %>
+    <%= f.text_area :description, rows: 3, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+  </div>
+  <div class="mb-3">
+    <%= f.label :category, class: "block text-sm font-medium text-slate-700 mb-1" %>
+    <%= f.select :category, DocumentType::CATEGORIES, {}, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+  </div>
+  <div class="mb-3 flex items-center gap-2">
+    <%= f.check_box :requires_expiration_date, class: "rounded border-slate-300" %>
+    <%= f.label :requires_expiration_date, class: "text-sm text-slate-700" %>
+  </div>
+  <div class="mb-3">
+    <%= f.label :default_expiring_soon_days, class: "block text-sm font-medium text-slate-700 mb-1" %>
+    <%= f.number_field :default_expiring_soon_days, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+  </div>
+  <div class="mb-3 flex items-center gap-2">
+    <%= f.check_box :verification_required, class: "rounded border-slate-300" %>
+    <%= f.label :verification_required, "Default verification required", class: "text-sm text-slate-700" %>
+  </div>
+  <div class="mb-3">
+    <%= f.label :status, class: "block text-sm font-medium text-slate-700 mb-1" %>
+    <%= f.select :status, DocumentType::STATUSES, {}, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+  </div>
+  <%= f.submit class: "rounded bg-slate-900 text-white px-4 py-2 text-sm cursor-pointer" %>
+<% end %>

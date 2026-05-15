@@ -279,6 +279,8 @@ Examples may include:
 
 Document requirements may vary by engagement type, contractor type, location, role, or other configuration.
 
+**TC-06 (implementation):** `DocumentRequirement` rows are agency-scoped; **`requirement_scope`** is **`engagement`** or **`team_member`** in v1; **`relationship_type`** uses **`any`** or a specific `Engagement` `relationship_type`. Applicability is **not** on `DocumentType` in v1. See **[`documents-compliance.md`](documents-compliance.md)**.
+
 ---
 
 ### Verification
