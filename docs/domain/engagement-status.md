@@ -146,6 +146,8 @@ Align row labels with individual contractor (**draft** … **cancelled**) with o
 
 ## Subcontractor (`relationship_type = subcontractor`)
 
+**TC-05** hub — association vs promotion, source rules, overlap, stale source: [`subcontractor-relationships.md`](subcontractor-relationships.md).
+
 ### Related party vs promoted subcontractor
 
 - **Related party only:** **`PartyRelationship`** (often under **OD-004**) — visibility/context; **no** `Engagement` required.

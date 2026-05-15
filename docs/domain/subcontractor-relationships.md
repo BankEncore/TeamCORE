@@ -57,14 +57,14 @@ If a **person** was eligible as a source because they had an **active individual
 
 ## Overlap rule (pair-level)
 
-For **`relationship_type = subcontractor`**, apply uniqueness of **concurrent** association at triple \((agency, source_party, target_party)\):
+For **`relationship_type = subcontractor`**, constrain **concurrent** association at \((agency_id, source_party_id, target_party_id)\):
 
-- Multiple **historical** rows are allowed (e.g. one ended, another started later).
-- **Forbidden:** two rows that are **both** `status = active`, **both** **currently effective on `Date.current`**, for the same `(agency_id, source_party_id, target_party_id, subcontractor)` (implemented as **at most one** such row effective “today”).
+- Multiple **historical** rows are allowed when they do not conflict—for example **back-to-back** windows, **`inactive` / `archived`** rows, or **non-overlapping** `effective_start_date` / `effective_end_date` intervals while **`status = active`**.
+- **Forbidden:** two rows that are **both** `status = active` for the same `(agency_id, source_party_id, target_party_id, relationship_type = subcontractor)` whose **effective date intervals overlap**. Blanks are treated as **open-ended** for that bound when detecting overlap (inclusive interval overlap in application validation).
 
 The same **target** subcontractor may still link to **different** source contractors—only the **pair** is constrained.
 
-**Currently effective** matches **[`PartyRelationship#currently_effective_on?`](../../app/models/party_relationship.rb)**:
+Promotion and other “is this edge live right now?” checks use **currently effective**, which matches **[`PartyRelationship#currently_effective_on?`](../../app/models/party_relationship.rb)**:
 
 ```text
 status = active

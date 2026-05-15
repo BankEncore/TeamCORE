@@ -93,4 +93,95 @@ class AdminPartyRelationshipsTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_match(/no longer contractor-capable/i, @response.body)
   end
+
+  test "update subcontractor relationship notes" do
+    rel =
+      PartyRelationship.create!(
+        agency: @agency,
+        source_party: @org,
+        target_party: @target,
+        relationship_type: "subcontractor",
+        status: "active",
+        notes: "before"
+      )
+
+    patch admin_party_party_relationship_path(@org, rel), params: {
+      party_relationship: {
+        target_party_id: @target.id,
+        status: "active",
+        notes: "after edit"
+      }
+    }
+
+    assert_redirected_to admin_party_party_relationships_path(@org)
+    assert_equal "after edit", rel.reload.notes
+  end
+
+  test "promote redirects with alert when relationship is not currently effective" do
+    rel =
+      PartyRelationship.create!(
+        agency: @agency,
+        source_party: @org,
+        target_party: @target,
+        relationship_type: "subcontractor",
+        status: "active",
+        effective_start_date: Date.current + 1.year,
+        effective_end_date: nil
+      )
+
+    post promote_admin_party_party_relationship_path(@org, rel)
+
+    assert_redirected_to admin_party_party_relationships_path(@org)
+    follow_redirect!
+    assert_match(/currently effective|Promotion requires/i, @response.body)
+  end
+
+  test "promote redirects with alert when relationship is inactive" do
+    rel =
+      PartyRelationship.create!(
+        agency: @agency,
+        source_party: @org,
+        target_party: @target,
+        relationship_type: "subcontractor",
+        status: "inactive"
+      )
+
+    post promote_admin_party_party_relationship_path(@org, rel)
+
+    assert_redirected_to admin_party_party_relationships_path(@org)
+    follow_redirect!
+    assert_match(/currently effective|Promotion requires/i, @response.body)
+  end
+
+  test "stale person source blocks update" do
+    person_src = Party.create!(agency: @agency, party_type: "person", display_name: "IC2")
+    PersonProfile.create!(party: person_src, first_name: "IC", last_name: "Two")
+    person_src.reload
+    tm = TeamMember.create!(agency: @agency, party: person_src)
+    e = Engagement.create!(agency: @agency, team_member: tm, relationship_type: "individual_contractor")
+    e.update!(status: "pending") if e.status == "draft"
+    e.update!(status: "active", start_on: Date.current)
+
+    rel =
+      PartyRelationship.create!(
+        agency: @agency,
+        source_party: person_src,
+        target_party: @target,
+        relationship_type: "subcontractor",
+        status: "active",
+        notes: "original"
+      )
+    e.update!(status: "suspended")
+
+    patch admin_party_party_relationship_path(person_src, rel), params: {
+      party_relationship: {
+        target_party_id: @target.id,
+        status: "active",
+        notes: "blocked"
+      }
+    }
+
+    assert_response :unprocessable_entity
+    assert_equal "original", rel.reload.notes
+  end
 end
