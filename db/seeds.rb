@@ -5,7 +5,7 @@
 # Acceptance checklist (audit):
 # - Baseline agency: "Example Agency" (code: example).
 # - Baseline departments/locations/teams match epic TC-01.11 naming (generic demo labels).
-# - TC-05.08: Maria remains related-only (PartyRelationship); Alex is promoted (TeamMember + subcontractor Engagement).
+# - TC-06: demo document types, requirements, and sample records (evaluator-ready).
 # - Intentionally generic — not modeled on a single real-world company name or structure.
 #
 # Run: bin/rails db:seed   (inside Docker per project README if applicable)
@@ -366,3 +366,167 @@ second_agency = Agency.find_or_initialize_by(code: "example_secondary")
 second_agency.assign_attributes(name: "Example Agency Secondary", status: "active")
 second_agency.save!
 UserAgency.where(user: admin_user, agency: second_agency).first_or_create!
+
+# TC-06 — document configuration & readiness (issue #7)
+# Hub: docs/domain/documents-compliance.md
+w9_type = DocumentType.find_or_initialize_by(agency:, code: "w9")
+w9_type.assign_attributes(
+  name: "W-9",
+  description: "Tax classification (demo / not legal advice).",
+  category: "tax_form",
+  requires_expiration_date: false,
+  default_expiring_soon_days: nil,
+  verification_required: true,
+  status: "active"
+)
+w9_type.save!
+
+contract_agreement_type = DocumentType.find_or_initialize_by(agency:, code: "contractor_services_agreement")
+contract_agreement_type.assign_attributes(
+  name: "Contractor services agreement",
+  description: "Master contractor agreement (demo).",
+  category: "contractor_agreement",
+  requires_expiration_date: true,
+  default_expiring_soon_days: 30,
+  verification_required: true,
+  status: "active"
+)
+contract_agreement_type.save!
+
+handbook_type = DocumentType.find_or_initialize_by(agency:, code: "employee_handbook_ack")
+handbook_type.assign_attributes(
+  name: "Employee handbook acknowledgment",
+  description: "Handbook receipt / attestation (demo).",
+  category: "employee_agreement",
+  requires_expiration_date: false,
+  default_expiring_soon_days: nil,
+  verification_required: false,
+  status: "active"
+)
+handbook_type.save!
+
+DocumentRequirement.find_or_initialize_by(
+  agency:,
+  document_type: w9_type,
+  requirement_scope: "engagement",
+  relationship_type: "any"
+).tap do |req|
+  req.assign_attributes(
+    name: "W-9 on file",
+    required: true,
+    verification_required: true,
+    expiration_required: false,
+    status: "active"
+  )
+  req.save!
+end
+
+DocumentRequirement.find_or_initialize_by(
+  agency:,
+  document_type: handbook_type,
+  requirement_scope: "engagement",
+  relationship_type: "employee"
+).tap do |req|
+  req.assign_attributes(
+    name: "Handbook acknowledgment",
+    description: "Employee acknowledgment (demo).",
+    required: true,
+    verification_required: false,
+    expiration_required: false,
+    status: "active"
+  )
+  req.save!
+end
+
+DocumentRequirement.find_or_initialize_by(
+  agency:,
+  document_type: contract_agreement_type,
+  requirement_scope: "engagement",
+  relationship_type: "individual_contractor"
+).tap do |req|
+  req.assign_attributes(
+    name: "Executed contractor agreement",
+    required: true,
+    verification_required: true,
+    expiration_required: true,
+    expiring_soon_days: 45,
+    status: "active"
+  )
+  req.save!
+end
+
+DocumentRequirement.find_or_initialize_by(
+  agency:,
+  document_type: w9_type,
+  requirement_scope: "team_member",
+  relationship_type: "any"
+).tap do |req|
+  req.assign_attributes(
+    name: "Team member W-9 (identity scope)",
+    required: false,
+    verification_required: true,
+    expiration_required: false,
+    status: "active"
+  )
+  req.save!
+end
+
+demo_admin = User.find_by!(email: "admin@example.com")
+vdate = Date.new(2024, 2, 1)
+
+# Jane employee — verified W-9 on engagement + acknowledged handbook (submitted only; satisfied without verification)
+jane_w9 = DocumentRecord.find_or_initialize_by(
+  agency:,
+  document_type: w9_type,
+  engagement: jane_eng,
+  team_member: jane_tm
+)
+jane_w9.assign_attributes(
+  filename: "w9-demo.pdf",
+  content_type: "application/pdf",
+  byte_size: 12_288,
+  display_name: "W-9 (Jane)",
+  status: "verified",
+  submitted_on: vdate,
+  verified_by: demo_admin,
+  verified_on: vdate,
+  storage_key: "seed/w9-jane"
+)
+jane_w9.save!
+
+jane_handbook = DocumentRecord.find_or_initialize_by(
+  agency:,
+  document_type: handbook_type,
+  engagement: jane_eng,
+  team_member: jane_tm
+)
+jane_handbook.assign_attributes(
+  filename: "handbook-ack.html",
+  content_type: "text/html",
+  byte_size: 256,
+  display_name: "Handbook acknowledgment",
+  status: "submitted",
+  submitted_on: vdate,
+  storage_key: nil
+)
+jane_handbook.save!
+
+# Robert IC — pending verification on agreement (expires in demo future)
+robert_agreement = DocumentRecord.find_or_initialize_by(
+  agency:,
+  document_type: contract_agreement_type,
+  engagement: robert_eng,
+  team_member: robert_tm
+)
+robert_agreement.assign_attributes(
+  filename: "agreement.pdf",
+  content_type: "application/pdf",
+  byte_size: 24_000,
+  display_name: "Services agreement",
+  status: "submitted",
+  submitted_on: vdate,
+  issued_on: vdate,
+  expires_on: demo_start_on + 2.years,
+  storage_key: "seed/agreement-robert"
+)
+robert_agreement.save!

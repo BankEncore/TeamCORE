@@ -10,6 +10,7 @@ class Party < ApplicationRecord
   has_one :organization_profile, inverse_of: :party, dependent: :restrict_with_exception
   has_many :party_contact_methods, inverse_of: :party, dependent: :restrict_with_exception
   has_many :team_members, inverse_of: :party, dependent: :restrict_with_exception
+  has_many :document_records, inverse_of: :party, dependent: :restrict_with_exception
   has_many(
     :outgoing_party_relationships,
     class_name: "PartyRelationship",

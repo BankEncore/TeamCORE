@@ -2,7 +2,7 @@
 
 Modeling notes for **TC-03 — Engagement Lifecycle** ([GitHub epic #4](https://github.com/BankEncore/TeamCORE/issues/4)) and cross-reference **TC-04 — Engagement status semantics** ([`engagement-status.md`](engagement-status.md)). **TC-05** subcontractor relationship hub: [`subcontractor-relationships.md`](subcontractor-relationships.md). Glossary ([`../product/glossary.md`](../product/glossary.md)); decisions ([`../product/open-decisions.md`](../product/open-decisions.md) — **TC-03-D01…D10**, **TC-04-D01…D05**); identity substrate [`party-team-member.md`](party-team-member.md); TC-01 placement/supervision concepts [`organization.md`](organization.md); applicability matrix [`employee-contractor-applicability-matrix.md`](../product/employee-contractor-applicability-matrix.md).
 
-**Spine:** `Party → TeamMember → Engagement(s)`. Engagement is **workflow authority** for employee vs contractor semantics and lifecycle (not Party or TeamMember). See **OD-001**, **OD-002**, **OD-003**.
+**Spine:** `Party → TeamMember → Engagement(s)`. Engagement is **workflow authority** for employee vs contractor semantics and lifecycle (not Party or TeamMember). See **OD-001**, **OD-002**, **OD-003**. Document requirements and readiness attach as consumers — **[`documents-compliance.md`](documents-compliance.md)** (**TC-06**).
 
 ---
 
@@ -19,7 +19,7 @@ Modeling notes for **TC-03 — Engagement Lifecycle** ([GitHub epic #4](https://
 | **Engagement** | `engagements` | Yes |
 | **EngagementOrganizationPlacement** | `engagement_organization_placements` | Yes |
 | **EngagementSupervisionAssignment** | `engagement_supervision_assignments` | Yes |
-| **Documents / compliance** | Engagement consumers | No — future |
+| **Documents / compliance** | Engagement consumers | **TC-06** — [`documents-compliance.md`](documents-compliance.md) |
 | **Compensation / settlement** | Engagement consumers | No — future |
 | **Team360 UI** | Read paths only (requirements in this doc § Team360) | No — TC-10 |
 | **Operational reports** | Engagement + placement dimensions | No — TC-12 |

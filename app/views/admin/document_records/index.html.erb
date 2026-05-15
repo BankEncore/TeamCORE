@@ -1,0 +1,25 @@
+<% content_for :title, "Document records — TeamCORE Admin" %>
+<div class="flex justify-between items-center mb-4">
+  <h1 class="text-2xl font-semibold">Document records</h1>
+  <%= link_to "New record", new_admin_document_record_path, class: "rounded bg-slate-900 text-white px-3 py-2 text-sm" %>
+</div>
+<table class="min-w-full text-sm border border-slate-200 bg-white rounded-lg overflow-hidden">
+  <thead class="bg-slate-100"><tr>
+    <th class="text-left p-2">ID</th>
+    <th class="text-left p-2">Type</th>
+    <th class="text-left p-2">Status</th>
+    <th class="text-left p-2">Engagement</th>
+    <th class="text-left p-2">Team member</th>
+  </tr></thead>
+  <tbody>
+    <% @document_records.each do |rec| %>
+      <tr class="border-t border-slate-200">
+        <td class="p-2"><%= link_to rec.id, admin_document_record_path(rec), class: "text-sky-700 underline" %></td>
+        <td class="p-2"><%= rec.document_type&.code %></td>
+        <td class="p-2"><%= rec.status %></td>
+        <td class="p-2"><%= rec.engagement_id || "—" %></td>
+        <td class="p-2"><%= rec.team_member_id %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

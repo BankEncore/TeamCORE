@@ -33,6 +33,10 @@ Rails.application.routes.draw do
       resources :placements, controller: "engagement_placements", only: %i[index show new create edit update]
       resources :supervision_assignments, controller: "engagement_supervisions", only: %i[index show new create edit update]
     end
+
+    resources :document_types
+    resources :document_requirements, except: %i[show destroy]
+    resources :document_records
   end
 
   root "home#index"

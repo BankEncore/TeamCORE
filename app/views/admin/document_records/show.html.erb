@@ -1,0 +1,12 @@
+<% content_for :title, "Document record ##{@document_record.id} — TeamCORE Admin" %>
+<div class="mb-4"><%= link_to "← Document records", admin_document_records_path, class: "text-sky-700 text-sm" %></div>
+<h1 class="text-2xl font-semibold mb-2">Document record #<%= @document_record.id %></h1>
+<dl class="grid grid-cols-1 gap-2 text-sm mb-4">
+  <dt class="text-slate-500">Type</dt><dd><%= @document_record.document_type&.name %> (<%= @document_record.document_type&.code %>)</dd>
+  <dt class="text-slate-500">Status</dt><dd><%= @document_record.status %></dd>
+  <dt class="text-slate-500">Team member</dt><dd><%= @document_record.team_member_id %> <%= @document_record.team_member&.party&.display_name %></dd>
+  <dt class="text-slate-500">Engagement</dt><dd><%= @document_record.engagement_id || "—" %></dd>
+  <dt class="text-slate-500">Submitted</dt><dd><%= @document_record.submitted_on %></dd>
+  <dt class="text-slate-500">Expires</dt><dd><%= @document_record.expires_on || "—" %></dd>
+</dl>
+<%= link_to "Edit", edit_admin_document_record_path(@document_record), class: "rounded bg-slate-900 text-white px-3 py-2 text-sm" %>

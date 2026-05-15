@@ -28,6 +28,8 @@ module Admin
             .includes(:source_party)
             .order(effective_start_date: :desc, id: :desc)
       end
+
+      @document_readiness = Documents::ReadinessEvaluator.new(engagement: @engagement).call
     end
 
     def new
