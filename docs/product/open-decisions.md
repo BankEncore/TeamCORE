@@ -131,7 +131,7 @@ Engagement = specific employee/contractor relationship
 | Direct settlement/payment | Team Member + contractor engagement |
 | Team360 profile | Team Member |
 
-**Follow-up:** Glossary + product rule checklist issue.
+**Follow-up:** Glossary + product rule checklist issue. Phase 1 rules, validation, and admin UX: [`../domain/subcontractor-relationships.md`](../domain/subcontractor-relationships.md) **(TC-05)**. Sensitive actions (subcontractor relationship edits, promote-to-workforce) use **existing admin authentication** only; durable audit trails and **TC-29** / **TC-30** RBAC remain future work.
 
 ---
 

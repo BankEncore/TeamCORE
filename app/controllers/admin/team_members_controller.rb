@@ -10,6 +10,15 @@ module Admin
     end
 
     def show
+      @incoming_subcontractor_rels =
+        PartyRelationship
+          .where(
+            agency_id: current_agency.id,
+            relationship_type: "subcontractor",
+            target_party_id: @team_member.party_id
+          )
+          .includes(:source_party)
+          .order(:id)
     end
 
     def new

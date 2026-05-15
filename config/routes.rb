@@ -16,7 +16,13 @@ Rails.application.routes.draw do
     resources :locations, only: %i[index show new create edit update]
     resources :teams, only: %i[index show new create edit update]
 
-    resources :parties, only: %i[index show edit update]
+    resources :parties, only: %i[index show edit update] do
+      resources :party_relationships, only: %i[index new create edit update] do
+        member do
+          post :promote
+        end
+      end
+    end
     get "parties/new/person", to: "parties#new_person", as: :new_person_party
     post "parties/person", to: "parties#create_person", as: :person_parties
     get "parties/new/organization", to: "parties#new_organization", as: :new_organization_party

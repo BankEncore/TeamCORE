@@ -10,6 +10,17 @@ module Admin
     end
 
     def show
+      @outgoing_subcontractors =
+        @party.outgoing_party_relationships
+          .where(relationship_type: "subcontractor")
+          .includes(:target_party)
+          .order(:id)
+      @incoming_subcontractors =
+        @party.incoming_party_relationships
+          .where(relationship_type: "subcontractor")
+          .includes(:source_party)
+          .order(:id)
+      @can_source_subcontractor_relationships = @party.subcontractor_source_contractor_capable_for_agency?(current_agency)
     end
 
     def new_person

@@ -1,6 +1,6 @@
 # Party and Team Member domain — TeamCORE
 
-Modeling notes for **TC-02 — Team Member / Party Foundation**. Glossary cross-refs in [`../product/glossary.md`](../product/glossary.md); decisions in [`../product/open-decisions.md`](../product/open-decisions.md) (**OD-001**, **OD-002**, **OD-004**, **TC-02-D01…D05**); **TC-03 Engagement** in **[`engagement.md`](engagement.md)**; internal org substrate in **[`organization.md`](organization.md)** / **ADR-0001**; Party↔Engagement spine in [`../product/modeling-notes/party-team-member-engagement.md`](../product/modeling-notes/party-team-member-engagement.md).
+Modeling notes for **TC-02 — Team Member / Party Foundation**. Glossary cross-refs in [`../product/glossary.md`](../product/glossary.md); decisions in [`../product/open-decisions.md`](../product/open-decisions.md) (**OD-001**, **OD-002**, **OD-004**, **TC-02-D01…D05**); **TC-03 Engagement** in **[`engagement.md`](engagement.md)**; **TC-05 subcontractor association vs promotion** in **[`subcontractor-relationships.md`](subcontractor-relationships.md)**; internal org substrate in **[`organization.md`](organization.md)** / **ADR-0001**; Party↔Engagement spine in [`../product/modeling-notes/party-team-member-engagement.md`](../product/modeling-notes/party-team-member-engagement.md).
 
 ---
 

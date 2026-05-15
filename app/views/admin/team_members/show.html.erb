@@ -6,4 +6,22 @@
   <dt class="text-slate-500">Team member number</dt><dd><%= @team_member.team_member_number.presence || "—" %></dd>
   <dt class="text-slate-500">Status</dt><dd><%= @team_member.status %></dd>
 </dl>
-<%= link_to "Edit", edit_admin_team_member_path(@team_member), class: "rounded bg-slate-900 text-white px-3 py-2 text-sm" %>
+
+<section class="mt-6 border border-slate-200 rounded p-4 bg-white">
+  <h2 class="font-medium mb-2 text-sm">Subcontractor relationships for this party (incoming)</h2>
+  <% if @incoming_subcontractor_rels.blank? %>
+    <p class="text-sm text-slate-600">None.</p>
+  <% else %>
+    <ul class="text-sm space-y-2 list-disc pl-5">
+      <% @incoming_subcontractor_rels.each do |rel| %>
+        <li>
+          <span class="font-mono text-xs text-slate-500">source → target</span>
+          <%= rel.source_party.display_name.presence || "Party ##{rel.source_party_id}" %> → <%= @team_member.party.display_name %>
+          · <%= rel.status %>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+</section>
+
+<%= link_to "Edit", edit_admin_team_member_path(@team_member), class: "rounded bg-slate-900 text-white px-3 py-2 text-sm mt-4 inline-block" %>
