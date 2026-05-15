@@ -579,7 +579,7 @@ The original domain-map draft correctly identified a broad Phase 1/MVP universe,
 | Glossary               | Stabilize terminology.                            |
 | Domain map             | Define major domains and relationships.           |
 | MVP scope              | Firm charter in **`mvp-scope.md`** (GH-36 / TC-scope).                             |
-| Decision log           | Record settled roadmap/product decisions.         |
+| Decision log           | Settled roadmap decisions in **`roadmap-decision-log.md`** (GH-37). |
 | Open decision register | Resolve OD-items by tier; authoritative file **`open-decisions.md`**.         |
 
 ---
@@ -736,6 +736,6 @@ This domain map is complete enough for `TC-00.02` when:
 * [`gloassry.md`](gloassry.md) — Working glossary filename (canonical terminology; sync OD-007/008 when updated).
 * [`open-decisions.md`](open-decisions.md) — Decision register with OD-001–OD-012 status and tiers.
 * [`modeling-notes/party-team-member-engagement.md`](modeling-notes/party-team-member-engagement.md) — Modeling note for OD-001.
-* `docs/product/roadmap-decision-log.md` — Settled roadmap/product decisions once created.
+* [`roadmap-decision-log.md`](roadmap-decision-log.md) — Settled roadmap decisions (sequencing, epics, phased intent; **GH-37**).
 * GitHub issue **TC-00.02** — Draft TeamCORE domain map (#34).
 

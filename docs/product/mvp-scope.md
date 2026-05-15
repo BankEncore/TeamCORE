@@ -215,6 +215,7 @@ Derived from GitHub issue #36:
 
 | Document | Purpose |
 | --- | --- |
+| [`roadmap-decision-log.md`](roadmap-decision-log.md) | Accepted phased roadmap intents (GH-37; RD-xxx) |
 | [`overview.md`](overview.md) | Narrative MVP operating decisions |
 | [`domain-map.md`](domain-map.md) | Phases 0–6 domain ordering |
 | [`open-decisions.md`](open-decisions.md) | OD-007, OD-008, OD-011, OD-012, OD-009, OD-010 |
