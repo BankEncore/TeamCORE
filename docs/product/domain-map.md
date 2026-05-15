@@ -578,7 +578,7 @@ The original domain-map draft correctly identified a broad Phase 1/MVP universe,
 | Product framing        | Establish what TeamCORE is and is not.            |
 | Glossary               | Stabilize terminology.                            |
 | Domain map             | Define major domains and relationships.           |
-| MVP scope              | Separate MVP from later scope.                    |
+| MVP scope              | Firm charter in **`mvp-scope.md`** (GH-36 / TC-scope).                             |
 | Decision log           | Record settled roadmap/product decisions.         |
 | Open decision register | Resolve OD-items by tier; authoritative file **`open-decisions.md`**.         |
 
@@ -731,7 +731,8 @@ This domain map is complete enough for `TC-00.02` when:
 
 ## References
 
-* [`overview.md`](overview.md) — Product overview, MVP scope, and roadmap framing.
+* [`overview.md`](overview.md) — Product overview, MVP scope narrative, roadmap framing.
+* [`mvp-scope.md`](mvp-scope.md) — MVP inclusion/exclusion charter and risky boundaries (**GH-36**).
 * [`gloassry.md`](gloassry.md) — Working glossary filename (canonical terminology; sync OD-007/008 when updated).
 * [`open-decisions.md`](open-decisions.md) — Decision register with OD-001–OD-012 status and tiers.
 * [`modeling-notes/party-team-member-engagement.md`](modeling-notes/party-team-member-engagement.md) — Modeling note for OD-001.
