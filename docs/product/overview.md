@@ -164,7 +164,7 @@ The following operating decisions guide the proposed MVP roadmap.
 
 * TeamCORE will support manually entered or imported gross sales and commissionable revenue.  
 * MVP commission calculation will support simple flat-rate commission based on commissionable revenue.  
-* Repayable draws will automatically recover from future commission settlements.  
+* **Employee minimum commission draw recovery** (commissioned employees): when commission in a period is below a configured minimum, the system may record a draw up to that minimum and recover the balance from **future employee commission** in later periods—without employee draw recovery being implemented as **contractor settlement** or contractor charge logic.[^p4-draw]  
 * Commission plans will generally be assigned at the Engagement level, with possible defaults or suggested plans derived from role, position, contractor program, agency program, or business line.  
 * Contractor charges may be recovered through settlement deduction or invoice/direct payment.  
 * MVP contractor charges will use basic due/open/paid status tracking rather than full accounts-receivable aging.  
@@ -234,19 +234,19 @@ Engagement should be treated as a central MVP concept because it defines the leg
 
 ### Compensation
 
-The Compensation domain tracks amounts the agency may owe to team members, including salary, hourly wages, commission, draws, draw recoveries, and compensation plan assignments.
+The Compensation domain tracks amounts the agency may owe to team members, including salary, hourly wages, commission, **employee** minimum-commission draws and recoveries, and compensation plan assignments. Tiered commission and other advanced structures are later-phase capabilities.
 
 For MVP, TeamCORE should support compensation plan setup, engagement-level compensation plan assignment, salary or hourly compensation tracking, and simple flat-rate commission calculation based on manually entered or imported gross sales and commissionable revenue.
 
 Commission plans should generally be assigned at the Engagement level, while allowing defaults or suggested plans to derive from role, position, contractor program, agency program, or business line. This keeps the active employment or contractor relationship as the authoritative source while preserving flexibility for agency-specific compensation structures.
 
-Repayable draws should automatically recover from future contractor commission settlements until the outstanding draw balance is satisfied.
+**Minimum commission draw recovery** is an **employee-only** compensation mechanism: recoverable draw balances are satisfied from **future employee commission** (and related payroll/compensation preparation flows), not from **contractor settlement** processing. Contractors are paid through **contractor settlement**, which applies contractor commission, contractor charge deductions, and adjustments—not employee draw recovery.[^p4-draw]
 
 More advanced commission features, such as tiered commissions, commission splits, overrides, supplier-specific commission rules, booking-level integrations, and complex adjustment logic, should be deferred to later phases.
 
 ### Contractor Charges and Recoverables
 
-The Contractor Charges and Recoverables domain tracks amounts that independent contractors may owe to the agency. These may include onboarding fees, annual renewal fees, recurring monthly fees, technology fees, pass-through expenses, reimbursable costs, chargebacks, waivers, and balances recovered through commission settlement or direct payment.
+The Contractor Charges and Recoverables domain tracks amounts that independent contractors may owe to the agency. These may include onboarding fees, annual renewal fees, recurring monthly fees, technology fees, pass-through expenses, reimbursable costs, chargebacks, waivers, and balances recovered through **contractor** settlement deduction or direct payment.[^p4-settlement]
 
 For MVP, contractor charges should support both settlement deduction and invoice/direct-payment recovery. TeamCORE should track basic charge statuses such as draft, open, due, partially paid, paid, deducted, and waived. Full accounts-receivable aging, dispute management, and write-off workflows should be deferred to later phases.
 
@@ -293,9 +293,9 @@ The Payroll and Settlement Runs domain packages pay-related information for exte
 
 For MVP, TeamCORE should use generic CSV and Excel/XLSX export and import workflows rather than vendor-specific payroll integrations. TeamCORE should also support manual entry of final payroll or settlement results for agencies that cannot provide a structured import file during the initial release.
 
-For employees, payroll runs may include compensation inputs, approved time, approved paid leave, employee deductions, exported payroll input files, and imported payroll results.
+For employees, payroll runs may include compensation inputs (including employee commission and **minimum commission draw** effects where applicable), approved time, approved paid leave, employee deductions, exported payroll input files, and imported payroll results.
 
-For contractors, settlement runs may include gross sales, commissionable revenue, flat-rate commission calculation, draw recoveries, contractor charge deductions, direct-payment references, and settlement results.
+For contractors, settlement runs may include gross sales, commissionable revenue, flat-rate commission calculation, contractor charge deductions, direct-payment references, and settlement results—**not** employee minimum-commission draw recovery, which stays on the employee compensation / payroll side.[^p4-settlement]
 
 Contractor payments may initially be tracked through manual settlement records or a lightweight contractor settlement process. The system should be designed so contractor settlement can later become a formal exportable workflow.
 
@@ -307,7 +307,7 @@ TeamCORE should store final payroll and settlement result details, including:
 - taxes  
 - employee deductions  
 - contractor charge deductions  
-- draw recoveries  
+- employee-side minimum commission draw recovery (and related compensation amounts), where applicable[^p4-draw-list]  
 - net pay or net settlement  
 - payment date  
 - payment method  
@@ -418,11 +418,11 @@ The Engagement domain tracks the formal employment or contractor relationship be
 
 ### Compensation
 
-The Compensation domain tracks amounts the agency may owe to team members, including salary, hourly wages, commissions, tiered commission plans, draws, draw recoveries, and compensation plan assignments.
+The Compensation domain tracks amounts the agency may owe to team members, including salary, hourly wages, commissions, tiered commission plans (later phases), **employee** minimum-commission draws and recoveries, and compensation plan assignments.[^p4-draw]
 
 ### Contractor Charges and Recoverables
 
-The Contractor Charges and Recoverables domain tracks amounts that independent contractors may owe to the agency. These may include onboarding fees, annual renewal fees, recurring monthly fees, technology fees, pass-through expenses, reimbursable costs, chargebacks, waivers, write-offs, and balances recovered through commission settlement or direct payment.
+The Contractor Charges and Recoverables domain tracks amounts that independent contractors may owe to the agency. These may include onboarding fees, annual renewal fees, recurring monthly fees, technology fees, pass-through expenses, reimbursable costs, chargebacks, waivers, write-offs, and balances recovered through **contractor** settlement or direct payment.
 
 ### Benefits
 
@@ -438,7 +438,7 @@ The Leave domain tracks paid and unpaid time off, including PTO, medical leave, 
 
 ### Payroll and Settlement Runs
 
-The Payroll and Settlement Runs domain packages pay-related information for external processing. For employees, this may include payroll input exports and imported payroll results. For contractors, this may include commission settlements, draw recoveries, contractor charge deductions, and imported payment results. TeamCORE should prepare payroll and settlement information, while external processors remain responsible for payroll tax calculations, statutory withholdings, filings, and final payment execution unless a future scope explicitly expands that boundary.
+The Payroll and Settlement Runs domain packages pay-related information for external processing. For employees, this may include payroll input exports, compensation inputs (including employee commission and **minimum commission draw** mechanics where applicable), and imported payroll results. For contractors, this may include **contractor settlement** runs: commission, contractor charge deductions, and imported payment results—distinct from employee draw recovery.[^p4-settlement] TeamCORE should prepare payroll and settlement information, while external processors remain responsible for payroll tax calculations, statutory withholdings, filings, and final payment execution unless a future scope explicitly expands that boundary.
 
 ### Training and Certification
 
@@ -469,7 +469,7 @@ TeamCORE is organized around the following domains:
 * **Organization** — agency structure, departments, locations, teams, reporting relationships, and lines of authority.  
 * **Team Member / Party** — person and organization records for employees, individual contractors, contractor organizations, and related contacts.  
 * **Engagement** — the employment or contractor relationship between the agency and the team member, including position, contract, lifecycle, status, and assignment history.  
-* **Compensation** — salary, hourly wage, commission, tiered commission, draws, draw recovery, and compensation plan assignment.  
+* **Compensation** — salary, hourly wage, commission, tiered commission, **employee** minimum-commission draws and recovery, and compensation plan assignment.  
 * **Contractor Charges and Recoverables** — onboarding fees, renewal fees, recurring contractor fees, reimbursable expenses, pass-through costs, waivers, write-offs, and contractor balances owed to the agency.  
 * **Benefits** — benefit plans, eligibility, enrollment, employer cost, team member deductions, and coverage tiers.  
 * **Time Tracking** — timeclock punches, manual timesheets, salaried no-daily-time configurations, timesheet approvals, and pay-period time summaries.  
@@ -588,7 +588,7 @@ Engagement defines the **relationship**. It should not replace the identity reco
 
 The **Compensation** domain tracks how team members are paid or become eligible to be paid by the agency.
 
-For employees, this may include salary, hourly wage, pay rate history, compensation plan assignment, and possibly commission eligibility. For contractors, this may include commission plans, commission rates, tiered commission structures, draw arrangements, and settlement-related compensation rules.
+For employees, this may include salary, hourly wage, pay rate history, compensation plan assignment, commission eligibility, and **minimum commission draw** arrangements (recoverable draws for commissioned employees only). For contractors, this may include commission plans, flat-rate commission (MVP), and settlement-related compensation rules paid through **contractor settlement**—without treating employee draw recovery as part of that settlement rail.[^p4-contractor-comp]
 
 Compensation should focus on amounts the agency may owe to the team member. It should be kept separate from contractor charges and recoverables, which represent amounts the contractor may owe back to the agency.
 
@@ -599,8 +599,8 @@ Compensation should focus on amounts the agency may owe to the team member. It s
 * Store effective dates and compensation history.  
 * Support fixed, variable, and mixed compensation structures.  
 * Track commission eligibility and commission plan terms.  
-* Support basic draw arrangements and draw recovery visibility.  
-* Feed payroll or settlement runs with compensation-related inputs.
+* Support **employee** minimum commission draw and recovery (employee-only; not contractor settlement).[^p4-draw]  
+* Feed **employee** payroll preparation and **contractor** settlement runs with the appropriate compensation inputs (rails stay separate).[^p4-settlement]
 
 ### Example Use Cases
 
@@ -608,12 +608,12 @@ Compensation should focus on amounts the agency may owe to the team member. It s
 * Assign a contractor to a commission plan.  
 * Track a salary change effective on a future date.  
 * View a team member’s current compensation arrangement.  
-* Calculate or record commissionable earnings for a settlement period.  
-* Track whether a contractor has a repayable draw balance.
+* Calculate or record commissionable earnings for a pay or settlement period (employee vs contractor context).  
+* Track whether a **commissioned employee** has an outstanding minimum-commission draw balance.
 
 ### MVP Boundary
 
-For the MVP, Compensation may begin with plan setup, assignments, rates, effective dates, and basic commission/draw visibility. More advanced features, such as full commission automation, complex tiering, productivity thresholds, and repayable draw accounting, can be expanded later.
+For the MVP, Compensation may begin with plan setup, assignments, rates, effective dates, flat-rate commission, and **employee** minimum-commission draw visibility where that plan type applies. More advanced features, such as full commission automation, complex tiering, productivity thresholds, and contractor “draw-like” constructs, can be expanded later.
 
 ---
 
@@ -641,7 +641,7 @@ This domain should be separate from Compensation. Compensation tracks what the a
 * Charge an annual contractor renewal fee.  
 * Track a monthly platform or technology fee.  
 * Record an agency-paid expense that must be reimbursed by the contractor.  
-* Deduct an outstanding charge from a commission settlement.  
+* Deduct an outstanding charge from a **contractor** settlement.  
 * Waive a contractor fee.  
 * Write off an uncollectible contractor balance.
 
@@ -723,7 +723,7 @@ Leave primarily applies to employees. Contractors may have availability or absen
 
 The **Payroll and Settlement Runs** domain packages pay-related information for external processing and stores the results returned from external systems.
 
-For employees, this includes pay schedules, payroll input exports, approved time, leave hours, benefit deduction instructions, compensation inputs, and imported payroll results. For contractors, this may include settlement schedules, commission calculations, draw recoveries, contractor charge deductions, and contractor payment results.
+For employees, this includes pay schedules, payroll input exports, approved time, leave hours, benefit deduction instructions, compensation inputs (including employee commission and **minimum commission draw** effects where applicable), and imported payroll results. For contractors, this may include settlement schedules, commission calculations, contractor charge deductions, and contractor payment results—**not** employee draw recovery.[^p4-settlement]
 
 This domain should be broader than traditional payroll because TeamCORE must support both employee payroll and contractor settlement workflows.
 
@@ -974,7 +974,7 @@ Company Assets should integrate with:
 | Engagement | MVP | Defines employment or contractor relationship |
 | Documents and Compliance | MVP | Supports required records, contractor classification support, missing-document alerts, and expiration alerts |
 | Team360 | MVP | Primary unified profile and dashboard |
-| Compensation | MVP | Supports salary/hourly tracking, flat-rate commission, and draw recovery context |
+| Compensation | MVP | Supports salary/hourly tracking, flat-rate commission, and **employee** minimum-commission draw recovery context |  
 | Contractor Charges and Recoverables | MVP | Core contractor-specific financial capability |
 | Payroll and Settlement Runs | MVP | Provides CSV/XLSX export/import, manual results entry, run history, and Team360 visibility |
 | Time Tracking | MVP | Employee-only time capture, review, and payroll input support |
@@ -989,5 +989,17 @@ Company Assets should integrate with:
 | Contractor Self-Service | Later | Broader permissions and contractor access should follow core workflow stability |
 | Advanced Commission Engine | Later | Tiers, splits, overrides, supplier rules, and integrations are deferred |
 | Payroll Provider Integrations | Later | Vendor-specific mappings and APIs should follow generic file-based MVP workflows |
-| AR Aging / Disputes / Write-Offs | Later | Contractor charge MVP uses basic statuses and waivers only |
-| Advanced Analytics | Later | MVP reporting should focus on operational views, not advanced analytics |
+| AR Aging / Disputes / Write-Offs | Later | Contractor charge MVP uses basic statuses and waivers only |  
+| Advanced Analytics | Later | MVP reporting should focus on operational views, not advanced analytics |  
+
+---
+
+## Footnotes (product copy reconciliations)
+
+[^p4-draw]: **Substantial change — Phase 4 / developer brief (TC-16).** Prior wording suggested repayable draws recovered via “contractor commission settlements,” which conflated **employee** minimum commission draw recovery with **contractor settlement**. The product model is: draw recovery for this mechanism is **employee-only** and runs in the **compensation** rail (future employee commission / payroll-input preparation), not as a deduction inside contractor settlement or contractor charges.
+
+[^p4-settlement]: **Substantial change — Phase 4 / developer brief.** **Employee payroll** (and payroll-oriented preparation) and **contractor settlement** are separate workflows. Contractor settlement includes contractor commission, contractor charge deductions, and adjustments. Employee minimum-commission draw recovery must not be described as part of contractor settlement inputs or results.
+
+[^p4-draw-list]: **Substantial change — Phase 4.** The combined “final results” list previously used an undifferentiated “draw recoveries” line that implied contractor settlement. Draw recovery in that list refers to **employee** minimum-commission draw recovery / compensation-side amounts where applicable, not contractor settlement math.
+
+[^p4-contractor-comp]: **Substantial change — Phase 4.** MVP contractor compensation emphasizes **flat-rate commission** via **contractor settlement**. Prior text implied contractor “draw arrangements” parallel to employee draws; **minimum commission draw recovery** remains **employee-only** unless a future scope explicitly adds a distinct contractor construct.
