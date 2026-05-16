@@ -6,6 +6,7 @@
 # - Baseline agency: "Example Agency" (code: example).
 # - Baseline departments/locations/teams match epic TC-01.11 naming (generic demo labels).
 # - TC-06: demo document types, requirements, and sample records (evaluator-ready).
+# - Phase 4 (db/seeds/phase4.rb): demo compensation, revenue/commission, charges, settlement.
 # - Intentionally generic — not modeled on a single real-world company name or structure.
 #
 # Run: bin/rails db:seed   (inside Docker per project README if applicable)
@@ -520,3 +521,6 @@ robert_agreement.assign_attributes(
   storage_key: "seed/agreement-robert"
 )
 robert_agreement.save!
+
+# Phase 4 — compensation, revenue/commission, charges, settlement (see db/seeds/phase4.rb)
+load Rails.root.join("db/seeds/phase4.rb")
