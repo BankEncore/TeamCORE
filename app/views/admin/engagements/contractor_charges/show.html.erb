@@ -1,0 +1,8 @@
+<% content_for :title, "Charge ##{@charge.id}" %>
+<div class="tc-page-stack">
+  <p class="text-sm"><%= link_to "← Charges", admin_engagement_contractor_charges_path(@engagement), class: tc_link_classes %></p>
+  <h1 class="text-2xl font-semibold">Charge #<%= @charge.id %></h1>
+  <p class="text-sm"><%= @charge.charge_type %> · <%= @charge.status %> · open <%= tc_money(@charge.open_balance_cents) %></p>
+  <%= link_to "Edit", edit_admin_engagement_contractor_charge_path(@engagement, @charge), class: "tc-btn tc-btn--secondary" %>
+  <%= link_to "Waive", new_admin_engagement_contractor_charge_contractor_charge_waiver_path(@engagement, @charge), class: "tc-btn tc-btn--teal" %>
+</div>

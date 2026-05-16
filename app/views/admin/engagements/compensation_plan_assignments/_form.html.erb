@@ -1,0 +1,65 @@
+<%= form_with model: [:admin, engagement, assignment], class: "space-y-4 max-w-xl" do |f| %>
+  <% if assignment.errors.any? %>
+    <div class="text-red-600 text-sm"><%= assignment.errors.full_messages.join(", ") %></div>
+  <% end %>
+  <div class="tc-field">
+    <%= f.label :compensation_plan_id, class: "tc-label" %>
+    <%= f.collection_select :compensation_plan_id, plans, :id, :name, {}, class: "tc-select" %>
+  </div>
+  <div class="tc-field">
+    <%= f.label :effective_start_on, class: "tc-label" %>
+    <%= f.date_field :effective_start_on, class: "tc-input" %>
+  </div>
+  <div class="tc-field">
+    <%= f.label :effective_end_on, class: "tc-label" %>
+    <%= f.date_field :effective_end_on, class: "tc-input" %>
+  </div>
+  <p class="text-xs text-slate-500">Snapshots populate from the plan on create; advanced overrides below.</p>
+  <div class="tc-field">
+    <%= f.label :snapshot_plan_type, class: "tc-label" %>
+    <%= f.select :snapshot_plan_type,
+          options_for_select(
+            (CompensationPlan::PLAN_TYPES + [ assignment.snapshot_plan_type ].compact).uniq.map { |t| [ t.humanize, t ] },
+            assignment.snapshot_plan_type
+          ),
+          {},
+          class: "tc-select" %>
+  </div>
+  <div class="tc-field">
+    <%= f.label :snapshot_commission_rate_percent, "Commission rate", class: "tc-label" %>
+    <%= f.text_field :snapshot_commission_rate_percent, class: "tc-input", placeholder: "10.00", inputmode: "decimal", autocomplete: "off" %>
+  </div>
+  <div class="tc-field">
+    <%= f.label :snapshot_minimum_basis, class: "tc-label" %>
+    <%= f.select :snapshot_minimum_basis,
+          options_for_select(
+            CompensationPlan.minimum_basis_select_values(assignment.snapshot_minimum_basis).map { |b| [ b.humanize, b ] },
+            assignment.snapshot_minimum_basis
+          ),
+          { include_blank: "—" },
+          class: "tc-select" %>
+  </div>
+  <div class="tc-field">
+    <%= f.label :snapshot_minimum_amount_money, "Snapshot minimum gross commission", class: "tc-label" %>
+    <%= f.text_field :snapshot_minimum_amount_money, class: "tc-input", placeholder: "0.00", inputmode: "decimal", autocomplete: "off" %>
+  </div>
+  <div class="tc-field">
+    <%= f.label :snapshot_recovery_rule, class: "tc-label" %>
+    <%= f.select :snapshot_recovery_rule,
+          options_for_select(
+            CompensationPlan.recovery_rule_select_values(assignment.snapshot_recovery_rule).map { |r| [ r.humanize, r ] },
+            assignment.snapshot_recovery_rule
+          ),
+          { include_blank: "—" },
+          class: "tc-select" %>
+  </div>
+  <div class="tc-field">
+    <%= f.label :snapshot_salary_annual_money, "Snapshot annual salary", class: "tc-label" %>
+    <%= f.text_field :snapshot_salary_annual_money, class: "tc-input", placeholder: "0.00", inputmode: "decimal", autocomplete: "off" %>
+  </div>
+  <div class="tc-field">
+    <%= f.label :snapshot_hourly_rate_money, "Snapshot hourly rate", class: "tc-label" %>
+    <%= f.text_field :snapshot_hourly_rate_money, class: "tc-input", placeholder: "0.00", inputmode: "decimal", autocomplete: "off" %>
+  </div>
+  <%= f.submit class: "tc-btn tc-btn--primary" %>
+<% end %>

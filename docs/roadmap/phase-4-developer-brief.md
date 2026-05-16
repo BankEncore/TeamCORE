@@ -2,7 +2,7 @@
 
 ## Compensation, Contractor Charges, Minimum Commission Draws, and Contractor Settlement
 
-**Phase:** Phase 4 — Compensation, Contractor Charges, and Settlement Basics **Epics:** TC-13 through TC-19 **Audience:** Product, engineering, implementation planning, issue refinement **Status:** Planning synthesis from product/domain interview
+**Phase:** Phase 4 — Compensation, Contractor Charges, and Settlement Basics **Epics:** TC-13 through TC-19 **Audience:** Product, engineering, implementation planning, issue refinement **Status:** Authoritative product / workflow spec for TC-13–TC-19. **Persistence and implementation locks:** [`../domain/workforce-financial-modeling.md`](../domain/workforce-financial-modeling.md) (hub) · [`../domain/compensation-financials.md`](../domain/compensation-financials.md) · [`../domain/contractor-charges.md`](../domain/contractor-charges.md) · [`../domain/contractor-settlement.md`](../domain/contractor-settlement.md) (migrations, models, services).
 
 ---
 

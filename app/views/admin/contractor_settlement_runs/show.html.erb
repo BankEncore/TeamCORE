@@ -1,0 +1,94 @@
+<% content_for :title, "Settlement run ##{@run.id}" %>
+<div class="tc-page-stack">
+  <%= link_to "← Runs", admin_contractor_settlement_runs_path, class: "text-sm #{tc_link_classes}" %>
+  <h1 class="text-2xl font-semibold">Settlement run #<%= @run.id %></h1>
+  <p class="text-sm font-mono">Status: <%= @run.status %> · <%= @run.period_start_on %> – <%= @run.period_end_on %></p>
+  <% if @run.status.in?(%w[draft calculated]) %>
+    <%= button_to "Finalize", finalize_admin_contractor_settlement_run_path(@run), method: :post, class: "tc-btn tc-btn--primary" %>
+  <% end %>
+  <% if @run.status == "finalized" %>
+    <%= form_with url: mark_paid_admin_contractor_settlement_run_path(@run), method: :post, class: "mt-3 flex flex-wrap gap-2 items-end max-w-xl" do %>
+      <div class="tc-field flex-1 min-w-[12rem]">
+        <%= label_tag :reason, "Payment note (optional)", class: "tc-label" %>
+        <%= text_field_tag :reason, nil, class: "tc-input", placeholder: "Check #, date, memo" %>
+      </div>
+      <%= submit_tag "Mark paid", class: "tc-btn tc-btn--secondary" %>
+    <% end %>
+  <% end %>
+  <% if @run.status.in?(%w[draft calculated finalized]) %>
+    <%= form_with url: void_admin_contractor_settlement_run_path(@run), method: :post, class: "mt-3 space-y-2 max-w-xl" do %>
+      <div class="tc-field">
+        <%= label_tag :reason, "Void reason (optional)", class: "tc-label" %>
+        <%= text_field_tag :reason, nil, class: "tc-input", placeholder: "Why this run is voided" %>
+      </div>
+      <%= submit_tag "Void run", class: "tc-btn tc-btn--quiet" %>
+    <% end %>
+  <% end %>
+
+  <h2 class="text-lg font-semibold mt-6">Lines</h2>
+  <div class="tc-table-wrap">
+    <table class="tc-data-table text-xs">
+      <thead><tr><th>Eng</th><th>Gross</th><th>Charges</th><th>Net</th></tr></thead>
+      <tbody>
+        <% @lines.each do |ln| %>
+          <tr>
+            <td class="font-mono"><%= ln.engagement_id %></td>
+            <td><%= tc_money(ln.gross_commission_cents) %></td>
+            <td><%= tc_money(ln.charge_deductions_cents) %></td>
+            <td><%= tc_money(ln.net_settlement_cents) %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+
+  <% if @run.status == "draft" %>
+    <h2 class="text-lg font-semibold mt-6">Add line (MVP)</h2>
+    <%= form_with url: compose_line_admin_contractor_settlement_run_path(@run), method: :post, class: "space-y-3 max-w-xl" do %>
+      <div class="tc-field">
+        <%= label_tag :engagement_id, "Contractor engagement", class: "tc-label" %>
+        <%= select_tag :engagement_id,
+              options_from_collection_for_select(@contractor_engagements, :id, ->(e) { "##{e.id} #{e.team_member.party.display_name} (#{e.relationship_type})" }),
+              class: "tc-select" %>
+      </div>
+      <div class="tc-field">
+        <%= label_tag :revenue_input_ids, "Revenue input IDs (comma)", class: "tc-label" %>
+        <%= text_field_tag :revenue_input_ids, nil, class: "tc-input" %>
+      </div>
+      <div class="tc-field">
+        <%= label_tag :commission_calculation_ids, "Commission calc IDs (comma, optional)", class: "tc-label" %>
+        <%= text_field_tag :commission_calculation_ids, nil, class: "tc-input" %>
+      </div>
+      <div class="tc-field">
+        <%= label_tag :contractor_charge_ids, "Charge IDs (comma)", class: "tc-label" %>
+        <%= text_field_tag :contractor_charge_ids, nil, class: "tc-input" %>
+      </div>
+      <div class="tc-field">
+        <%= label_tag :manual_positive_money, "Manual + (dollars)", class: "tc-label" %>
+        <%= text_field_tag :manual_positive_money, "0.00", class: "tc-input", placeholder: "0.00", inputmode: "decimal", autocomplete: "off" %>
+      </div>
+      <div class="tc-field">
+        <%= label_tag :manual_negative_money, "Manual − (dollars)", class: "tc-label" %>
+        <%= text_field_tag :manual_negative_money, "0.00", class: "tc-input", placeholder: "0.00", inputmode: "decimal", autocomplete: "off" %>
+      </div>
+      <%= submit_tag "Compose line", class: "tc-btn tc-btn--secondary" %>
+    <% end %>
+  <% end %>
+
+  <h2 class="text-lg font-semibold mt-6">Audit trail</h2>
+  <div class="tc-table-wrap">
+    <table class="tc-data-table text-xs">
+      <thead><tr><th>When</th><th>Event</th><th>Actor</th><th>Reason</th></tr></thead>
+      <tbody>
+        <% @events.each do |ev| %>
+          <tr>
+            <td class="font-mono whitespace-nowrap"><%= ev.created_at.in_time_zone.strftime("%Y-%m-%d %H:%M") %></td>
+            <td><%= ev.event_type %></td>
+            <td><%= ev.actor&.email || "—" %></td>
+            <td class="max-w-xs truncate" title="<%= ev.reason %>"><%= ev.reason.presence || "—" %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

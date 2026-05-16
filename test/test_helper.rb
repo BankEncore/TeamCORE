@@ -18,8 +18,12 @@ end
 require_relative "../config/environment"
 require "rails/test_help"
 
+require_relative "support/phase4_test_helper"
+
 module ActiveSupport
   class TestCase
+    include Phase4TestHelper
+
     parallelize(workers: Integer(ENV.fetch("PARALLEL_WORKERS")))
 
     # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.
@@ -27,4 +31,8 @@ module ActiveSupport
 
     # Add more helper methods to be used by all tests here...
   end
+end
+
+class ActionDispatch::IntegrationTest
+  include Phase4TestHelper
 end

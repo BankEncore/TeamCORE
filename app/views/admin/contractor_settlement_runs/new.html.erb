@@ -1,0 +1,16 @@
+<% content_for :title, "New settlement run" %>
+<h1 class="text-2xl font-semibold mb-4">New settlement run</h1>
+<%= form_with model: [:admin, @run], class: "space-y-4 max-w-xl" do |f| %>
+  <% if @run.errors.any? %>
+    <div class="text-red-600 text-sm"><%= @run.errors.full_messages.join(", ") %></div>
+  <% end %>
+  <div class="tc-field">
+    <%= f.label :period_start_on, class: "tc-label" %>
+    <%= f.date_field :period_start_on, class: "tc-input" %>
+  </div>
+  <div class="tc-field">
+    <%= f.label :period_end_on, class: "tc-label" %>
+    <%= f.date_field :period_end_on, class: "tc-input" %>
+  </div>
+  <%= f.submit class: "tc-btn tc-btn--primary" %>
+<% end %>

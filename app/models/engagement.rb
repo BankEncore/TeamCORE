@@ -2,6 +2,7 @@
 
 class Engagement < ApplicationRecord
   include EngagementWorkflowEligibility
+  include EngagementFinancialContext
 
   RELATIONSHIP_TYPES = %w[
     employee
@@ -43,6 +44,13 @@ class Engagement < ApplicationRecord
     inverse_of: :supervisor_engagement,
     dependent: :restrict_with_exception
   has_many :document_records, inverse_of: :engagement, dependent: :restrict_with_exception
+  has_many :compensation_plan_assignments, dependent: :restrict_with_exception
+  has_many :revenue_inputs, dependent: :restrict_with_exception
+  has_many :commission_calculations, dependent: :restrict_with_exception
+  has_one :commission_draw_balance, dependent: :restrict_with_exception
+  has_many :draw_balance_events, dependent: :restrict_with_exception
+  has_many :contractor_charges, dependent: :restrict_with_exception
+  has_many :contractor_settlement_lines, dependent: :restrict_with_exception
 
   validates :relationship_type, presence: true, inclusion: { in: RELATIONSHIP_TYPES }
   validates :status, presence: true, inclusion: { in: STATUSES }

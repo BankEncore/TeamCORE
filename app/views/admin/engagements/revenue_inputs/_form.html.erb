@@ -1,0 +1,45 @@
+<%= form_with model: [:admin, engagement, revenue_input], class: "space-y-4 max-w-xl" do |f| %>
+  <% locked = local_assigns[:locked] %>
+  <% if locked %>
+    <p class="text-amber-800 text-sm border border-amber-200 bg-amber-50 rounded-md p-3">
+      Commission for this period is finalized. Revenue and recalculation are locked.
+    </p>
+  <% end %>
+  <% if revenue_input.errors.any? %>
+    <div class="text-red-600 text-sm"><%= revenue_input.errors.full_messages.join(", ") %></div>
+  <% end %>
+  <% if pay_periods.present? %>
+    <div class="tc-field">
+      <%= f.label :pay_period_id, class: "tc-label" %>
+      <%= f.collection_select :pay_period_id, pay_periods, :id, ->(p) { "#{p.start_on} – #{p.end_on}" }, { include_blank: "—" }, class: "tc-select" %>
+    </div>
+  <% end %>
+  <div class="tc-field">
+    <%= f.label :period_start_on, class: "tc-label" %>
+    <%= f.date_field :period_start_on, class: "tc-input" %>
+  </div>
+  <div class="tc-field">
+    <%= f.label :period_end_on, class: "tc-label" %>
+    <%= f.date_field :period_end_on, class: "tc-input" %>
+  </div>
+  <div class="tc-field">
+    <%= f.label :commissionable_revenue_money, "Commissionable revenue", class: "tc-label" %>
+    <%= f.text_field :commissionable_revenue_money, class: "tc-input", placeholder: "0.00", inputmode: "decimal", autocomplete: "off" %>
+  </div>
+  <div class="tc-field">
+    <%= f.label :gross_sales_money, "Gross sales (optional)", class: "tc-label" %>
+    <%= f.text_field :gross_sales_money, class: "tc-input", placeholder: "0.00", inputmode: "decimal", autocomplete: "off" %>
+  </div>
+  <div class="tc-field">
+    <%= f.label :source_type, class: "tc-label" %>
+    <%= f.select :source_type,
+          options_for_select(RevenueInput.source_type_options_for_select, revenue_input.source_type),
+          {},
+          class: "tc-select" %>
+  </div>
+  <div class="tc-field">
+    <%= f.label :notes, class: "tc-label" %>
+    <%= f.text_area :notes, class: "tc-input", rows: 3 %>
+  </div>
+  <%= f.submit class: "tc-btn tc-btn--primary", disabled: locked %>
+<% end %>

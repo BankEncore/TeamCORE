@@ -1,0 +1,24 @@
+<% content_for :title, "Contractor charges" %>
+<div class="tc-page-stack">
+  <p class="text-sm"><%= link_to "← Engagement ##{@engagement.id}", admin_engagement_path(@engagement), class: tc_link_classes %></p>
+  <h1 class="text-2xl font-semibold">Contractor charges</h1>
+  <%= link_to "New charge", new_admin_engagement_contractor_charge_path(@engagement), class: "tc-btn tc-btn--primary" %>
+  <div class="tc-table-wrap mt-4">
+    <table class="tc-data-table text-xs">
+      <thead><tr><th>ID</th><th>Type</th><th>Status</th><th>Open ¢</th><th></th></tr></thead>
+      <tbody>
+        <% @charges.each do |ch| %>
+          <tr>
+            <td class="font-mono"><%= ch.id %></td>
+            <td class="font-mono"><%= ch.charge_type %></td>
+            <td><%= ch.status %></td>
+            <td><%= tc_money(ch.open_balance_cents) %></td>
+            <td>
+              <%= link_to "Open", admin_engagement_contractor_charge_path(@engagement, ch), class: tc_link_classes %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

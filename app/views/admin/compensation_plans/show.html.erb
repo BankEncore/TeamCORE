@@ -1,0 +1,7 @@
+<% content_for :title, "Compensation plan" %>
+<div class="tc-page-stack">
+  <%= link_to "← Plans", admin_compensation_plans_path, class: "text-sm #{tc_link_classes}" %>
+  <h1 class="text-2xl font-semibold"><%= @compensation_plan.name %></h1>
+  <p class="text-sm font-mono"><%= @compensation_plan.plan_type %> · <%= @compensation_plan.status %></p>
+  <%= link_to "Edit", edit_admin_compensation_plan_path(@compensation_plan), class: "tc-btn tc-btn--secondary" %>
+</div>

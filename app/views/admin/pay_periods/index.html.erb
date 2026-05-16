@@ -1,0 +1,22 @@
+<% content_for :title, "Pay periods" %>
+<div class="tc-page-stack">
+  <%= link_to "← Dashboard", admin_root_path, class: "text-sm #{tc_link_classes}" %>
+  <h1 class="text-2xl font-semibold">Pay periods</h1>
+  <%= link_to "New pay period", new_admin_pay_period_path, class: "tc-btn tc-btn--primary" %>
+  <div class="tc-table-wrap mt-4">
+    <table class="tc-data-table text-sm">
+      <thead><tr><th>ID</th><th>Label</th><th>Start</th><th>End</th><th></th></tr></thead>
+      <tbody>
+        <% @pay_periods.each do |p| %>
+          <tr>
+            <td class="font-mono"><%= p.id %></td>
+            <td><%= p.label.presence || "—" %></td>
+            <td><%= p.start_on %></td>
+            <td><%= p.end_on %></td>
+            <td><%= link_to "Open", admin_pay_period_path(p), class: tc_link_classes %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

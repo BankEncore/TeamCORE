@@ -1,0 +1,37 @@
+<% content_for :title, "Commission calculations" %>
+<div class="tc-page-stack">
+  <p class="text-sm"><%= link_to "← Engagement ##{@engagement.id}", admin_engagement_path(@engagement), class: tc_link_classes %></p>
+  <h1 class="text-2xl font-semibold">Commission calculations</h1>
+  <%= link_to "Revenue inputs", admin_engagement_revenue_inputs_path(@engagement), class: "tc-btn tc-btn--secondary" %>
+  <div class="tc-table-wrap mt-4">
+    <table class="tc-data-table text-xs">
+      <thead>
+        <tr>
+          <th>ID</th><th>Revenue</th><th>Rate</th><th>Raw comm.</th><th>Draw +</th><th>Rec</th><th>Gross pay</th><th>Ending draw</th><th>Status</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @calculations.each do |c| %>
+          <tr>
+            <td class="font-mono"><%= c.id %></td>
+            <td><%= tc_money(c.commissionable_revenue_cents) %></td>
+            <td><%= tc_percent_from_bps(c.commission_rate_bps) %></td>
+            <td><%= tc_money(c.calculated_commission_cents) %></td>
+            <td><%= tc_money(c.draw_added_cents) %></td>
+            <td><%= tc_money(c.draw_recovery_cents) %></td>
+            <td><%= tc_money(c.gross_commission_pay_cents) %></td>
+            <td><%= tc_money(c.ending_draw_balance_cents) %></td>
+            <td class="font-mono"><%= c.status %></td>
+            <td>
+              <% if c.status == "draft" %>
+                <%= button_to "Finalize", finalize_admin_engagement_commission_calculation_path(@engagement, c),
+                      method: :post,
+                      class: "tc-btn tc-btn--quiet text-xs" %>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

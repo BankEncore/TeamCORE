@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_14_150000) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_16_120000) do
   create_table "agencies", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
     t.string "code", null: false
     t.datetime "created_at", null: false
@@ -18,6 +18,183 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_14_150000) do
     t.string "status", default: "active", null: false
     t.datetime "updated_at", null: false
     t.index ["code"], name: "index_agencies_on_code", unique: true
+  end
+
+  create_table "commission_calculations", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.bigint "agency_id", null: false
+    t.bigint "calculated_commission_cents", default: 0, null: false
+    t.integer "commission_rate_bps", null: false
+    t.bigint "commissionable_revenue_cents", null: false
+    t.datetime "created_at", null: false
+    t.bigint "draw_added_cents", default: 0, null: false
+    t.bigint "draw_recovery_cents", default: 0, null: false
+    t.bigint "ending_draw_balance_cents", default: 0, null: false
+    t.bigint "engagement_id", null: false
+    t.bigint "gross_commission_pay_cents", default: 0, null: false
+    t.bigint "pay_period_id"
+    t.bigint "revenue_input_id"
+    t.string "status", default: "draft", null: false
+    t.datetime "updated_at", null: false
+    t.index ["agency_id"], name: "index_commission_calculations_on_agency_id"
+    t.index ["engagement_id", "pay_period_id"], name: "index_commission_calcs_on_engagement_pay_period"
+    t.index ["engagement_id"], name: "index_commission_calculations_on_engagement_id"
+    t.index ["pay_period_id"], name: "index_commission_calculations_on_pay_period_id"
+    t.index ["revenue_input_id"], name: "index_commission_calculations_on_revenue_input_id"
+  end
+
+  create_table "commission_draw_balances", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.bigint "agency_id", null: false
+    t.bigint "balance_cents", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.bigint "engagement_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["agency_id"], name: "index_commission_draw_balances_on_agency_id"
+    t.index ["engagement_id"], name: "index_commission_draw_balances_on_engagement_id"
+    t.index ["engagement_id"], name: "index_draw_balances_unique_engagement", unique: true
+  end
+
+  create_table "compensation_plan_assignments", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.bigint "agency_id", null: false
+    t.bigint "compensation_plan_id", null: false
+    t.datetime "created_at", null: false
+    t.date "effective_end_on"
+    t.date "effective_start_on", null: false
+    t.bigint "engagement_id", null: false
+    t.integer "snapshot_commission_rate_bps"
+    t.bigint "snapshot_hourly_rate_cents"
+    t.bigint "snapshot_minimum_amount_cents"
+    t.string "snapshot_minimum_basis"
+    t.string "snapshot_plan_name", null: false
+    t.string "snapshot_plan_type", null: false
+    t.string "snapshot_recovery_rule"
+    t.bigint "snapshot_salary_annual_cents"
+    t.datetime "updated_at", null: false
+    t.index ["agency_id"], name: "index_compensation_plan_assignments_on_agency_id"
+    t.index ["compensation_plan_id"], name: "index_compensation_plan_assignments_on_compensation_plan_id"
+    t.index ["engagement_id", "effective_start_on"], name: "index_comp_plan_assignments_on_engagement_and_start"
+    t.index ["engagement_id"], name: "index_compensation_plan_assignments_on_engagement_id"
+  end
+
+  create_table "compensation_plans", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.bigint "agency_id", null: false
+    t.datetime "created_at", null: false
+    t.integer "default_commission_rate_bps"
+    t.bigint "hourly_rate_cents"
+    t.bigint "minimum_commission_amount_cents"
+    t.string "minimum_commission_basis"
+    t.string "name", null: false
+    t.string "plan_type", null: false
+    t.string "recovery_rule"
+    t.bigint "salary_annual_cents"
+    t.string "status", default: "active", null: false
+    t.datetime "updated_at", null: false
+    t.index ["agency_id", "status"], name: "index_compensation_plans_on_agency_id_and_status"
+    t.index ["agency_id"], name: "index_compensation_plans_on_agency_id"
+  end
+
+  create_table "contractor_charge_recoveries", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.bigint "actor_id"
+    t.bigint "agency_id", null: false
+    t.bigint "amount_cents", null: false
+    t.bigint "contractor_charge_id", null: false
+    t.bigint "contractor_settlement_line_id"
+    t.datetime "created_at", null: false
+    t.text "notes"
+    t.date "occurred_on", null: false
+    t.string "reference"
+    t.string "source_type", null: false
+    t.datetime "updated_at", null: false
+    t.index ["actor_id"], name: "index_contractor_charge_recoveries_on_actor_id"
+    t.index ["agency_id"], name: "index_contractor_charge_recoveries_on_agency_id"
+    t.index ["contractor_charge_id"], name: "index_contractor_charge_recoveries_on_contractor_charge_id"
+    t.index ["contractor_settlement_line_id"], name: "idx_on_contractor_settlement_line_id_66d99f6593"
+  end
+
+  create_table "contractor_charge_waivers", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.bigint "actor_id", null: false
+    t.bigint "agency_id", null: false
+    t.bigint "amount_cents", null: false
+    t.bigint "contractor_charge_id", null: false
+    t.datetime "created_at", null: false
+    t.text "reason"
+    t.datetime "updated_at", null: false
+    t.index ["actor_id"], name: "index_contractor_charge_waivers_on_actor_id"
+    t.index ["agency_id"], name: "index_contractor_charge_waivers_on_agency_id"
+    t.index ["contractor_charge_id"], name: "index_contractor_charge_waivers_on_contractor_charge_id"
+  end
+
+  create_table "contractor_charges", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.bigint "agency_id", null: false
+    t.string "charge_type", null: false
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.date "due_on"
+    t.bigint "engagement_id", null: false
+    t.bigint "open_balance_cents", null: false
+    t.bigint "original_amount_cents", null: false
+    t.string "status", default: "draft", null: false
+    t.datetime "updated_at", null: false
+    t.index ["agency_id"], name: "index_contractor_charges_on_agency_id"
+    t.index ["engagement_id", "status"], name: "index_contractor_charges_on_engagement_and_status"
+    t.index ["engagement_id"], name: "index_contractor_charges_on_engagement_id"
+  end
+
+  create_table "contractor_settlement_line_commission_calculations", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.bigint "commission_calculation_id", null: false
+    t.bigint "contractor_settlement_line_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["commission_calculation_id"], name: "idx_on_commission_calculation_id_68974ec53d"
+    t.index ["contractor_settlement_line_id", "commission_calculation_id"], name: "index_settlement_line_comm_calc_unique", unique: true
+    t.index ["contractor_settlement_line_id"], name: "idx_on_contractor_settlement_line_id_3c31823aed"
+  end
+
+  create_table "contractor_settlement_line_revenue_inputs", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.bigint "contractor_settlement_line_id", null: false
+    t.datetime "created_at", null: false
+    t.bigint "revenue_input_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["contractor_settlement_line_id", "revenue_input_id"], name: "index_settlement_line_revenue_unique", unique: true
+    t.index ["contractor_settlement_line_id"], name: "idx_on_contractor_settlement_line_id_11bf46bd30"
+    t.index ["revenue_input_id"], name: "idx_on_revenue_input_id_2279910aa4"
+  end
+
+  create_table "contractor_settlement_lines", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.bigint "agency_id", null: false
+    t.bigint "charge_deductions_cents", default: 0, null: false
+    t.bigint "contractor_settlement_run_id", null: false
+    t.datetime "created_at", null: false
+    t.bigint "engagement_id", null: false
+    t.bigint "gross_commission_cents", default: 0, null: false
+    t.bigint "manual_adjustment_negative_cents", default: 0, null: false
+    t.bigint "manual_adjustment_positive_cents", default: 0, null: false
+    t.bigint "net_settlement_cents", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.index ["agency_id"], name: "index_contractor_settlement_lines_on_agency_id"
+    t.index ["contractor_settlement_run_id"], name: "idx_on_contractor_settlement_run_id_f6e1bef308"
+    t.index ["engagement_id"], name: "index_contractor_settlement_lines_on_engagement_id"
+  end
+
+  create_table "contractor_settlement_run_events", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.bigint "actor_id"
+    t.bigint "contractor_settlement_run_id", null: false
+    t.datetime "created_at", null: false
+    t.string "event_type", null: false
+    t.text "reason"
+    t.datetime "updated_at", null: false
+    t.index ["actor_id"], name: "index_contractor_settlement_run_events_on_actor_id"
+    t.index ["contractor_settlement_run_id"], name: "idx_on_contractor_settlement_run_id_26862ac2e4"
+  end
+
+  create_table "contractor_settlement_runs", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.bigint "agency_id", null: false
+    t.datetime "created_at", null: false
+    t.date "period_end_on", null: false
+    t.date "period_start_on", null: false
+    t.string "status", default: "draft", null: false
+    t.datetime "updated_at", null: false
+    t.index ["agency_id", "period_start_on", "period_end_on"], name: "index_settlement_runs_on_agency_and_period"
+    t.index ["agency_id"], name: "index_contractor_settlement_runs_on_agency_id"
   end
 
   create_table "departments", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
@@ -107,6 +284,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_14_150000) do
     t.index ["agency_id", "code"], name: "index_document_types_on_agency_id_and_code", unique: true
     t.index ["agency_id", "status"], name: "index_document_types_on_agency_id_and_status"
     t.index ["agency_id"], name: "index_document_types_on_agency_id"
+  end
+
+  create_table "draw_balance_events", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.bigint "actor_id"
+    t.bigint "agency_id", null: false
+    t.bigint "amount_cents", null: false
+    t.bigint "commission_calculation_id"
+    t.datetime "created_at", null: false
+    t.bigint "engagement_id", null: false
+    t.string "event_type", null: false
+    t.text "reason"
+    t.datetime "updated_at", null: false
+    t.index ["actor_id"], name: "index_draw_balance_events_on_actor_id"
+    t.index ["agency_id"], name: "index_draw_balance_events_on_agency_id"
+    t.index ["commission_calculation_id"], name: "index_draw_balance_events_on_commission_calculation_id"
+    t.index ["engagement_id"], name: "index_draw_balance_events_on_engagement_id"
   end
 
   create_table "engagement_organization_placements", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
@@ -236,6 +429,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_14_150000) do
     t.index ["target_party_id"], name: "index_party_relationships_on_target_party_id"
   end
 
+  create_table "pay_periods", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.bigint "agency_id", null: false
+    t.datetime "created_at", null: false
+    t.date "end_on", null: false
+    t.string "label"
+    t.date "start_on", null: false
+    t.datetime "updated_at", null: false
+    t.index ["agency_id", "start_on", "end_on"], name: "index_pay_periods_on_agency_and_bounds"
+    t.index ["agency_id"], name: "index_pay_periods_on_agency_id"
+  end
+
   create_table "person_profiles", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "first_name"
@@ -246,6 +450,24 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_14_150000) do
     t.string "suffix"
     t.datetime "updated_at", null: false
     t.index ["party_id"], name: "index_person_profiles_on_party_id", unique: true
+  end
+
+  create_table "revenue_inputs", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.bigint "agency_id", null: false
+    t.bigint "commissionable_revenue_cents", null: false
+    t.datetime "created_at", null: false
+    t.bigint "engagement_id", null: false
+    t.bigint "gross_sales_cents"
+    t.text "notes"
+    t.bigint "pay_period_id"
+    t.date "period_end_on", null: false
+    t.date "period_start_on", null: false
+    t.string "source_type", default: "manual", null: false
+    t.datetime "updated_at", null: false
+    t.index ["agency_id"], name: "index_revenue_inputs_on_agency_id"
+    t.index ["engagement_id", "pay_period_id"], name: "index_revenue_inputs_on_engagement_and_pay_period"
+    t.index ["engagement_id"], name: "index_revenue_inputs_on_engagement_id"
+    t.index ["pay_period_id"], name: "index_revenue_inputs_on_pay_period_id"
   end
 
   create_table "team_members", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
@@ -298,6 +520,35 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_14_150000) do
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
+  add_foreign_key "commission_calculations", "agencies"
+  add_foreign_key "commission_calculations", "engagements"
+  add_foreign_key "commission_calculations", "pay_periods"
+  add_foreign_key "commission_calculations", "revenue_inputs"
+  add_foreign_key "commission_draw_balances", "agencies"
+  add_foreign_key "commission_draw_balances", "engagements"
+  add_foreign_key "compensation_plan_assignments", "agencies"
+  add_foreign_key "compensation_plan_assignments", "compensation_plans"
+  add_foreign_key "compensation_plan_assignments", "engagements"
+  add_foreign_key "compensation_plans", "agencies"
+  add_foreign_key "contractor_charge_recoveries", "agencies"
+  add_foreign_key "contractor_charge_recoveries", "contractor_charges"
+  add_foreign_key "contractor_charge_recoveries", "contractor_settlement_lines"
+  add_foreign_key "contractor_charge_recoveries", "users", column: "actor_id"
+  add_foreign_key "contractor_charge_waivers", "agencies"
+  add_foreign_key "contractor_charge_waivers", "contractor_charges"
+  add_foreign_key "contractor_charge_waivers", "users", column: "actor_id"
+  add_foreign_key "contractor_charges", "agencies"
+  add_foreign_key "contractor_charges", "engagements"
+  add_foreign_key "contractor_settlement_line_commission_calculations", "commission_calculations"
+  add_foreign_key "contractor_settlement_line_commission_calculations", "contractor_settlement_lines"
+  add_foreign_key "contractor_settlement_line_revenue_inputs", "contractor_settlement_lines"
+  add_foreign_key "contractor_settlement_line_revenue_inputs", "revenue_inputs"
+  add_foreign_key "contractor_settlement_lines", "agencies"
+  add_foreign_key "contractor_settlement_lines", "contractor_settlement_runs"
+  add_foreign_key "contractor_settlement_lines", "engagements"
+  add_foreign_key "contractor_settlement_run_events", "contractor_settlement_runs"
+  add_foreign_key "contractor_settlement_run_events", "users", column: "actor_id"
+  add_foreign_key "contractor_settlement_runs", "agencies"
   add_foreign_key "departments", "agencies"
   add_foreign_key "departments", "departments", column: "parent_department_id"
   add_foreign_key "document_records", "agencies"
@@ -309,6 +560,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_14_150000) do
   add_foreign_key "document_requirements", "agencies"
   add_foreign_key "document_requirements", "document_types"
   add_foreign_key "document_types", "agencies"
+  add_foreign_key "draw_balance_events", "agencies"
+  add_foreign_key "draw_balance_events", "commission_calculations"
+  add_foreign_key "draw_balance_events", "engagements"
+  add_foreign_key "draw_balance_events", "users", column: "actor_id"
   add_foreign_key "engagement_organization_placements", "agencies"
   add_foreign_key "engagement_organization_placements", "departments"
   add_foreign_key "engagement_organization_placements", "engagements"
@@ -326,7 +581,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_14_150000) do
   add_foreign_key "party_relationships", "agencies"
   add_foreign_key "party_relationships", "parties", column: "source_party_id"
   add_foreign_key "party_relationships", "parties", column: "target_party_id"
+  add_foreign_key "pay_periods", "agencies"
   add_foreign_key "person_profiles", "parties"
+  add_foreign_key "revenue_inputs", "agencies"
+  add_foreign_key "revenue_inputs", "engagements"
+  add_foreign_key "revenue_inputs", "pay_periods"
   add_foreign_key "team_members", "agencies"
   add_foreign_key "team_members", "parties"
   add_foreign_key "teams", "agencies"

@@ -31,9 +31,34 @@ Rails.application.routes.draw do
     resources :team_members, only: %i[index show new create edit update] do
       resource :team360, only: %i[show], controller: "team360"
     end
+    resources :pay_periods
+    resources :compensation_plans
+    resources :contractor_settlement_runs, only: %i[index show new create] do
+      member do
+        post :finalize
+        post :compose_line
+        post :void
+        post :mark_paid
+      end
+    end
     resources :engagements, only: %i[index show new create edit update] do
       resources :placements, controller: "engagement_placements", only: %i[index show new create edit update]
       resources :supervision_assignments, controller: "engagement_supervisions", only: %i[index show new create edit update]
+      scope module: :engagements do
+        resources :compensation_plan_assignments, path: "compensation_assignments", except: %i[show]
+        resources :revenue_inputs do
+          member { post :calculate_commission }
+          collection { post :import_csv }
+        end
+        resources :commission_calculations, only: [ :index ] do
+          member do
+            post :finalize
+          end
+        end
+        resources :contractor_charges do
+          resources :contractor_charge_waivers, path: "waivers", only: %i[new create]
+        end
+      end
     end
 
     resources :document_types

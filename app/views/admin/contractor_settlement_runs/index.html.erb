@@ -1,0 +1,21 @@
+<% content_for :title, "Settlement runs" %>
+<div class="tc-page-stack">
+  <%= link_to "← Dashboard", admin_root_path, class: "text-sm #{tc_link_classes}" %>
+  <h1 class="text-2xl font-semibold">Contractor settlement runs</h1>
+  <%= link_to "New run", new_admin_contractor_settlement_run_path, class: "tc-btn tc-btn--primary" %>
+  <div class="tc-table-wrap mt-4">
+    <table class="tc-data-table text-sm">
+      <thead><tr><th>ID</th><th>Period</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+        <% @runs.each do |r| %>
+          <tr>
+            <td class="font-mono"><%= r.id %></td>
+            <td><%= r.period_start_on %> – <%= r.period_end_on %></td>
+            <td class="font-mono"><%= r.status %></td>
+            <td><%= link_to "Open", admin_contractor_settlement_run_path(r), class: tc_link_classes %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

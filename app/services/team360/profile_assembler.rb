@@ -2,6 +2,8 @@
 
 module Team360
   class ProfileAssembler
+    include Rails.application.routes.url_helpers
+
     def initialize(team_member:, agency:, current_user: nil, as_of_date: Date.current, focused_engagement_id: nil)
       @team_member = team_member
       @agency = agency
@@ -56,7 +58,8 @@ module Team360
         readiness_result: readiness_result,
         document_types_by_id: doc_types_by_id,
         records_by_id: records_by_id,
-        subcontractor_rows: build_subcontractor_rows(party)
+        subcontractor_rows: build_subcontractor_rows(party),
+        workforce_financial: build_workforce_financial(focused)
       )
     end
 
@@ -156,6 +159,138 @@ module Team360
         end
 
       [ doc_types_by_id, records_by_id ]
+    end
+
+    def build_workforce_financial(focused_engagement)
+      return { focused_engagement_id: nil } unless focused_engagement
+
+      assignment = CompensationPlanAssignment.current_for_engagement(focused_engagement, as_of: @as_of_date)
+      draw = focused_engagement.commission_draw_balance
+      show_draw =
+        focused_engagement.allows_employee_commission_draw? &&
+        (@current_user.nil? || @current_user.team360_show_employee_draw_balance?)
+
+      out = {
+        focused_engagement_id: focused_engagement.id,
+        relationship_type: focused_engagement.relationship_type,
+        assignment_summary: assignment && {
+          plan_name: assignment.snapshot_plan_name,
+          plan_type: assignment.snapshot_plan_type,
+          effective_start_on: assignment.effective_start_on,
+          effective_end_on: assignment.effective_end_on,
+          commission_rate_bps: assignment.snapshot_commission_rate_bps,
+          minimum_amount_cents: assignment.snapshot_minimum_amount_cents
+        },
+        draw_balance_cents: (show_draw ? draw&.balance_cents : nil)
+      }
+
+      out[:admin_links] = {
+        revenue_inputs: admin_engagement_revenue_inputs_path(focused_engagement),
+        commission_calculations: admin_engagement_commission_calculations_path(focused_engagement),
+        settlement_runs_index: admin_contractor_settlement_runs_path
+      }
+      if focused_engagement.allows_contractor_charges_and_settlement?
+        out[:admin_links][:contractor_charges] = admin_engagement_contractor_charges_path(focused_engagement)
+      end
+
+      if focused_engagement.allows_contractor_charges_and_settlement?
+        charges = focused_engagement.contractor_charges.where(status: %w[open draft])
+        overdue_scope = charges.where.not(due_on: nil).where("due_on < ?", @as_of_date)
+        upcoming_scope = charges.where.not(due_on: nil).where("due_on >= ?", @as_of_date)
+        recent_recoveries =
+          ContractorChargeRecovery
+            .joins(:contractor_charge)
+            .where(contractor_charges: { engagement_id: focused_engagement.id })
+            .order(occurred_on: :desc, id: :desc)
+            .limit(5)
+            .map do |r|
+              {
+                id: r.id,
+                amount_cents: r.amount_cents,
+                occurred_on: r.occurred_on,
+                source_type: r.source_type,
+                contractor_charge_id: r.contractor_charge_id
+              }
+            end
+        recent_waivers =
+          ContractorChargeWaiver
+            .joins(:contractor_charge)
+            .where(contractor_charges: { engagement_id: focused_engagement.id })
+            .order(id: :desc)
+            .limit(5)
+            .map do |w|
+              {
+                id: w.id,
+                amount_cents: w.amount_cents,
+                created_at: w.created_at,
+                contractor_charge_id: w.contractor_charge_id
+              }
+            end
+
+        open_settlement_runs =
+          ContractorSettlementRun
+            .where(agency_id: @agency.id, status: %w[draft calculated])
+            .order(id: :desc)
+            .limit(5)
+            .map do |r|
+              {
+                id: r.id,
+                status: r.status,
+                period_start_on: r.period_start_on,
+                period_end_on: r.period_end_on
+              }
+            end
+
+        out[:contractor_charges] = {
+          open_count: charges.count,
+          open_balance_cents: charges.sum(:open_balance_cents),
+          past_due_count: overdue_scope.count,
+          past_due_balance_cents: overdue_scope.sum(:open_balance_cents),
+          next_due_on: upcoming_scope.minimum(:due_on),
+          recent_recoveries:,
+          recent_waivers:
+        }
+
+        line_records =
+          ContractorSettlementLine
+            .includes(:contractor_settlement_run)
+            .where(engagement_id: focused_engagement.id)
+            .order(id: :desc)
+            .limit(5)
+            .to_a
+
+        settlement_lines =
+          line_records.map do |ln|
+            run = ln.contractor_settlement_run
+            {
+              line_id: ln.id,
+              run_id: run.id,
+              run_status: run.status,
+              period_start_on: run.period_start_on,
+              period_end_on: run.period_end_on,
+              net_cents: ln.net_settlement_cents
+            }
+          end
+
+        ln_latest = line_records.first
+        out[:last_settlement] =
+          if ln_latest
+            run = ln_latest.contractor_settlement_run
+            {
+              run_id: run.id,
+              status: run.status,
+              period_start_on: run.period_start_on,
+              period_end_on: run.period_end_on,
+              net_cents: ln_latest.net_settlement_cents
+            }
+          end
+        out[:settlement] = {
+          open_runs: open_settlement_runs,
+          recent_lines: settlement_lines
+        }
+      end
+
+      out
     end
 
     def build_subcontractor_rows(party)
