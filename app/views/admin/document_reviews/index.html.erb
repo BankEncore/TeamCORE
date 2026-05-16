@@ -144,7 +144,7 @@
               <td class="font-mono text-xs"><%= rec.submitted_on %></td>
               <td class="font-mono text-xs"><%= rec.expires_on || "—" %></td>
               <td class="tc-data-table__cell-actions"><%= link_to "Review", admin_document_record_path(rec), class: tc_link_classes %></td>
-              <td class="tc-data-table__cell-muted font-mono"><%= rec.id %></td>
+              <td class="tc-data-table__cell-muted font-mono">#<%= rec.id %></td>
             </tr>
           <% end %>
         </tbody>
