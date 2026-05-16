@@ -17,7 +17,7 @@ module Admin
         pending_count: base_queue.count,
         oldest_submitted_on: base_queue.minimum(:submitted_on),
         expiring_soon_count: base_queue.where.not(expires_on: nil).where("expires_on <= ?", today + 30.days).count,
-        verification_required_count: base_queue.joins(:document_type).where(document_types: { verification_required: true }).count,
+        verification_required_count: base_queue.joins(:document_type).where(document_types: { verification_required: true }).count
       }
 
       scope =

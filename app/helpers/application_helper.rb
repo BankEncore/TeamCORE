@@ -44,7 +44,7 @@ module ApplicationHelper
     opts[:class] = [
       "tc-section-nav__link",
       ("tc-section-nav__link--active" if active),
-      opts[:class],
+      opts[:class]
     ].compact.join(" ")
     opts["aria-current"] = "page" if active
     link_to text, path, opts
