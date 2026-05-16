@@ -1,0 +1,39 @@
+<% content_for :title, "Operational reports" %>
+<div class="mb-4"><%= link_to "← Dashboard", admin_root_path, class: "text-sky-700 text-sm" %></div>
+<h1 class="text-2xl font-semibold mb-2">Operational reports</h1>
+<p class="text-sm text-slate-600 mb-6">
+  Dense admin hub (TC-12). Each report queries authoritative models and evaluator output — no snapshot tables.
+</p>
+
+<ul class="tc-panel divide-y divide-slate-200">
+  <li class="p-4">
+    <%= link_to admin_reports_team_members_path, class: "block hover:bg-slate-50 -m-4 p-4" do %>
+      <span class="font-medium text-sky-800">Team member roster</span>
+      <p class="text-sm text-slate-600 mt-1">Filters on party type, TM status, engagement dimensions, placement, supervisor, readiness.</p>
+    <% end %>
+  </li>
+  <li class="p-4">
+    <%= link_to admin_reports_engagements_path, class: "block hover:bg-slate-50 -m-4 p-4" do %>
+      <span class="font-medium text-sky-800">Engagement roster</span>
+      <p class="text-sm text-slate-600 mt-1">Relationship type, status, dates, placement, supervisor — links to Team360 and engagement.</p>
+    <% end %>
+  </li>
+  <li class="p-4">
+    <%= link_to admin_reports_document_compliance_index_path, class: "block hover:bg-slate-50 -m-4 p-4" do %>
+      <span class="font-medium text-sky-800">Document compliance exceptions</span>
+      <p class="text-sm text-slate-600 mt-1">Virtual alerts from <code class="font-mono text-xs">ReadinessEvaluator</code>; drill-through to records and Team360.</p>
+    <% end %>
+  </li>
+  <li class="p-4">
+    <%= link_to admin_reports_contractor_documentation_index_path, class: "block hover:bg-slate-50 -m-4 p-4" do %>
+      <span class="font-medium text-sky-800">Contractor documentation exceptions</span>
+      <p class="text-sm text-slate-600 mt-1">Contractor-class engagements only; optional document category filter (type <code class="font-mono text-xs">category</code>).</p>
+    <% end %>
+  </li>
+  <li class="p-4">
+    <%= link_to admin_reports_subcontractors_path, class: "block hover:bg-slate-50 -m-4 p-4" do %>
+      <span class="font-medium text-sky-800">Subcontractor relationships</span>
+      <p class="text-sm text-slate-600 mt-1">Incoming subcontractor PartyRelationship rows; promoted targets link to Team360.</p>
+    <% end %>
+  </li>
+</ul>

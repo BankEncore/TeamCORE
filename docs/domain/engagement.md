@@ -196,7 +196,7 @@ Read surfaces for the **Engagement / workforce** narrative (delivery **TC-10**):
 | Epic | Role |
 | --- | --- |
 | **TC-10** | **Team360 MVP shell** embedding org placement + supervisor read paths powered by **`engagements`** / **`EngagementOrganizationPlacement`** / **`EngagementSupervisionAssignment`**. Dependency table: **[`organization.md` § Dependencies](organization.md#dependencies-acceptance--tc-10-tc-12-explicitly)**. |
-| **TC-11** | **Not** assigned a numbered section elsewhere in repo markdown yet. **TC-03 UX** assumes **adjacent Phase 3** work alongside Team360/reporting (**[`domain-map.md` — Phase 3 — Team360 MVP and Operational Reporting](../product/domain-map.md#phase-3--team360-mvp-and-operational-reporting)**). When program management pins **TC-11** on GitHub, add a row here linking that epic explicitly. |
+| **TC-11** | Team360 engagement, organization, and compliance panels (Phases 1–2 data). Domain hub: [`team360.md`](team360.md). |
 
 ---
 
