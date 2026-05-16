@@ -430,4 +430,81 @@ class DocumentsReadinessEvaluatorTest < ActiveSupport::TestCase
     assert_equal "not_ready", result.readiness_status
     assert result.alerts.any? { |a| a.alert_type == "missing" }
   end
+
+  test "voided best candidate skips to next verified record for same requirement" do
+    d1 = Date.new(2025, 1, 1)
+    DocumentRecord.create!(
+      agency: @agency,
+      document_type: @w9,
+      engagement: @engagement,
+      team_member: @team_member,
+      status: "voided",
+      submitted_on: d1,
+      verified_by: @user,
+      verified_on: d1,
+      verification_notes: "Duplicate upload",
+      filename: "old.pdf",
+      content_type: "application/pdf"
+    )
+    DocumentRecord.create!(
+      agency: @agency,
+      document_type: @w9,
+      engagement: @engagement,
+      team_member: @team_member,
+      status: "verified",
+      submitted_on: d1,
+      verified_by: @user,
+      verified_on: d1,
+      filename: "good.pdf",
+      content_type: "application/pdf"
+    )
+    DocumentRecord.create!(
+      agency: @agency,
+      document_type: @req_employee_only.document_type,
+      engagement: @engagement,
+      team_member: @team_member,
+      status: "submitted",
+      submitted_on: d1,
+      filename: "ack.html",
+      content_type: "text/html"
+    )
+
+    result = Documents::ReadinessEvaluator.new(engagement: @engagement, as_of_date: Date.new(2025, 6, 1)).call
+    w9_row = result.requirements.find { |r| r.document_requirement_id == @req_any.id }
+
+    assert_equal "satisfied", w9_row.requirement_outcome
+    assert_equal "verified", w9_row.record_review_status
+  end
+
+  test "verified record past expires_on evaluates expired" do
+    DocumentRecord.create!(
+      agency: @agency,
+      document_type: @w9,
+      engagement: @engagement,
+      team_member: @team_member,
+      status: "verified",
+      submitted_on: Date.new(2025, 1, 1),
+      verified_by: @user,
+      verified_on: Date.new(2025, 1, 2),
+      expires_on: Date.new(2025, 4, 1),
+      filename: "w9.pdf",
+      content_type: "application/pdf"
+    )
+    DocumentRecord.create!(
+      agency: @agency,
+      document_type: @req_employee_only.document_type,
+      engagement: @engagement,
+      team_member: @team_member,
+      status: "submitted",
+      submitted_on: Date.new(2025, 1, 2),
+      filename: "ack.html",
+      content_type: "text/html"
+    )
+
+    result = Documents::ReadinessEvaluator.new(engagement: @engagement, as_of_date: Date.new(2025, 6, 1)).call
+    w9_row = result.requirements.find { |r| r.document_requirement_id == @req_any.id }
+
+    assert_equal "expired", w9_row.requirement_outcome
+    assert_equal "not_ready", result.readiness_status
+  end
 end

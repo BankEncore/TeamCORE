@@ -1,12 +1,65 @@
 <% content_for :title, "Document record ##{@document_record.id} — TeamCORE Admin" %>
-<div class="mb-4"><%= link_to "← Document records", admin_document_records_path, class: "text-sky-700 text-sm" %></div>
+<div class="mb-4 flex flex-wrap gap-3 items-center">
+  <%= link_to "← Document records", admin_document_records_path, class: "text-sky-700 text-sm" %>
+  <%= link_to "Pending review", admin_document_reviews_path, class: "text-sky-700 text-sm" %>
+</div>
 <h1 class="text-2xl font-semibold mb-2">Document record #<%= @document_record.id %></h1>
+
+<% if flash[:alert].present? %>
+  <div class="mb-4 rounded border border-red-200 bg-red-50 text-red-800 text-sm px-3 py-2"><%= flash[:alert] %></div>
+<% end %>
+
 <dl class="grid grid-cols-1 gap-2 text-sm mb-4">
   <dt class="text-slate-500">Type</dt><dd><%= @document_record.document_type&.name %> (<%= @document_record.document_type&.code %>)</dd>
-  <dt class="text-slate-500">Status</dt><dd><%= @document_record.status %></dd>
+  <dt class="text-slate-500">Status</dt><dd class="font-mono"><%= @document_record.status %></dd>
   <dt class="text-slate-500">Team member</dt><dd><%= @document_record.team_member_id %> <%= @document_record.team_member&.party&.display_name %></dd>
   <dt class="text-slate-500">Engagement</dt><dd><%= @document_record.engagement_id || "—" %></dd>
-  <dt class="text-slate-500">Submitted</dt><dd><%= @document_record.submitted_on %></dd>
-  <dt class="text-slate-500">Expires</dt><dd><%= @document_record.expires_on || "—" %></dd>
+  <dt class="text-slate-500">Submitted</dt><dd class="font-mono"><%= @document_record.submitted_on %></dd>
+  <dt class="text-slate-500">Expires</dt><dd class="font-mono"><%= @document_record.expires_on || "—" %></dd>
+  <dt class="text-slate-500">Verified by</dt><dd><%= @document_record.verified_by_id ? @document_record.verified_by&.email : "—" %></dd>
+  <dt class="text-slate-500">Verified on</dt><dd class="font-mono"><%= @document_record.verified_on || "—" %></dd>
+  <dt class="text-slate-500">Verification notes</dt><dd><%= @document_record.verification_notes.presence || "—" %></dd>
+  <dt class="text-slate-500">Rejection reason</dt><dd><%= @document_record.rejection_reason.presence || "—" %></dd>
 </dl>
-<%= link_to "Edit", edit_admin_document_record_path(@document_record), class: "rounded bg-slate-900 text-white px-3 py-2 text-sm" %>
+
+<section class="border border-slate-200 rounded p-4 bg-white mb-4">
+  <h2 class="font-medium mb-3 text-sm">Review actions</h2>
+  <p class="text-xs text-slate-600 mb-4">Readiness and alerts derive from evaluator output after the record saves — not edited here (**TC-08**).</p>
+
+  <% case @document_record.status
+     when "submitted" %>
+    <div class="space-y-4">
+      <%= form_with url: verify_admin_document_record_path(@document_record), method: :post, data: { turbo: false }, class: "border border-slate-100 rounded p-3 bg-slate-50" do %>
+        <%= label_tag :verification_notes, "Notes (optional)", class: "block text-xs text-slate-600 mb-1" %>
+        <%= text_area_tag :verification_notes, nil, rows: 2, class: "w-full border border-slate-300 rounded px-2 py-1 text-sm mb-2" %>
+        <%= submit_tag "Verify document", data: { confirm: "Verify this submission?" }, class: "rounded bg-emerald-800 text-white px-3 py-2 text-sm cursor-pointer" %>
+      <% end %>
+
+      <%= form_with url: reject_admin_document_record_path(@document_record), method: :post, data: { turbo: false }, class: "border border-slate-100 rounded p-3 bg-slate-50" do %>
+        <%= label_tag :rejection_reason, "Rejection reason (required)", class: "block text-xs text-slate-600 mb-1" %>
+        <%= text_area_tag :rejection_reason, nil, rows: 3, required: true, class: "w-full border border-slate-300 rounded px-2 py-1 text-sm mb-2" %>
+        <%= label_tag :verification_notes, "Notes (optional)", class: "block text-xs text-slate-600 mb-1" %>
+        <%= text_area_tag :verification_notes, nil, rows: 2, class: "w-full border border-slate-300 rounded px-2 py-1 text-sm mb-2" %>
+        <%= submit_tag "Reject document", data: { confirm: "Reject this submission?" }, class: "rounded bg-red-800 text-white px-3 py-2 text-sm cursor-pointer" %>
+      <% end %>
+
+      <%= form_with url: void_admin_document_record_path(@document_record), method: :post, data: { turbo: false }, class: "border border-slate-100 rounded p-3 bg-slate-50" do %>
+        <%= label_tag :verification_notes, "Notes (optional, void context)", class: "block text-xs text-slate-600 mb-1" %>
+        <%= text_area_tag :verification_notes, nil, rows: 2, class: "w-full border border-slate-300 rounded px-2 py-1 text-sm mb-2" %>
+        <%= submit_tag "Void submission", data: { confirm: "Void this record? It will not count toward readiness." }, class: "rounded bg-slate-700 text-white px-3 py-2 text-sm cursor-pointer" %>
+      <% end %>
+    </div>
+  <% when "verified", "rejected" %>
+    <%= form_with url: void_admin_document_record_path(@document_record), method: :post, data: { turbo: false }, class: "border border-slate-100 rounded p-3 bg-slate-50 max-w-xl" do %>
+      <%= label_tag :verification_notes, "Notes (optional, void context)", class: "block text-xs text-slate-600 mb-1" %>
+      <%= text_area_tag :verification_notes, nil, rows: 2, class: "w-full border border-slate-300 rounded px-2 py-1 text-sm mb-2" %>
+      <%= submit_tag "Void record", data: { confirm: "Void this record? Prior review metadata is preserved." }, class: "rounded bg-slate-700 text-white px-3 py-2 text-sm cursor-pointer" %>
+    <% end %>
+  <% else %>
+    <p class="text-sm text-slate-600">No further review actions (<code class="font-mono">voided</code> is terminal in MVP).</p>
+  <% end %>
+</section>
+
+<div class="flex flex-wrap gap-2">
+  <%= link_to "Edit metadata", edit_admin_document_record_path(@document_record), class: "rounded bg-slate-900 text-white px-3 py-2 text-sm" %>
+</div>

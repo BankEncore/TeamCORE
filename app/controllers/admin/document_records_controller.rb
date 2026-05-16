@@ -2,8 +2,23 @@
 
 module Admin
   class DocumentRecordsController < Admin::BaseController
+    include Admin::DocumentVerifier
+
     before_action :require_current_agency!
-    before_action :set_document_record, only: %i[show edit update]
+    before_action :set_document_record,
+      only: %i[show edit update verify reject void]
+    before_action :require_document_verifier, only: %i[verify reject void]
+
+    SUBMITTED_FIELDS = %i[
+      document_type_id team_member_id engagement_id party_id
+      storage_key filename content_type byte_size display_name
+      submitted_on issued_on expires_on
+    ].freeze
+
+    POST_REVIEW_METADATA_FIELDS = %i[
+      display_name filename storage_key content_type byte_size
+      issued_on expires_on
+    ].freeze
 
     def index
       @document_records =
@@ -22,9 +37,10 @@ module Admin
     end
 
     def create
-      @document_record = DocumentRecord.new(document_record_params.merge(agency: current_agency))
-      apply_verifier_defaults(@document_record)
+      @document_record = DocumentRecord.new(document_record_create_params.merge(agency: current_agency))
+      @document_record.status = "submitted"
       load_collections
+
       if @document_record.save
         redirect_to admin_document_record_path(@document_record), notice: "Document record created."
       else
@@ -37,13 +53,59 @@ module Admin
     end
 
     def update
-      @document_record.assign_attributes(document_record_params)
-      apply_verifier_defaults(@document_record)
+      @document_record.assign_attributes(document_record_update_params)
       load_collections
+
       if @document_record.save
         redirect_to admin_document_record_path(@document_record), notice: "Document record updated."
       else
         render :edit, status: :unprocessable_entity
+      end
+    end
+
+    def verify
+      result = Documents::ReviewDocumentRecord.call(
+        document_record: @document_record,
+        action: :verify,
+        reviewer: current_user,
+        notes: params[:verification_notes]
+      )
+      if result.success?
+        redirect_to admin_document_record_path(result.document_record), notice: "Document verified."
+      else
+        flash.now[:alert] = result.error_messages.to_sentence
+        render :show, status: :unprocessable_entity
+      end
+    end
+
+    def reject
+      result = Documents::ReviewDocumentRecord.call(
+        document_record: @document_record,
+        action: :reject,
+        reviewer: current_user,
+        notes: params[:verification_notes],
+        rejection_reason: params[:rejection_reason]
+      )
+      if result.success?
+        redirect_to admin_document_record_path(result.document_record), notice: "Document rejected."
+      else
+        flash.now[:alert] = result.error_messages.to_sentence
+        render :show, status: :unprocessable_entity
+      end
+    end
+
+    def void
+      result = Documents::ReviewDocumentRecord.call(
+        document_record: @document_record,
+        action: :void,
+        reviewer: current_user,
+        notes: params[:verification_notes]
+      )
+      if result.success?
+        redirect_to admin_document_record_path(result.document_record), notice: "Document voided."
+      else
+        flash.now[:alert] = result.error_messages.to_sentence
+        render :show, status: :unprocessable_entity
       end
     end
 
@@ -60,20 +122,16 @@ module Admin
       @users = User.order(:email)
     end
 
-    def document_record_params
-      params.require(:document_record).permit(
-        :document_type_id, :team_member_id, :engagement_id, :party_id,
-        :storage_key, :filename, :content_type, :byte_size, :display_name,
-        :status, :submitted_on, :issued_on, :expires_on,
-        :verified_by_id, :verified_on, :verification_notes, :rejection_reason
-      )
+    def document_record_create_params
+      params.require(:document_record).permit(*SUBMITTED_FIELDS)
     end
 
-    def apply_verifier_defaults(record)
-      return unless record.status.in?(%w[verified rejected])
-
-      record.verified_by_id = current_user.id if record.verified_by_id.blank?
-      record.verified_on = Date.current if record.verified_on.blank?
+    def document_record_update_params
+      if @document_record.status == "submitted"
+        params.require(:document_record).permit(*SUBMITTED_FIELDS)
+      else
+        params.require(:document_record).permit(*POST_REVIEW_METADATA_FIELDS)
+      end
     end
   end
 end

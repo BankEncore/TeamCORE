@@ -2,7 +2,7 @@
 
 This register tracks product and modeling decisions for TeamCORE. Not every item needs the same rigor: use the **decision handling model** below so Phase 0 can close without pretending Phase 4–6 design is final.
 
-**Companion docs:** [`domain-map.md`](domain-map.md), [`overview.md`](overview.md), [`roadmap-decision-log.md`](roadmap-decision-log.md), [`../roadmap/phase-1-readiness-checklist.md`](../roadmap/phase-1-readiness-checklist.md), [`employee-contractor-applicability-matrix.md`](employee-contractor-applicability-matrix.md), [`glossary.md`](glossary.md), [`../domain/party-team-member.md`](../domain/party-team-member.md), **[`../domain/engagement.md`](../domain/engagement.md)** (TC-03), **[`../domain/engagement-status.md`](../domain/engagement-status.md)** (TC-04), **[`../domain/documents-compliance.md`](../domain/documents-compliance.md)** (TC-06), **[`../domain/document-alerts.md`](../domain/document-alerts.md)** (TC-07).
+**Companion docs:** [`domain-map.md`](domain-map.md), [`overview.md`](overview.md), [`roadmap-decision-log.md`](roadmap-decision-log.md), [`../roadmap/phase-1-readiness-checklist.md`](../roadmap/phase-1-readiness-checklist.md), [`employee-contractor-applicability-matrix.md`](employee-contractor-applicability-matrix.md), [`glossary.md`](glossary.md), [`../domain/party-team-member.md`](../domain/party-team-member.md), **[`../domain/engagement.md`](../domain/engagement.md)** (TC-03), **[`../domain/engagement-status.md`](../domain/engagement-status.md)** (TC-04), **[`../domain/documents-compliance.md`](../domain/documents-compliance.md)** (TC-06), **[`../domain/document-alerts.md`](../domain/document-alerts.md)** (TC-07), **[`../domain/document-verification.md`](../domain/document-verification.md)** (TC-08).
 
 ---
 
@@ -65,6 +65,13 @@ This register tracks product and modeling decisions for TeamCORE. Not every item
 | TC-07-D08 | Default evaluator `as_of_date` is `Date.current` | 2 |
 | TC-07-D09 | Deterministic alert sort order (severity, type, expires_on, type code) | 2 |
 | TC-07-D10 | Engagement detail evaluates all statuses; alert index defaults non-terminal engagements | 2 |
+| TC-08-D01 | Verification field naming — keep **`verified_*`**; rejects use reviewer actor/date (**TC-08**) | 2 |
+| TC-08-D02 | **`rejection_reason`** required when **`status = rejected`** | 2 |
+| TC-08-D03 | Void MVP — no **`voided_*`** columns; optional notes; TC-30 for durable void audit | 2 |
+| TC-08-D04 | No **`rejected` → `submitted`** in-place; new **`DocumentRecord`** for correction | 2 |
+| TC-08-D05 | Verification authorization — MVP coarse verifier gate; TC-29 matrix later | 2 |
+| TC-08-D06 | Pending-review queue is **`DocumentRecord.status = submitted`** (optional **`verification_required`** hint) | 2 |
+| TC-08-D07 | Review **`status`** / review metadata change only via **`Documents::ReviewDocumentRecord`**, not generic CRUD (**TC-08**) | 2 |
 
 
 ### OD-001 — Party vs Team Member
@@ -249,7 +256,7 @@ Compliance — requirement rules, completeness, expirations, readiness signals, 
 - Readiness is a **deterministic signal** derived from configured requirements, document states, verification, expiration rules, and engagement status.
 - **Manual override**, if introduced, must be permission-controlled, reason-coded, and audit-tracked—not the default MVP behavior.
 
-**Follow-up:** Readiness rules backlog for Phase 2; glossary entry. **Document slice (TC-06):** readiness interpretation for configured document requirements lives in **`Documents::ReadinessEvaluator`** per [`../domain/documents-compliance.md`](../domain/documents-compliance.md); full multi-domain activation rules remain Phase 2+. **Virtual document alerts (TC-07)** extend evaluator output (`Documents::ReadinessResult#alerts`); authoritative detail **[`document-alerts.md`](../domain/document-alerts.md)** — **TC-07-D01–D10**.
+**Follow-up:** Readiness rules backlog for Phase 2; glossary entry. **Document slice (TC-06):** readiness interpretation for configured document requirements lives in **`Documents::ReadinessEvaluator`** per [`../domain/documents-compliance.md`](../domain/documents-compliance.md); full multi-domain activation rules remain Phase 2+. **Virtual document alerts (TC-07)** extend evaluator output (`Documents::ReadinessResult#alerts`); authoritative detail **[`document-alerts.md`](../domain/document-alerts.md)** — **TC-07-D01–D10**. **Document verification actions (TC-08)** mutate **`DocumentRecord`** through **`Documents::ReviewDocumentRecord`** only; authoritative detail **[`document-verification.md`](../domain/document-verification.md)** — **TC-08-D01–D07**.
 
 ---
 
@@ -261,6 +268,17 @@ Compliance — requirement rules, completeness, expirations, readiness signals, 
 **Decision (summary):** TC-07 is **read-time alert presentation only** atop **`Documents::ReadinessEvaluator`**: no **`document_alerts`** table (**D01**); severities (**D02**); expiring-soon chain (**D03**); no dismissal/waiver (**D04**); no outbound notifications/jobs (**D05**); alerts only for **`required`** requirements (**D06**); **`Documents::AlertMessageBuilder`** centralizes **`message`** (**D07**); default **`Date.current`** as **`as_of_date`** (**D08**); deterministic sort (**D09**); engagement **show** always evaluates; cross-engagement index defaults **non-terminal** (**D10**).
 
 **Companion:** **[`domain/document-alerts.md`](../domain/document-alerts.md)**
+
+---
+
+### TC-08-D01 … TC-08-D07 — Document verification controls (TC-08)
+
+**Status:** Accepted for TC-08 implementation  
+**Tier:** 2  
+
+**Decision (summary):** Keep **`verified_by_id`**, **`verified_on`**, **`verification_notes`** (**D01**) — rejects record reviewer + timestamp in the same columns. **`rejection_reason`** mandatory for **`rejected`** (**D02**). **`void`** uses **`status`** + notes only — no **`voided_by`** schema in MVP; durable void audit deferred (**D03**, **TC-30**). **Append-only corrections** — forbid **`rejected` → `submitted`** (**D04**). **Verifier gate** MVP = admin + agency scope; fine roles → **TC-29** (**D05**). **Worklist source** **`submitted`** records; optional **`DocumentType#verification_required`** column in queue (**D06**). **TC-08-D07:** **`DocumentRecord`** review status and review-only columns (**verifier IDs/dates**, **`rejection_reason`**, **`verification_notes`**) cannot change via generic **`document_records`** mass assignment (`create`/`update`); only **`Documents::ReviewDocumentRecord`** and explicit **`POST`** review endpoints.
+
+**Companion:** **[`domain/document-verification.md`](../domain/document-verification.md)**
 
 ---
 

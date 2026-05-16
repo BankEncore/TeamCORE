@@ -36,37 +36,36 @@
     <%= f.label :storage_key, class: "block text-sm font-medium text-slate-700 mb-1" %>
     <%= f.text_field :storage_key, class: "w-full border border-slate-300 rounded px-3 py-2" %>
   </div>
-  <div class="mb-3">
-    <%= f.label :status, class: "block text-sm font-medium text-slate-700 mb-1" %>
-    <%= f.select :status, DocumentRecord::STATUSES, {}, class: "w-full border border-slate-300 rounded px-3 py-2" %>
-  </div>
-  <div class="mb-3">
-    <%= f.label :submitted_on, class: "block text-sm font-medium text-slate-700 mb-1" %>
-    <%= f.date_field :submitted_on, class: "w-full border border-slate-300 rounded px-3 py-2" %>
-  </div>
-  <div class="mb-3">
-    <%= f.label :issued_on, class: "block text-sm font-medium text-slate-700 mb-1" %>
-    <%= f.date_field :issued_on, class: "w-full border border-slate-300 rounded px-3 py-2" %>
-  </div>
-  <div class="mb-3">
-    <%= f.label :expires_on, class: "block text-sm font-medium text-slate-700 mb-1" %>
-    <%= f.date_field :expires_on, class: "w-full border border-slate-300 rounded px-3 py-2" %>
-  </div>
-  <div class="mb-3">
-    <%= f.label :verified_by_id, "Verifier (user)", class: "block text-sm font-medium text-slate-700 mb-1" %>
-    <%= f.collection_select :verified_by_id, @users, :id, :email, { include_blank: "—" }, class: "w-full border border-slate-300 rounded px-3 py-2" %>
-  </div>
-  <div class="mb-3">
-    <%= f.label :verified_on, class: "block text-sm font-medium text-slate-700 mb-1" %>
-    <%= f.date_field :verified_on, class: "w-full border border-slate-300 rounded px-3 py-2" %>
-  </div>
-  <div class="mb-3">
-    <%= f.label :verification_notes, class: "block text-sm font-medium text-slate-700 mb-1" %>
-    <%= f.text_area :verification_notes, rows: 2, class: "w-full border border-slate-300 rounded px-3 py-2" %>
-  </div>
-  <div class="mb-3">
-    <%= f.label :rejection_reason, class: "block text-sm font-medium text-slate-700 mb-1" %>
-    <%= f.text_area :rejection_reason, rows: 2, class: "w-full border border-slate-300 rounded px-3 py-2" %>
-  </div>
+
+  <% if @document_record.new_record? || @document_record.status == "submitted" %>
+    <div class="mb-3 rounded border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600 mb-4">
+      New records are created as <code class="font-mono">submitted</code>. Review actions (Verify / Reject / Void) are on the record detail page — not editable here (**TC-08**).
+    </div>
+    <div class="mb-3">
+      <%= f.label :submitted_on, class: "block text-sm font-medium text-slate-700 mb-1" %>
+      <%= f.date_field :submitted_on, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+    </div>
+    <div class="mb-3">
+      <%= f.label :issued_on, class: "block text-sm font-medium text-slate-700 mb-1" %>
+      <%= f.date_field :issued_on, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+    </div>
+    <div class="mb-3">
+      <%= f.label :expires_on, class: "block text-sm font-medium text-slate-700 mb-1" %>
+      <%= f.date_field :expires_on, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+    </div>
+  <% else %>
+    <div class="mb-3 rounded border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900 mb-4">
+      This record has left <code class="font-mono">submitted</code>. You can adjust file metadata and dates only; review status changes use Verify / Reject / Void from the detail page (<code class="font-mono">submitted_on</code> is fixed after submission pipeline).
+    </div>
+    <div class="mb-3">
+      <%= f.label :issued_on, class: "block text-sm font-medium text-slate-700 mb-1" %>
+      <%= f.date_field :issued_on, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+    </div>
+    <div class="mb-3">
+      <%= f.label :expires_on, class: "block text-sm font-medium text-slate-700 mb-1" %>
+      <%= f.date_field :expires_on, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+    </div>
+  <% end %>
+
   <%= f.submit class: "rounded bg-slate-900 text-white px-4 py-2 text-sm cursor-pointer" %>
 <% end %>
