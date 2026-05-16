@@ -33,6 +33,7 @@ module Admin
 
     def new
       @document_record = DocumentRecord.new(agency: current_agency, status: "submitted")
+      assign_document_record_from_query_params!
       load_collections
     end
 
@@ -110,6 +111,21 @@ module Admin
     end
 
     private
+
+    def assign_document_record_from_query_params!
+      if params[:party_id].present?
+        p = Party.where(agency_id: current_agency.id).find_by(id: params[:party_id])
+        @document_record.party_id = p.id if p
+      end
+      if params[:team_member_id].present?
+        tm = TeamMember.where(agency_id: current_agency.id).find_by(id: params[:team_member_id])
+        @document_record.team_member_id = tm.id if tm
+      end
+      if params[:engagement_id].present?
+        e = Engagement.where(agency_id: current_agency.id).find_by(id: params[:engagement_id])
+        @document_record.engagement_id = e.id if e
+      end
+    end
 
     def set_document_record
       @document_record = DocumentRecord.where(agency_id: current_agency.id).find(params[:id])

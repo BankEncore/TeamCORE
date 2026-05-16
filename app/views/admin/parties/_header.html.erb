@@ -1,0 +1,31 @@
+<header class="tc-record-header">
+  <div class="tc-record-header__top">
+    <div>
+      <div class="tc-record-header__eyebrow">Party</div>
+      <h1 class="tc-record-header__title"><%= @party.display_name.presence || "Party ##{@party.id}" %></h1>
+      <p class="tc-record-header__subtitle">
+        <% if @party.external_reference.present? %>
+          External ref: <span class="font-mono text-xs"><%= @party.external_reference %></span>
+        <% else %>
+          Party #<%= @party.id %>
+        <% end %>
+      </p>
+      <div class="tc-record-header__badges">
+        <span class="tc-badge tc-badge--secondary"><%= @party.party_type == "person" ? "Person" : "Organization" %></span>
+        <span class="<%= tc_status_badge_classes(@party.status) %>"><%= @party.status %></span>
+      </div>
+    </div>
+    <div class="tc-record-header__actions flex flex-wrap gap-2">
+      <%= link_to "Edit party", edit_admin_party_path(@party), class: "tc-btn tc-btn--primary" %>
+      <%= link_to "Add contact", new_admin_party_party_contact_method_path(@party), class: "tc-btn tc-btn--secondary" %>
+      <% if @can_source_subcontractor_relationships %>
+        <%= link_to "Add relationship", new_admin_party_party_relationship_path(@party), class: "tc-btn tc-btn--secondary" %>
+      <% end %>
+      <% if @party_eligible_for_new_team_member %>
+        <%= link_to "Create team member", new_admin_team_member_path(party_id: @party.id), class: "tc-btn tc-btn--teal" %>
+      <% elsif @team_member %>
+        <%= link_to "Team360", admin_team_member_team360_path(@team_member), class: "tc-btn tc-btn--teal" %>
+      <% end %>
+    </div>
+  </div>
+</header>

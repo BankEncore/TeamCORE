@@ -36,9 +36,6 @@
       <span class="tc-section-nav__label">Workspace</span>
       <div class="tc-section-nav__links">
         <%= tc_nav_link_to "Dashboard", admin_root_path %>
-        <% if current_agency.present? %>
-          <%= tc_nav_link_to "Team members", admin_team_members_path %>
-        <% end %>
       </div>
     </div>
 
@@ -70,6 +67,7 @@
         <span class="tc-section-nav__label">People</span>
         <div class="tc-section-nav__links">
           <%= tc_nav_link_to "Parties", admin_parties_path %>
+          <%= tc_nav_link_to "Team members", admin_team_members_path %>
           <%= tc_nav_link_to "Engagements", admin_engagements_path %>
         </div>
       </div>

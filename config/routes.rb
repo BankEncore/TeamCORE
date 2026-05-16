@@ -17,6 +17,7 @@ Rails.application.routes.draw do
     resources :teams, only: %i[index show new create edit update]
 
     resources :parties, only: %i[index show edit update] do
+      resources :party_contact_methods, only: %i[new create edit update]
       resources :party_relationships, only: %i[index new create edit update] do
         member do
           post :promote

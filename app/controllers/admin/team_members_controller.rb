@@ -24,6 +24,11 @@ module Admin
     def new
       @team_member = TeamMember.new(agency: current_agency)
       load_eligible_parties
+      if params[:party_id].present?
+        pid = params[:party_id].to_i
+        party = @eligible_parties.find { |p| p.id == pid }
+        @team_member.party_id = party.id if party
+      end
     end
 
     def create

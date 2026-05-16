@@ -1,5 +1,9 @@
 <% content_for :title, "New team member — TeamCORE Admin" %>
 <h1 class="text-2xl font-semibold mb-4">New team member</h1>
+<p class="text-sm text-slate-600 mb-4 max-w-2xl">
+  A <strong>team member</strong> links an existing <%= link_to "party", admin_parties_path, class: "text-sky-700 underline" %>
+  (identity) to this agency’s workforce operations — engagements, documents, Team360, and settlement.
+</p>
 <%= render "shared/errors", model: @team_member %>
 <% if @eligible_parties.empty? %>
   <p class="text-slate-600 mb-4">No eligible parties (complete identity, not yet a team member). <%= link_to "Create a person party", admin_new_person_party_path, class: "text-sky-700 underline" %> or <%= link_to "organization party", admin_new_organization_party_path, class: "text-sky-700 underline" %>.</p>
@@ -7,7 +11,9 @@
 <%= form_with model: [:admin, @team_member], data: { turbo: false } do |f| %>
   <div class="mb-4">
     <%= f.label :party_id, "Party", class: "block text-sm font-medium text-slate-700 mb-1" %>
-    <%= f.collection_select :party_id, @eligible_parties, :id, :display_name, { prompt: "Select party…" }, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+    <%= f.collection_select :party_id, @eligible_parties, :id, :display_name,
+          { prompt: "Select party…", selected: @team_member.party_id },
+          class: "w-full border border-slate-300 rounded px-3 py-2" %>
   </div>
   <div class="mb-3">
     <%= f.label :team_member_number, class: "block text-sm font-medium text-slate-700 mb-1" %>
@@ -15,7 +21,7 @@
   </div>
   <div class="mb-4">
     <%= f.label :status, class: "block text-sm font-medium text-slate-700 mb-1" %>
-    <%= f.select :status, LifecycleStatusable::STATUSES, {}, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+    <%= f.select :status, LifecycleStatusable::STATUSES.map { |s| [ s.humanize, s ] }, {}, class: "w-full border border-slate-300 rounded px-3 py-2" %>
   </div>
   <%= f.submit "Create", class: "rounded bg-slate-900 text-white px-4 py-2 text-sm cursor-pointer" %>
 <% end %>

@@ -2,105 +2,18 @@
 <div class="tc-page-stack">
   <p class="text-sm"><%= link_to "← Parties", admin_parties_path, class: tc_link_classes %></p>
 
-  <header class="tc-record-header">
-    <div class="tc-record-header__top">
-      <div>
-        <div class="tc-record-header__eyebrow">Party</div>
-        <h1 class="tc-record-header__title"><%= @party.display_name.presence || "Party ##{@party.id}" %></h1>
-        <p class="tc-record-header__subtitle">Party #<%= @party.id %></p>
-        <div class="tc-record-header__badges">
-          <span class="tc-badge tc-badge--secondary"><%= @party.party_type %></span>
-          <span class="<%= tc_status_badge_classes(@party.status) %>"><%= @party.status %></span>
-        </div>
-      </div>
-      <div class="tc-record-header__actions">
-        <%= link_to "Edit", edit_admin_party_path(@party), class: "tc-btn tc-btn--primary" %>
-      </div>
-    </div>
-  </header>
+  <%= render "admin/parties/header" %>
 
   <div class="tc-record-layout">
-    <section class="tc-record-main">
-      <section class="tc-panel">
-        <div class="tc-panel__header">
-          <div class="tc-panel__title">Profile</div>
-        </div>
-        <div class="tc-panel__body">
-          <dl class="tc-kv-grid">
-            <% if @party.external_reference.present? %>
-              <div class="tc-kv">
-                <dt class="tc-kv__key">External ref</dt>
-                <dd class="tc-kv__value"><%= @party.external_reference %></dd>
-              </div>
-            <% end %>
-            <% if @party.person? && @party.person_profile %>
-              <div class="tc-kv">
-                <dt class="tc-kv__key">Person</dt>
-                <dd class="tc-kv__value"><%= [@party.person_profile.first_name, @party.person_profile.last_name].compact.join(" ") %></dd>
-              </div>
-            <% elsif @party.organization? && @party.organization_profile %>
-              <div class="tc-kv">
-                <dt class="tc-kv__key">Organization</dt>
-                <dd class="tc-kv__value"><%= @party.organization_profile.trade_name.presence || @party.organization_profile.legal_name %></dd>
-              </div>
-            <% end %>
-          </dl>
-        </div>
-      </section>
-
-      <% if @can_source_subcontractor_relationships %>
-        <section class="tc-panel">
-          <div class="tc-panel__header">
-            <div class="flex flex-wrap items-start justify-between gap-2">
-              <div class="tc-panel__title"><%= outbound_subcontractors_panel_title(@party) %></div>
-              <%= link_to "Manage", admin_party_party_relationships_path(@party), class: tc_link_classes %>
-            </div>
-          </div>
-          <div class="tc-panel__body">
-            <% if @outgoing_subcontractors.empty? %>
-              <p class="text-sm" style="color: var(--tc-text-muted);">No outbound subcontractor relationships.</p>
-            <% else %>
-              <ul class="m-0 list-none space-y-2 p-0 text-sm">
-                <% @outgoing_subcontractors.each do |rel| %>
-                  <li>
-                    <span class="font-mono text-xs" style="color: var(--tc-text-muted);">source → target</span>
-                    <%= @party.display_name %> → <%= rel.target_party.display_name.presence || "Party ##{rel.target_party_id}" %>
-                    · <span class="<%= tc_status_badge_classes(rel.status) %>"><%= rel.status %></span>
-                    <% if rel.effective_start_date || rel.effective_end_date %>
-                      · <%= rel.effective_start_date || "—" %> — <%= rel.effective_end_date || "—" %>
-                    <% end %>
-                    · <%= subcontractor_workforce_tier_label(rel.target_party, current_agency) %>
-                  </li>
-                <% end %>
-              </ul>
-            <% end %>
-          </div>
-        </section>
-      <% end %>
-
-      <section class="tc-panel">
-        <div class="tc-panel__header">
-          <div class="tc-panel__title">Subcontractor relationships (incoming)</div>
-        </div>
-        <div class="tc-panel__body">
-          <% if @incoming_subcontractors.empty? %>
-            <p class="text-sm" style="color: var(--tc-text-muted);">No incoming subcontractor relationships.</p>
-          <% else %>
-            <ul class="m-0 list-none space-y-2 p-0 text-sm">
-              <% @incoming_subcontractors.each do |rel| %>
-                <li>
-                  <span class="font-mono text-xs" style="color: var(--tc-text-muted);">source → target</span>
-                  <%= rel.source_party.display_name.presence || "Party ##{rel.source_party_id}" %> → <%= @party.display_name %>
-                  · <span class="<%= tc_status_badge_classes(rel.status) %>"><%= rel.status %></span>
-                  <% if rel.subcontractor_person_source_stale_for_display? %>
-                    <span class="tc-badge tc-badge--pending mt-1 inline-block">Source stale</span>
-                  <% end %>
-                </li>
-              <% end %>
-            </ul>
-          <% end %>
-        </div>
-      </section>
+    <section class="tc-record-main space-y-6">
+      <div class="grid gap-6 lg:grid-cols-2">
+        <%= render "admin/parties/identity_panel" %>
+        <%= render "admin/parties/contact_methods_panel" %>
+      </div>
+      <%= render "admin/parties/workforce_panel" %>
+      <%= render "admin/parties/engagements_panel" %>
+      <%= render "admin/parties/relationships_panel" %>
+      <%= render "admin/parties/documents_panel" %>
     </section>
 
     <aside class="tc-record-context tc-record-context--sticky">

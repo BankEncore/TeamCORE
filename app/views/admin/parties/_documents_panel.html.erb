@@ -1,0 +1,62 @@
+<section class="tc-panel">
+  <div class="tc-panel__header">
+    <div class="flex flex-wrap items-start justify-between gap-2">
+      <div class="tc-panel__title">Documents tagged to this party</div>
+      <% if @team_member %>
+        <%= link_to "Add document", new_admin_document_record_path(@document_new_params), class: tc_link_classes %>
+      <% end %>
+    </div>
+  </div>
+  <div class="tc-panel__body">
+    <p class="text-xs mb-3" style="color: var(--tc-text-muted);">
+      Records listed here have this party’s id for reference. Document records still require a team member and/or engagement to create.
+      Engagement readiness appears on
+      <% if @team_member %>
+        <%= link_to "Team360", admin_team_member_team360_path(@team_member), class: tc_link_classes %>
+      <% else %>
+        Team360 (after you create a team member)
+      <% end %>
+      and engagement pages — this panel does not evaluate compliance.
+    </p>
+    <% unless @team_member %>
+      <p class="text-sm mb-2" style="color: var(--tc-text-muted);">
+        Create a team member to add document records with this party pre-filled.
+      </p>
+    <% end %>
+    <% if @document_records.empty? %>
+      <p class="text-sm" style="color: var(--tc-text-muted);">
+        No document records are tagged directly to this party. Engagement readiness and required documents are shown on Team360 and Engagement pages.
+      </p>
+    <% else %>
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-sm border-collapse">
+          <thead>
+            <tr class="border-b border-slate-200 text-left text-xs uppercase tracking-wide" style="color: var(--tc-text-muted);">
+              <th class="py-2 pr-3">Type</th>
+              <th class="py-2 pr-3">Display name</th>
+              <th class="py-2 pr-3">Status</th>
+              <th class="py-2 pr-3">Submitted</th>
+              <th class="py-2 pr-3">Expires</th>
+              <th class="py-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @document_records.each do |dr| %>
+              <tr class="border-b border-slate-100">
+                <td class="py-2 pr-3"><%= dr.document_type&.name || "—" %></td>
+                <td class="py-2 pr-3"><%= dr.display_name.presence || "—" %></td>
+                <td class="py-2 pr-3"><span class="<%= tc_status_badge_classes(dr.status) %>"><%= dr.status %></span></td>
+                <td class="py-2 pr-3"><%= dr.submitted_on || "—" %></td>
+                <td class="py-2 pr-3"><%= dr.expires_on || "—" %></td>
+                <td class="py-2"><%= link_to "View", admin_document_record_path(dr), class: tc_link_classes %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+      <p class="text-sm mt-3">
+        <%= link_to "All document records", admin_document_records_path, class: tc_link_classes %>
+      </p>
+    <% end %>
+  </div>
+</section>

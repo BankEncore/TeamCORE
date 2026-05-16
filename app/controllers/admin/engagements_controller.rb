@@ -55,7 +55,11 @@ module Admin
 
     def new
       @engagement = Engagement.new(agency: current_agency)
-      @relationship_types = Engagement::RELATIONSHIP_TYPES
+      if params[:team_member_id].present?
+        tm = TeamMember.where(agency_id: current_agency.id).find_by(id: params[:team_member_id])
+        @engagement.team_member = tm if tm
+      end
+      @relationship_types = relationship_types_for(@engagement.team_member&.party)
       load_form_collections
     end
 

@@ -8,7 +8,8 @@
             options_from_collection_for_select(
               @team_members,
               :id,
-              ->(tm) { "#{tm.party.display_name} · TM #{tm.id}" }
+              ->(tm) { "#{tm.party.display_name} · TM #{tm.id}" },
+              @engagement.team_member_id
             ),
             { prompt: "Select team member…" },
             class: "w-full border border-slate-300 rounded px-3 py-2" %>

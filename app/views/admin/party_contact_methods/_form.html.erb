@@ -1,0 +1,46 @@
+<%= render "shared/errors", model: @party_contact_method %>
+<%= form_with model: [:admin, @party, @party_contact_method], data: { turbo: false } do |f| %>
+  <div class="mb-4">
+    <%= f.label :contact_type, class: "block text-sm font-medium text-slate-700 mb-1" %>
+    <%= f.select :contact_type,
+          PartyContactMethod::CONTACT_TYPES.map { |t| [ t.humanize, t ] },
+          {},
+          class: "w-full border border-slate-300 rounded px-3 py-2" %>
+  </div>
+
+  <div class="mb-4">
+    <%= f.label :value, class: "block text-sm font-medium text-slate-700 mb-1" %>
+    <% case @party_contact_method.contact_type %>
+    <% when "email" %>
+      <%= f.email_field :value, class: "w-full border border-slate-300 rounded px-3 py-2", autocomplete: "email" %>
+    <% when "phone" %>
+      <%= f.telephone_field :value, class: "w-full border border-slate-300 rounded px-3 py-2", autocomplete: "tel" %>
+    <% else %>
+      <%= f.text_field :value, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+    <% end %>
+    <p class="text-xs text-slate-500 mt-1">Choose Email or Phone above for a friendlier input field.</p>
+  </div>
+
+  <div class="mb-4">
+    <%= f.label :label, class: "block text-sm font-medium text-slate-700 mb-1" %>
+    <%= f.text_field :label, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+  </div>
+
+  <div class="mb-4">
+    <%= f.label :status, class: "block text-sm font-medium text-slate-700 mb-1" %>
+    <%= f.select :status,
+          LifecycleStatusable::STATUSES.map { |s| [ s.humanize, s ] },
+          {},
+          class: "w-full border border-slate-300 rounded px-3 py-2" %>
+  </div>
+
+  <div class="mb-4">
+    <label class="flex items-center gap-2 text-sm">
+      <%= f.check_box :is_primary %>
+      <span>Primary for this contact type</span>
+    </label>
+    <p class="text-xs text-slate-500 mt-1">When checked and status is Active, any other active primary for this type is cleared.</p>
+  </div>
+
+  <%= f.submit class: "rounded bg-slate-900 text-white px-4 py-2 text-sm cursor-pointer" %>
+<% end %>

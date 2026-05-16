@@ -1,0 +1,62 @@
+<section class="tc-panel">
+  <div class="tc-panel__header">
+    <div class="tc-panel__title">Subcontractor relationships</div>
+  </div>
+  <div class="tc-panel__body space-y-6">
+    <div>
+      <div class="flex flex-wrap items-start justify-between gap-2 mb-2">
+        <h3 class="text-sm font-semibold m-0"><%= outbound_subcontractors_panel_title(@party) %></h3>
+        <% if @can_source_subcontractor_relationships %>
+          <%= link_to "Manage", admin_party_party_relationships_path(@party), class: tc_link_classes %>
+        <% end %>
+      </div>
+      <% if @outgoing_subcontractors.empty? %>
+        <p class="text-sm m-0" style="color: var(--tc-text-muted);">No outbound subcontractor relationships.</p>
+        <% if @can_source_subcontractor_relationships %>
+          <p class="text-sm mt-2"><%= link_to "Add relationship", new_admin_party_party_relationship_path(@party), class: tc_link_classes %></p>
+        <% end %>
+      <% else %>
+        <ul class="m-0 list-none space-y-3 p-0 text-sm">
+          <% @outgoing_subcontractors.each do |rel| %>
+            <li class="border border-slate-100 rounded p-2">
+              <div>
+                <%= @party.display_name %> → <%= rel.target_party.display_name.presence || "Party ##{rel.target_party_id}" %>
+                · <span class="<%= tc_status_badge_classes(rel.status) %>"><%= rel.status %></span>
+                <% if rel.effective_start_date || rel.effective_end_date %>
+                  · <%= rel.effective_start_date || "—" %> — <%= rel.effective_end_date || "—" %>
+                <% end %>
+                · <%= subcontractor_workforce_tier_label(rel.target_party, current_agency) %>
+              </div>
+              <div class="mt-2 flex flex-wrap gap-x-3 gap-y-1">
+                <%= link_to "Edit", edit_admin_party_party_relationship_path(@party, rel), class: tc_link_classes %>
+                <%= button_to "Promote", promote_admin_party_party_relationship_path(@party, rel), method: :post, class: "tc-btn tc-btn--secondary tc-btn--sm", form: { class: "inline", data: { turbo: false } } %>
+              </div>
+            </li>
+          <% end %>
+        </ul>
+      <% end %>
+    </div>
+
+    <div>
+      <h3 class="text-sm font-semibold mb-2">Incoming (this party as subcontractor target)</h3>
+      <% if @incoming_subcontractors.empty? %>
+        <p class="text-sm m-0" style="color: var(--tc-text-muted);">No incoming subcontractor relationships.</p>
+      <% else %>
+        <ul class="m-0 list-none space-y-2 p-0 text-sm">
+          <% @incoming_subcontractors.each do |rel| %>
+            <li>
+              <%= rel.source_party.display_name.presence || "Party ##{rel.source_party_id}" %> → <%= @party.display_name %>
+              · <span class="<%= tc_status_badge_classes(rel.status) %>"><%= rel.status %></span>
+              <% if rel.subcontractor_person_source_stale_for_display? %>
+                <span class="tc-badge tc-badge--pending mt-1 inline-block">Source stale</span>
+              <% end %>
+              <span class="block mt-1">
+                <%= link_to "View relationship", edit_admin_party_party_relationship_path(rel.source_party, rel), class: tc_link_classes %>
+              </span>
+            </li>
+          <% end %>
+        </ul>
+      <% end %>
+    </div>
+  </div>
+</section>

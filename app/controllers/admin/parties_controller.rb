@@ -21,6 +21,20 @@ module Admin
           .includes(:source_party)
           .order(:id)
       @can_source_subcontractor_relationships = @party.subcontractor_source_contractor_capable_for_agency?(current_agency)
+
+      @team_member = TeamMember.find_by(agency_id: current_agency.id, party_id: @party.id)
+      @party_eligible_for_new_team_member = @party.identity_complete? && @team_member.nil?
+      @engagements = @team_member ? @team_member.engagements.order(:id).to_a : []
+      @contact_methods = @party.party_contact_methods.order(:contact_type, :id).to_a
+      @document_records =
+        @party
+          .document_records
+          .where(agency_id: current_agency.id)
+          .includes(:document_type)
+          .order(id: :desc)
+          .limit(10)
+          .to_a
+      @document_new_params = document_new_query_params
     end
 
     def new_person
@@ -29,7 +43,9 @@ module Admin
     end
 
     def create_person
-      @party = Party.new(party_base_params.merge(agency: current_agency, party_type: "person"))
+      attrs = party_base_params.merge(agency: current_agency, party_type: "person")
+      attrs[:status] = attrs[:status].presence || "active"
+      @party = Party.new(attrs)
       @party.build_person_profile(person_profile_params)
       if @party.save
         redirect_to admin_party_path(@party), notice: "Person party created."
@@ -44,7 +60,9 @@ module Admin
     end
 
     def create_organization
-      @party = Party.new(party_base_params.merge(agency: current_agency, party_type: "organization"))
+      attrs = party_base_params.merge(agency: current_agency, party_type: "organization")
+      attrs[:status] = attrs[:status].presence || "active"
+      @party = Party.new(attrs)
       @party.build_organization_profile(organization_profile_params)
       if @party.save
         redirect_to admin_party_path(@party), notice: "Organization party created."
@@ -69,7 +87,20 @@ module Admin
     private
 
     def set_party
-      @party = Party.where(agency_id: current_agency.id).find(params[:id])
+      scope = Party.where(agency_id: current_agency.id)
+      if action_name == "show"
+        scope = scope.includes(:person_profile, :organization_profile, :party_contact_methods)
+      end
+      @party = scope.find(params[:id])
+    end
+
+    def document_new_query_params
+      h = { party_id: @party.id }
+      if @team_member
+        h[:team_member_id] = @team_member.id
+        h[:engagement_id] = @engagements.first.id if @engagements.one?
+      end
+      h
     end
 
     def party_base_params

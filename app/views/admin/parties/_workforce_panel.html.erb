@@ -1,0 +1,39 @@
+<section class="tc-panel">
+  <div class="tc-panel__header">
+    <div class="tc-panel__title">Workforce participation</div>
+  </div>
+  <div class="tc-panel__body">
+    <% if @team_member %>
+      <dl class="tc-kv-grid mb-4">
+        <div class="tc-kv">
+          <dt class="tc-kv__key">Team member</dt>
+          <dd class="tc-kv__value">
+            <%= link_to "TM ##{@team_member.id}", admin_team_member_path(@team_member), class: tc_link_classes %>
+            <% if @team_member.team_member_number.present? %>
+              · <span class="font-mono text-xs"><%= @team_member.team_member_number %></span>
+            <% end %>
+          </dd>
+        </div>
+        <div class="tc-kv">
+          <dt class="tc-kv__key">Status</dt>
+          <dd class="tc-kv__value"><span class="<%= tc_status_badge_classes(@team_member.status) %>"><%= @team_member.status %></span></dd>
+        </div>
+      </dl>
+      <div class="flex flex-wrap gap-2">
+        <%= link_to "Team360", admin_team_member_team360_path(@team_member), class: "tc-btn tc-btn--teal tc-btn--sm" %>
+        <%= link_to "Edit team member", edit_admin_team_member_path(@team_member), class: "tc-btn tc-btn--secondary tc-btn--sm" %>
+      </div>
+    <% else %>
+      <p class="text-sm mb-3" style="color: var(--tc-text-muted);">
+        This party is not currently a Team Member. Create a Team Member when this person or organization should participate in workforce operations, engagements, documents, Team360, or settlement workflows.
+      </p>
+      <% if @party_eligible_for_new_team_member %>
+        <%= link_to "Create team member", new_admin_team_member_path(party_id: @party.id), class: "tc-btn tc-btn--primary tc-btn--sm" %>
+      <% else %>
+        <p class="text-sm" style="color: var(--tc-text-muted);">
+          Complete the party profile before creating a team member.
+        </p>
+      <% end %>
+    <% end %>
+  </div>
+</section>
