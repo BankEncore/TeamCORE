@@ -1,0 +1,70 @@
+/* app/assets/stylesheets/teamcore/04_tables.css */
+
+@layer components {
+    .tc-table-wrap {
+      @apply w-full overflow-x-auto rounded-xl border bg-white;
+      border-color: var(--tc-border);
+    }
+  
+    .tc-data-table {
+      @apply min-w-full divide-y text-sm;
+      divide-color: var(--tc-border);
+    }
+  
+    .tc-data-table thead {
+      background: var(--tc-neutral-bg);
+    }
+  
+    .tc-data-table th {
+      @apply whitespace-nowrap px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide;
+      color: var(--tc-text-muted);
+    }
+  
+    .tc-data-table td {
+      @apply whitespace-nowrap px-3 py-2 align-middle;
+      color: var(--tc-text);
+    }
+  
+    .tc-data-table tbody {
+      @apply divide-y;
+      divide-color: var(--tc-border);
+    }
+  
+    .tc-data-table tbody tr:hover {
+      background: color-mix(in srgb, var(--tc-secondary-soft) 36%, white);
+    }
+  
+    .tc-data-table__cell-muted {
+      color: var(--tc-text-muted);
+    }
+  
+    .tc-data-table__cell-actions {
+      @apply text-right;
+    }
+  
+    .tc-data-table__number {
+      @apply text-right tabular-nums;
+    }
+  
+    .tc-data-table__primary {
+      @apply font-medium;
+      color: var(--tc-text);
+    }
+  
+    .tc-data-table__secondary {
+      @apply mt-0.5 text-xs;
+      color: var(--tc-text-muted);
+    }
+  
+    .tc-row--warning {
+      background: color-mix(in srgb, var(--tc-warning-bg) 70%, white);
+    }
+  
+    .tc-row--danger {
+      background: color-mix(in srgb, var(--tc-danger-bg) 76%, white);
+    }
+  
+    .tc-row--success {
+      background: color-mix(in srgb, var(--tc-success-bg) 64%, white);
+    }
+  }

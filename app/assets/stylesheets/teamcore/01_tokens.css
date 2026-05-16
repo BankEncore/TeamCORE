@@ -1,0 +1,59 @@
+/* app/assets/stylesheets/teamcore/01_tokens.css */
+
+@layer base {
+    :root {
+      /* Brand / structural palette */
+      --tc-primary: #0f294a;
+      --tc-primary-dark: #071a30;
+      --tc-secondary: #007c89;
+      --tc-secondary-soft: #ddf4f3;
+      --tc-accent: #d97745;
+      --tc-accent-soft: #fff4ec;
+  
+      /* Neutral palette */
+      --tc-text: #1e293b;
+      --tc-text-muted: #64748b;
+      --tc-text-subtle: #94a3b8;
+      --tc-bg: #f8fafc;
+      --tc-surface: #ffffff;
+      --tc-surface-muted: #f1f5f9;
+      --tc-border: #e2e8f0;
+      --tc-border-strong: #cbd5e1;
+  
+      /* Semantic palette */
+      --tc-success: #059669;
+      --tc-success-bg: #ecfdf5;
+      --tc-success-border: #a7f3d0;
+  
+      --tc-warning: #d97706;
+      --tc-warning-bg: #fffbeb;
+      --tc-warning-border: #fde68a;
+  
+      --tc-danger: #dc2626;
+      --tc-danger-bg: #fef2f2;
+      --tc-danger-border: #fecaca;
+  
+      --tc-info: #2563eb;
+      --tc-info-bg: #eff6ff;
+      --tc-info-border: #bfdbfe;
+  
+      --tc-neutral: #64748b;
+      --tc-neutral-bg: #f8fafc;
+      --tc-neutral-border: #cbd5e1;
+  
+      /* Shape */
+      --tc-radius-sm: 0.375rem;
+      --tc-radius-md: 0.5rem;
+      --tc-radius-lg: 0.75rem;
+      --tc-radius-xl: 1rem;
+  
+      /* Shadows */
+      --tc-shadow-sm: 0 1px 2px rgb(15 41 74 / 0.06);
+      --tc-shadow-md: 0 8px 24px rgb(15 41 74 / 0.08);
+  
+      /* Layout */
+      --tc-page-max-width: 88rem;
+      --tc-context-width: 22rem;
+    }
+  }
+  

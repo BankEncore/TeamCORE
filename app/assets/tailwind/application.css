@@ -1,1 +1,12 @@
 @import "tailwindcss";
+/*
+  TeamCORE design layer.
+  Keep these imports after Tailwind so TeamCORE classes can use @apply.
+*/
+
+@import "./teamcore/01_tokens.css";
+@import "./teamcore/02_base.css";
+@import "./teamcore/03_components.css";
+@import "./teamcore/04_tables.css";
+@import "./teamcore/05_forms.css";
+@import "./teamcore/06_workspaces.css";

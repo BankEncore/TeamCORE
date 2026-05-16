@@ -1,0 +1,118 @@
+/* app/assets/stylesheets/teamcore/06_workspaces.css */
+
+@layer components {
+    /*
+      General workspace shell
+    */
+  
+    .tc-workspace {
+      @apply min-h-screen;
+      background: var(--tc-bg);
+    }
+  
+    .tc-workspace__body {
+      @apply mx-auto w-full px-4 py-6 sm:px-6 lg:px-8;
+      max-width: var(--tc-page-max-width);
+    }
+  
+    /*
+      Two-column record layout:
+      left = authoritative story
+      right = context / alerts
+    */
+  
+    .tc-record-layout {
+      @apply grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_22rem];
+    }
+  
+    .tc-record-main {
+      @apply min-w-0 space-y-5;
+    }
+  
+    .tc-record-context {
+      @apply min-w-0 space-y-5;
+    }
+  
+    @media (min-width: 1024px) {
+      .tc-record-context--sticky {
+        @apply sticky top-5 self-start;
+      }
+    }
+  
+    /*
+      Team360-specific aliases.
+      These let Team360 markup read clearly without forking the design language.
+    */
+  
+    .tc-team360 {
+      @apply space-y-5;
+    }
+  
+    .tc-team360__summary-grid {
+      @apply grid grid-cols-1 gap-5 md:grid-cols-2;
+    }
+  
+    .tc-team360__readiness-score {
+      @apply flex items-start justify-between gap-4;
+    }
+  
+    .tc-team360__readiness-label {
+      @apply text-sm font-medium;
+      color: var(--tc-text-muted);
+    }
+  
+    .tc-team360__readiness-value {
+      @apply mt-1 text-2xl font-semibold tracking-tight;
+      color: var(--tc-text);
+    }
+  
+    .tc-team360__metric-row {
+      @apply mt-4 grid grid-cols-3 gap-3;
+    }
+  
+    .tc-team360__metric {
+      @apply rounded-lg border p-3 text-center;
+      border-color: var(--tc-border);
+      background: var(--tc-neutral-bg);
+    }
+  
+    .tc-team360__metric-value {
+      @apply text-lg font-semibold tabular-nums;
+      color: var(--tc-text);
+    }
+  
+    .tc-team360__metric-label {
+      @apply mt-0.5 text-xs;
+      color: var(--tc-text-muted);
+    }
+  
+    /*
+      Optional left navigation layout for later.
+    */
+  
+    .tc-sidebar-layout {
+      @apply grid grid-cols-1 gap-5 lg:grid-cols-[16rem_minmax(0,1fr)];
+    }
+  
+    .tc-side-nav {
+      @apply rounded-xl border bg-white p-2 shadow-sm;
+      border-color: var(--tc-border);
+    }
+  
+    .tc-side-nav__link {
+      @apply block rounded-md px-3 py-2 text-sm font-medium;
+      color: var(--tc-text-muted);
+    }
+  
+    .tc-side-nav__link:hover {
+      color: var(--tc-primary);
+      background: var(--tc-neutral-bg);
+      text-decoration: none;
+    }
+  
+    .tc-side-nav__link[aria-current="page"],
+    .tc-side-nav__link--active {
+      color: var(--tc-secondary);
+      background: var(--tc-secondary-soft);
+    }
+  }

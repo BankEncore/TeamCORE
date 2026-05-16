@@ -1,0 +1,44 @@
+/* app/assets/stylesheets/teamcore/02_base.css */
+
+@layer base {
+    html {
+      color: var(--tc-text);
+      background: var(--tc-bg);
+    }
+  
+    body {
+      @apply antialiased;
+      color: var(--tc-text);
+      background: var(--tc-bg);
+      font-family:
+        Inter,
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+    }
+  
+    a {
+      color: var(--tc-secondary);
+      text-decoration: none;
+    }
+  
+    a:hover {
+      color: var(--tc-primary);
+      text-decoration: underline;
+      text-underline-offset: 0.18em;
+    }
+  
+    :focus-visible {
+      outline: 2px solid color-mix(in srgb, var(--tc-secondary) 80%, white);
+      outline-offset: 2px;
+    }
+  
+    ::selection {
+      color: var(--tc-primary-dark);
+      background: var(--tc-secondary-soft);
+    }
+  }
+  

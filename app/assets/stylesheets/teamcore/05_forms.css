@@ -1,0 +1,87 @@
+/* app/assets/stylesheets/teamcore/05_forms.css */
+
+@layer components {
+    .tc-form {
+      @apply space-y-6;
+    }
+  
+    .tc-form-section {
+      @apply rounded-xl border bg-white p-4 shadow-sm;
+      border-color: var(--tc-border);
+      box-shadow: var(--tc-shadow-sm);
+    }
+  
+    .tc-form-section__header {
+      @apply mb-4 border-b pb-3;
+      border-color: var(--tc-border);
+    }
+  
+    .tc-form-section__title {
+      @apply text-sm font-semibold;
+      color: var(--tc-text);
+    }
+  
+    .tc-form-section__description {
+      @apply mt-1 text-sm;
+      color: var(--tc-text-muted);
+    }
+  
+    .tc-form-grid {
+      @apply grid grid-cols-1 gap-4 sm:grid-cols-2;
+    }
+  
+    .tc-field {
+      @apply space-y-1;
+    }
+  
+    .tc-label {
+      @apply block text-sm font-medium;
+      color: var(--tc-text);
+    }
+  
+    .tc-hint {
+      @apply text-xs;
+      color: var(--tc-text-muted);
+    }
+  
+    .tc-input,
+    .tc-select,
+    .tc-textarea {
+      @apply block w-full rounded-md border px-3 py-2 text-sm shadow-sm;
+      color: var(--tc-text);
+      background: white;
+      border-color: var(--tc-border-strong);
+    }
+  
+    .tc-input:focus,
+    .tc-select:focus,
+    .tc-textarea:focus {
+      border-color: var(--tc-secondary);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--tc-secondary) 18%, transparent);
+      outline: none;
+    }
+  
+    .tc-input[disabled],
+    .tc-select[disabled],
+    .tc-textarea[disabled] {
+      @apply cursor-not-allowed;
+      color: var(--tc-text-muted);
+      background: var(--tc-neutral-bg);
+    }
+  
+    .tc-field-error {
+      @apply text-xs font-medium;
+      color: var(--tc-danger);
+    }
+  
+    .tc-input--error,
+    .tc-select--error,
+    .tc-textarea--error {
+      border-color: var(--tc-danger);
+    }
+  
+    .tc-form-actions {
+      @apply flex flex-wrap items-center justify-end gap-2 border-t pt-4;
+      border-color: var(--tc-border);
+    }
+  }
