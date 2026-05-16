@@ -1,0 +1,39 @@
+<%= form_with model: [:admin, engagement, charge], class: "space-y-4 max-w-xl" do |f| %>
+  <% if charge.errors.any? %>
+    <div class="text-red-600 text-sm"><%= charge.errors.full_messages.join(", ") %></div>
+  <% end %>
+  <div class="tc-field">
+    <%= f.label :charge_type, class: "tc-label" %>
+    <%= f.select :charge_type,
+          options_for_select(
+            ContractorCharge.charge_type_select_values(charge.charge_type).map { |t| [ t.humanize, t ] },
+            charge.charge_type
+          ),
+          {},
+          class: "tc-select" %>
+  </div>
+  <div class="tc-field">
+    <%= f.label :status, class: "tc-label" %>
+    <%= f.select :status,
+          options_for_select(ContractorCharge::STATUSES.map { |s| [ s.humanize, s ] }, charge.status),
+          {},
+          class: "tc-select" %>
+  </div>
+  <div class="tc-field">
+    <%= f.label :original_amount_cents, class: "tc-label" %>
+    <%= f.number_field :original_amount_cents, class: "tc-input" %>
+  </div>
+  <div class="tc-field">
+    <%= f.label :open_balance_cents, class: "tc-label" %>
+    <%= f.number_field :open_balance_cents, class: "tc-input" %>
+  </div>
+  <div class="tc-field">
+    <%= f.label :due_on, class: "tc-label" %>
+    <%= f.date_field :due_on, class: "tc-input" %>
+  </div>
+  <div class="tc-field">
+    <%= f.label :description, class: "tc-label" %>
+    <%= f.text_area :description, class: "tc-input", rows: 3 %>
+  </div>
+  <%= f.submit class: "tc-btn tc-btn--primary" %>
+<% end %>

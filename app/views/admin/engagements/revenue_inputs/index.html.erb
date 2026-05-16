@@ -1,0 +1,33 @@
+<% content_for :title, "Revenue inputs" %>
+<div class="tc-page-stack">
+  <p class="text-sm"><%= link_to "← Engagement ##{@engagement.id}", admin_engagement_path(@engagement), class: tc_link_classes %></p>
+  <h1 class="text-2xl font-semibold">Revenue inputs</h1>
+  <%= link_to "New revenue row", new_admin_engagement_revenue_input_path(@engagement), class: "tc-btn tc-btn--primary" %>
+
+  <h2 class="text-sm font-semibold mt-6 mb-2">Import CSV</h2>
+  <%= form_with url: import_csv_admin_engagement_revenue_inputs_path(@engagement), method: :post, multipart: true, class: "flex flex-wrap gap-2 items-end" do %>
+    <%= file_field_tag :csv_file, accept: "text/csv,.csv", class: "text-sm" %>
+    <%= submit_tag "Upload", class: "tc-btn tc-btn--secondary" %>
+  <% end %>
+  <p class="text-xs text-slate-500 mt-1">Headers: period_start_on, period_end_on, commissionable_revenue_cents, optional pay_period_id, gross_sales_cents, source_type, notes</p>
+
+  <div class="tc-table-wrap mt-4">
+    <table class="tc-data-table text-xs">
+      <thead><tr><th>ID</th><th>Period</th><th>Comm. rev ¢</th><th>Source</th><th></th></tr></thead>
+      <tbody>
+        <% @revenue_inputs.each do |r| %>
+          <tr>
+            <td class="font-mono"><%= r.id %></td>
+            <td><%= r.period_start_on %> – <%= r.period_end_on %></td>
+            <td class="font-mono"><%= r.commissionable_revenue_cents %></td>
+            <td class="font-mono"><%= r.source_type %></td>
+            <td>
+              <%= button_to "Calc", calculate_commission_admin_engagement_revenue_input_path(@engagement, r), method: :post, class: "tc-btn tc-btn--quiet text-xs" %>
+              <%= link_to "Edit", edit_admin_engagement_revenue_input_path(@engagement, r), class: tc_link_classes %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

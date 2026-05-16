@@ -56,6 +56,17 @@
 
     <% if current_agency.present? %>
       <div class="tc-section-nav__group">
+        <span class="tc-section-nav__label">Financial</span>
+        <div class="tc-section-nav__links">
+          <%= tc_nav_link_to "Pay periods", admin_pay_periods_path %>
+          <%= tc_nav_link_to "Compensation plans", admin_compensation_plans_path %>
+          <%= tc_nav_link_to "Settlement runs", admin_contractor_settlement_runs_path %>
+        </div>
+      </div>
+    <% end %>
+
+    <% if current_agency.present? %>
+      <div class="tc-section-nav__group">
         <span class="tc-section-nav__label">People</span>
         <div class="tc-section-nav__links">
           <%= tc_nav_link_to "Parties", admin_parties_path %>

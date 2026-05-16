@@ -44,6 +44,13 @@ module Admin
             document_types_by_id: @document_types_by_id
           )
         end
+
+      @phase4_assignment = CompensationPlanAssignment.current_for_engagement(@engagement)
+      @phase4_draw_balance = @engagement.commission_draw_balance if @engagement.allows_employee_commission_draw?
+      @phase4_open_charges =
+        if @engagement.allows_contractor_charges_and_settlement?
+          @engagement.contractor_charges.where(status: %w[open draft]).order(:id).limit(20)
+        end
     end
 
     def new

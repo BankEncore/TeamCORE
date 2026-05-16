@@ -1,0 +1,59 @@
+<% content_for :title, "Settlement run ##{@run.id}" %>
+<div class="tc-page-stack">
+  <%= link_to "← Runs", admin_contractor_settlement_runs_path, class: "text-sm #{tc_link_classes}" %>
+  <h1 class="text-2xl font-semibold">Settlement run #<%= @run.id %></h1>
+  <p class="text-sm font-mono">Status: <%= @run.status %> · <%= @run.period_start_on %> – <%= @run.period_end_on %></p>
+  <% if @run.status.in?(%w[draft calculated]) %>
+    <%= button_to "Finalize", finalize_admin_contractor_settlement_run_path(@run), method: :post, class: "tc-btn tc-btn--primary" %>
+  <% end %>
+
+  <h2 class="text-lg font-semibold mt-6">Lines</h2>
+  <div class="tc-table-wrap">
+    <table class="tc-data-table text-xs">
+      <thead><tr><th>Eng</th><th>Gross</th><th>Charges</th><th>Net</th></tr></thead>
+      <tbody>
+        <% @lines.each do |ln| %>
+          <tr>
+            <td class="font-mono"><%= ln.engagement_id %></td>
+            <td class="font-mono"><%= ln.gross_commission_cents %></td>
+            <td class="font-mono"><%= ln.charge_deductions_cents %></td>
+            <td class="font-mono"><%= ln.net_settlement_cents %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+
+  <% if @run.status == "draft" %>
+    <h2 class="text-lg font-semibold mt-6">Add line (MVP)</h2>
+    <%= form_with url: compose_line_admin_contractor_settlement_run_path(@run), method: :post, class: "space-y-3 max-w-xl" do %>
+      <div class="tc-field">
+        <%= label_tag :engagement_id, "Contractor engagement", class: "tc-label" %>
+        <%= select_tag :engagement_id,
+              options_from_collection_for_select(@contractor_engagements, :id, ->(e) { "##{e.id} #{e.team_member.party.display_name} (#{e.relationship_type})" }),
+              class: "tc-select" %>
+      </div>
+      <div class="tc-field">
+        <%= label_tag :revenue_input_ids, "Revenue input IDs (comma)", class: "tc-label" %>
+        <%= text_field_tag :revenue_input_ids, nil, class: "tc-input" %>
+      </div>
+      <div class="tc-field">
+        <%= label_tag :commission_calculation_ids, "Commission calc IDs (comma, optional)", class: "tc-label" %>
+        <%= text_field_tag :commission_calculation_ids, nil, class: "tc-input" %>
+      </div>
+      <div class="tc-field">
+        <%= label_tag :contractor_charge_ids, "Charge IDs (comma)", class: "tc-label" %>
+        <%= text_field_tag :contractor_charge_ids, nil, class: "tc-input" %>
+      </div>
+      <div class="tc-field">
+        <%= label_tag :manual_positive, "Manual + (cents)", class: "tc-label" %>
+        <%= number_field_tag :manual_positive, 0, class: "tc-input" %>
+      </div>
+      <div class="tc-field">
+        <%= label_tag :manual_negative, "Manual − (cents)", class: "tc-label" %>
+        <%= number_field_tag :manual_negative, 0, class: "tc-input" %>
+      </div>
+      <%= submit_tag "Compose line", class: "tc-btn tc-btn--secondary" %>
+    <% end %>
+  <% end %>
+</div>

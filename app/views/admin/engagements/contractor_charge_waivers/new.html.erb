@@ -1,0 +1,20 @@
+<% content_for :title, "Waive charge" %>
+<div class="tc-page-stack">
+  <p class="text-sm"><%= link_to "← Charge ##{@charge.id}", admin_engagement_contractor_charge_path(@engagement, @charge), class: tc_link_classes %></p>
+  <h1 class="text-2xl font-semibold">Record waiver</h1>
+  <%= form_with model: [:admin, @engagement, @charge, @waiver], class: "space-y-4 max-w-xl" do |f| %>
+    <% if @waiver.errors.any? %>
+      <div class="text-red-600 text-sm"><%= @waiver.errors.full_messages.join(", ") %></div>
+    <% end %>
+    <p class="text-sm">Open balance: <span class="font-mono"><%= @charge.open_balance_cents %></span> c</p>
+    <div class="tc-field">
+      <%= f.label :amount_cents, class: "tc-label" %>
+      <%= f.number_field :amount_cents, class: "tc-input" %>
+    </div>
+    <div class="tc-field">
+      <%= f.label :reason, class: "tc-label" %>
+      <%= f.text_area :reason, class: "tc-input", rows: 3 %>
+    </div>
+    <%= f.submit "Record waiver", class: "tc-btn tc-btn--primary" %>
+  <% end %>
+</div>

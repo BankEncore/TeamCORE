@@ -1,0 +1,7 @@
+<% content_for :title, "Pay period ##{@pay_period.id}" %>
+<div class="tc-page-stack">
+  <%= link_to "← Pay periods", admin_pay_periods_path, class: "text-sm #{tc_link_classes}" %>
+  <h1 class="text-2xl font-semibold">Pay period #<%= @pay_period.id %></h1>
+  <p class="text-sm"><%= @pay_period.start_on %> – <%= @pay_period.end_on %></p>
+  <%= link_to "Edit", edit_admin_pay_period_path(@pay_period), class: "tc-btn tc-btn--secondary" %>
+</div>

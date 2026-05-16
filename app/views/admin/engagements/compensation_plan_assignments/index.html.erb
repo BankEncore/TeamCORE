@@ -1,0 +1,26 @@
+<% content_for :title, "Compensation assignments" %>
+<div class="tc-page-stack">
+  <p class="text-sm"><%= link_to "← Engagement ##{@engagement.id}", admin_engagement_path(@engagement), class: tc_link_classes %></p>
+  <h1 class="text-2xl font-semibold">Compensation plan assignments</h1>
+  <%= link_to "New assignment", new_admin_engagement_compensation_plan_assignment_path(@engagement), class: "tc-btn tc-btn--primary" %>
+  <div class="tc-table-wrap mt-4">
+    <table class="tc-data-table text-xs">
+      <thead><tr><th>ID</th><th>Plan</th><th>Start</th><th>End</th><th>Rate bps</th><th></th></tr></thead>
+      <tbody>
+        <% @assignments.each do |a| %>
+          <tr>
+            <td class="font-mono"><%= a.id %></td>
+            <td><%= a.snapshot_plan_name %></td>
+            <td><%= a.effective_start_on %></td>
+            <td><%= a.effective_end_on || "—" %></td>
+            <td class="font-mono"><%= a.snapshot_commission_rate_bps %></td>
+            <td>
+              <%= link_to "Edit", edit_admin_engagement_compensation_plan_assignment_path(@engagement, a), class: tc_link_classes %>
+              <%= button_to "Remove", admin_engagement_compensation_plan_assignment_path(@engagement, a), method: :delete, class: "tc-btn tc-btn--quiet text-xs" %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

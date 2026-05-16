@@ -59,6 +59,8 @@
         <%= render partial: "contractor_classification_support", locals: { presenter: @contractor_classification_support } %>
       <% end %>
 
+      <%= render "admin/engagements/phase4_financial_panel" %>
+
       <% if @engagement.title.present? || @engagement.notes.present? %>
         <section class="tc-panel">
           <div class="tc-panel__header">
