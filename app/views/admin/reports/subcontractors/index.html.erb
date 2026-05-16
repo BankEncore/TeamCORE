@@ -1,71 +1,87 @@
 <% content_for :title, "Report — Subcontractors" %>
-<div class="mb-4"><%= link_to "← Reports hub", admin_reports_root_path, class: "text-sky-700 text-sm" %></div>
-<h1 class="text-2xl font-semibold mb-4">Subcontractor relationships</h1>
+<div class="tc-page-stack">
+  <header class="tc-page-header">
+    <div>
+      <p class="tc-page-header__eyebrow">Reports</p>
+      <h1 class="tc-page-header__title">Subcontractor relationships</h1>
+    </div>
+    <div class="tc-page-header__actions">
+      <%= link_to "Reports hub", admin_reports_root_path, class: "#{tc_link_classes} text-sm" %>
+    </div>
+  </header>
 
-<%= form_with url: admin_reports_subcontractors_path, method: :get, data: { turbo: false }, class: "tc-panel p-4 mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm" do %>
-  <div>
-    <%= label_tag :source_party_id, "Source party id", class: "block text-xs text-slate-600 mb-1" %>
-    <%= text_field_tag :source_party_id, params[:source_party_id], class: "w-full border rounded px-2 py-1" %>
-  </div>
-  <div>
-    <%= label_tag :target_party_id, "Target party id", class: "block text-xs text-slate-600 mb-1" %>
-    <%= text_field_tag :target_party_id, params[:target_party_id], class: "w-full border rounded px-2 py-1" %>
-  </div>
-  <div>
-    <%= label_tag :relationship_status, "Relationship status", class: "block text-xs text-slate-600 mb-1" %>
-    <%= text_field_tag :relationship_status, params[:relationship_status], class: "w-full border rounded px-2 py-1" %>
-  </div>
-  <div>
-    <%= label_tag :promoted, "Promoted target (workforce)", class: "block text-xs text-slate-600 mb-1" %>
-    <%= select_tag :promoted, options_for_select([["— any —", ""], %w[Yes true], %w[No false]], params[:promoted]), class: "w-full border rounded px-2 py-1" %>
-  </div>
-  <div>
-    <%= label_tag :engagement_status, "Subcontractor engagement status", class: "block text-xs text-slate-600 mb-1" %>
-    <%= select_tag :engagement_status, options_for_select([["— any —", ""]] + Engagement::STATUSES.zip(Engagement::STATUSES), params[:engagement_status]), class: "w-full border rounded px-2 py-1" %>
-  </div>
-  <div class="flex items-end">
-    <%= submit_tag "Apply", class: "tc-btn tc-btn--primary" %>
-  </div>
-<% end %>
+  <%= form_with url: admin_reports_subcontractors_path, method: :get, data: { turbo: false }, class: "tc-form-section tc-form-section--dense mb-6" do %>
+    <div class="tc-form-section__header">
+      <h2 class="tc-form-section__title">Filters</h2>
+    </div>
+    <div class="tc-form-grid tc-form-grid--dense">
+      <div class="tc-field tc-field--compact">
+        <%= label_tag :source_party_id, "Source party id", class: "tc-label" %>
+        <%= text_field_tag :source_party_id, params[:source_party_id], class: "tc-input" %>
+      </div>
+      <div class="tc-field tc-field--compact">
+        <%= label_tag :target_party_id, "Target party id", class: "tc-label" %>
+        <%= text_field_tag :target_party_id, params[:target_party_id], class: "tc-input" %>
+      </div>
+      <div class="tc-field tc-field--compact">
+        <%= label_tag :relationship_status, "Relationship status", class: "tc-label" %>
+        <%= text_field_tag :relationship_status, params[:relationship_status], class: "tc-input" %>
+      </div>
+      <div class="tc-field tc-field--compact">
+        <%= label_tag :promoted, "Promoted target (workforce)", class: "tc-label" %>
+        <%= select_tag :promoted, options_for_select([["— any —", ""], %w[Yes true], %w[No false]], params[:promoted]), class: "tc-select" %>
+      </div>
+      <div class="tc-field tc-field--compact">
+        <%= label_tag :engagement_status, "Subcontractor engagement status", class: "tc-label" %>
+        <%= select_tag :engagement_status, options_for_select([["— any —", ""]] + Engagement::STATUSES.zip(Engagement::STATUSES), params[:engagement_status]), class: "tc-select" %>
+      </div>
+      <div class="tc-field tc-field--compact flex items-end">
+        <%= submit_tag "Apply", class: "tc-btn tc-btn--primary" %>
+      </div>
+    </div>
+  <% end %>
 
-<div class="overflow-x-auto tc-panel">
-  <table class="tc-data-table tc-data-table--compact text-sm min-w-full">
-    <thead>
-      <tr>
-        <th>Rel</th>
-        <th>Source</th>
-        <th>Target</th>
-        <th>Status</th>
-        <th>Promoted</th>
-        <th>Sub eng.</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      <% @rows.each do |row| %>
-        <% rel = row[:rel] %>
-        <% tm = row[:team_member] %>
-        <% se = row[:subcontractor_engagement] %>
+  <div class="tc-table-wrap">
+    <table class="tc-data-table tc-data-table--compact text-sm">
+      <thead>
         <tr>
-          <td class="font-mono"><%= rel.id %></td>
-          <td>
-            <%= link_to rel.source_party.display_name.presence || "Party ##{rel.source_party_id}", admin_party_path(rel.source_party_id), class: "text-sky-700 underline" %>
-          </td>
-          <td>
-            <%= link_to rel.target_party.display_name.presence || "Party ##{rel.target_party_id}", admin_party_path(rel.target_party_id), class: "text-sky-700 underline" %>
-          </td>
-          <td class="font-mono text-xs"><%= rel.status %></td>
-          <td><%= row[:promoted] ? "yes" : "no" %></td>
-          <td class="font-mono text-xs"><%= se&.status || "—" %></td>
-          <td class="whitespace-nowrap">
-            <% if tm %>
-              <%= link_to "Team360", admin_team_member_team360_path(tm), class: "text-sky-700 underline text-xs" %>
-            <% else %>
-              —
-            <% end %>
-          </td>
+          <th>Rel</th>
+          <th>Source</th>
+          <th>Target</th>
+          <th>Status</th>
+          <th>Promoted</th>
+          <th>Sub eng.</th>
+          <th></th>
         </tr>
-      <% end %>
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        <% @rows.each do |row| %>
+          <% rel = row[:rel] %>
+          <% tm = row[:team_member] %>
+          <% se = row[:subcontractor_engagement] %>
+          <tr>
+            <td class="font-mono"><%= rel.id %></td>
+            <td><%= link_to rel.source_party.display_name.presence || "Party ##{rel.source_party_id}", admin_party_path(rel.source_party_id), class: tc_link_classes %></td>
+            <td><%= link_to rel.target_party.display_name.presence || "Party ##{rel.target_party_id}", admin_party_path(rel.target_party_id), class: tc_link_classes %></td>
+            <td><span class="<%= tc_status_badge_classes(rel.status) %>"><%= rel.status %></span></td>
+            <td><%= row[:promoted] ? "yes" : "no" %></td>
+            <td>
+              <% if se %>
+                <span class="<%= tc_status_badge_classes(se.status) %>"><%= se.status %></span>
+              <% else %>
+                —
+              <% end %>
+            </td>
+            <td class="whitespace-nowrap">
+              <% if tm %>
+                <%= link_to "Team360", admin_team_member_team360_path(tm), class: "#{tc_link_classes} text-xs" %>
+              <% else %>
+                —
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
 </div>

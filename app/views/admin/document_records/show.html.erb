@@ -1,65 +1,133 @@
 <% content_for :title, "Document record ##{@document_record.id} — TeamCORE Admin" %>
-<div class="mb-4 flex flex-wrap gap-3 items-center">
-  <%= link_to "← Document records", admin_document_records_path, class: "text-sky-700 text-sm" %>
-  <%= link_to "Pending review", admin_document_reviews_path, class: "text-sky-700 text-sm" %>
-</div>
-<h1 class="text-2xl font-semibold mb-2">Document record #<%= @document_record.id %></h1>
+<div class="tc-page-stack">
+  <p class="text-sm flex flex-wrap gap-3">
+    <%= link_to "← Document records", admin_document_records_path, class: tc_link_classes %>
+    <%= link_to "Pending review", admin_document_reviews_path, class: tc_link_classes %>
+  </p>
 
-<% if flash[:alert].present? %>
-  <div class="mb-4 rounded border border-red-200 bg-red-50 text-red-800 text-sm px-3 py-2"><%= flash[:alert] %></div>
-<% end %>
-
-<dl class="grid grid-cols-1 gap-2 text-sm mb-4">
-  <dt class="text-slate-500">Type</dt><dd><%= @document_record.document_type&.name %> (<%= @document_record.document_type&.code %>)</dd>
-  <dt class="text-slate-500">Status</dt><dd class="font-mono"><%= @document_record.status %></dd>
-  <dt class="text-slate-500">Team member</dt><dd><%= @document_record.team_member_id %> <%= @document_record.team_member&.party&.display_name %></dd>
-  <dt class="text-slate-500">Engagement</dt><dd><%= @document_record.engagement_id || "—" %></dd>
-  <dt class="text-slate-500">Submitted</dt><dd class="font-mono"><%= @document_record.submitted_on %></dd>
-  <dt class="text-slate-500">Expires</dt><dd class="font-mono"><%= @document_record.expires_on || "—" %></dd>
-  <dt class="text-slate-500">Verified by</dt><dd><%= @document_record.verified_by_id ? @document_record.verified_by&.email : "—" %></dd>
-  <dt class="text-slate-500">Verified on</dt><dd class="font-mono"><%= @document_record.verified_on || "—" %></dd>
-  <dt class="text-slate-500">Verification notes</dt><dd><%= @document_record.verification_notes.presence || "—" %></dd>
-  <dt class="text-slate-500">Rejection reason</dt><dd><%= @document_record.rejection_reason.presence || "—" %></dd>
-</dl>
-
-<section class="border border-slate-200 rounded p-4 bg-white mb-4">
-  <h2 class="font-medium mb-3 text-sm">Review actions</h2>
-  <p class="text-xs text-slate-600 mb-4">Readiness and alerts derive from evaluator output after the record saves — not edited here (**TC-08**).</p>
-
-  <% case @document_record.status
-     when "submitted" %>
-    <div class="space-y-4">
-      <%= form_with url: verify_admin_document_record_path(@document_record), method: :post, data: { turbo: false }, class: "border border-slate-100 rounded p-3 bg-slate-50" do %>
-        <%= label_tag :verification_notes, "Notes (optional)", class: "block text-xs text-slate-600 mb-1" %>
-        <%= text_area_tag :verification_notes, nil, rows: 2, class: "w-full border border-slate-300 rounded px-2 py-1 text-sm mb-2" %>
-        <%= submit_tag "Verify document", data: { confirm: "Verify this submission?" }, class: "rounded bg-emerald-800 text-white px-3 py-2 text-sm cursor-pointer" %>
-      <% end %>
-
-      <%= form_with url: reject_admin_document_record_path(@document_record), method: :post, data: { turbo: false }, class: "border border-slate-100 rounded p-3 bg-slate-50" do %>
-        <%= label_tag :rejection_reason, "Rejection reason (required)", class: "block text-xs text-slate-600 mb-1" %>
-        <%= text_area_tag :rejection_reason, nil, rows: 3, required: true, class: "w-full border border-slate-300 rounded px-2 py-1 text-sm mb-2" %>
-        <%= label_tag :verification_notes, "Notes (optional)", class: "block text-xs text-slate-600 mb-1" %>
-        <%= text_area_tag :verification_notes, nil, rows: 2, class: "w-full border border-slate-300 rounded px-2 py-1 text-sm mb-2" %>
-        <%= submit_tag "Reject document", data: { confirm: "Reject this submission?" }, class: "rounded bg-red-800 text-white px-3 py-2 text-sm cursor-pointer" %>
-      <% end %>
-
-      <%= form_with url: void_admin_document_record_path(@document_record), method: :post, data: { turbo: false }, class: "border border-slate-100 rounded p-3 bg-slate-50" do %>
-        <%= label_tag :verification_notes, "Notes (optional, void context)", class: "block text-xs text-slate-600 mb-1" %>
-        <%= text_area_tag :verification_notes, nil, rows: 2, class: "w-full border border-slate-300 rounded px-2 py-1 text-sm mb-2" %>
-        <%= submit_tag "Void submission", data: { confirm: "Void this record? It will not count toward readiness." }, class: "rounded bg-slate-700 text-white px-3 py-2 text-sm cursor-pointer" %>
-      <% end %>
-    </div>
-  <% when "verified", "rejected" %>
-    <%= form_with url: void_admin_document_record_path(@document_record), method: :post, data: { turbo: false }, class: "border border-slate-100 rounded p-3 bg-slate-50 max-w-xl" do %>
-      <%= label_tag :verification_notes, "Notes (optional, void context)", class: "block text-xs text-slate-600 mb-1" %>
-      <%= text_area_tag :verification_notes, nil, rows: 2, class: "w-full border border-slate-300 rounded px-2 py-1 text-sm mb-2" %>
-      <%= submit_tag "Void record", data: { confirm: "Void this record? Prior review metadata is preserved." }, class: "rounded bg-slate-700 text-white px-3 py-2 text-sm cursor-pointer" %>
-    <% end %>
-  <% else %>
-    <p class="text-sm text-slate-600">No further review actions (<code class="font-mono">voided</code> is terminal in MVP).</p>
+  <% if flash[:alert].present? %>
+    <div class="tc-alert tc-alert--danger" role="alert"><%= flash[:alert] %></div>
   <% end %>
-</section>
 
-<div class="flex flex-wrap gap-2">
-  <%= link_to "Edit metadata", edit_admin_document_record_path(@document_record), class: "rounded bg-slate-900 text-white px-3 py-2 text-sm" %>
+  <header class="tc-record-header">
+    <div class="tc-record-header__top">
+      <div>
+        <div class="tc-record-header__eyebrow">Compliance</div>
+        <h1 class="tc-record-header__title"><%= @document_record.document_type&.name.presence || "Document record" %></h1>
+        <p class="tc-record-header__subtitle">
+          Record #<%= @document_record.id %> · <%= @document_record.document_type&.code %>
+        </p>
+        <div class="tc-record-header__badges">
+          <span class="<%= tc_status_badge_classes(@document_record.status) %>"><%= @document_record.status %></span>
+        </div>
+      </div>
+      <div class="tc-record-header__actions">
+        <%= link_to "Edit metadata", edit_admin_document_record_path(@document_record), class: "tc-btn tc-btn--secondary" %>
+      </div>
+    </div>
+  </header>
+
+  <div class="tc-record-layout">
+    <section class="tc-record-main">
+      <section class="tc-panel">
+        <div class="tc-panel__header">
+          <div>
+            <div class="tc-panel__title">Review actions</div>
+            <p class="tc-panel__subtitle">Readiness updates after the record saves — TC-08.</p>
+          </div>
+        </div>
+        <div class="tc-panel__body">
+          <% case @document_record.status
+             when "submitted" %>
+            <div class="space-y-4">
+              <%= form_with url: verify_admin_document_record_path(@document_record), method: :post, data: { turbo: false }, class: "rounded-lg border p-3" do %>
+                <div class="tc-field">
+                  <%= label_tag :verification_notes, "Notes (optional)", class: "tc-label" %>
+                  <%= text_area_tag :verification_notes, nil, rows: 2, class: "tc-textarea" %>
+                </div>
+                <%= submit_tag "Verify document", data: { confirm: "Verify this submission?" }, class: "tc-btn tc-btn--teal mt-2" %>
+              <% end %>
+
+              <%= form_with url: reject_admin_document_record_path(@document_record), method: :post, data: { turbo: false }, class: "rounded-lg border p-3" do %>
+                <div class="tc-field">
+                  <%= label_tag :rejection_reason, "Rejection reason (required)", class: "tc-label" %>
+                  <%= text_area_tag :rejection_reason, nil, rows: 3, required: true, class: "tc-textarea" %>
+                </div>
+                <div class="tc-field">
+                  <%= label_tag :verification_notes, "Notes (optional)", class: "tc-label" %>
+                  <%= text_area_tag :verification_notes, nil, rows: 2, class: "tc-textarea" %>
+                </div>
+                <%= submit_tag "Reject document", data: { confirm: "Reject this submission?" }, class: "tc-btn tc-btn--danger mt-2" %>
+              <% end %>
+
+              <%= form_with url: void_admin_document_record_path(@document_record), method: :post, data: { turbo: false }, class: "rounded-lg border p-3" do %>
+                <div class="tc-field">
+                  <%= label_tag :verification_notes, "Notes (optional, void context)", class: "tc-label" %>
+                  <%= text_area_tag :verification_notes, nil, rows: 2, class: "tc-textarea" %>
+                </div>
+                <%= submit_tag "Void submission", data: { confirm: "Void this record? It will not count toward readiness." }, class: "tc-btn tc-btn--secondary mt-2" %>
+              <% end %>
+            </div>
+          <% when "verified", "rejected" %>
+            <%= form_with url: void_admin_document_record_path(@document_record), method: :post, data: { turbo: false }, class: "max-w-xl rounded-lg border p-3" do %>
+              <div class="tc-field">
+                <%= label_tag :verification_notes, "Notes (optional, void context)", class: "tc-label" %>
+                <%= text_area_tag :verification_notes, nil, rows: 2, class: "tc-textarea" %>
+              </div>
+              <%= submit_tag "Void record", data: { confirm: "Void this record? Prior review metadata is preserved." }, class: "tc-btn tc-btn--secondary mt-2" %>
+            <% end %>
+          <% else %>
+            <p class="text-sm" style="color: var(--tc-text-muted);">No further review actions (<code class="font-mono">voided</code> is terminal in MVP).</p>
+          <% end %>
+        </div>
+      </section>
+    </section>
+
+    <aside class="tc-record-context tc-record-context--sticky">
+      <section class="tc-panel">
+        <div class="tc-panel__header">
+          <div class="tc-panel__title">Record details</div>
+        </div>
+        <div class="tc-panel__body">
+          <dl class="tc-kv-grid tc-kv-grid--single">
+            <div class="tc-kv">
+              <dt class="tc-kv__key">Team member</dt>
+              <dd class="tc-kv__value">
+                <%= @document_record.team_member_id %>
+                <%= @document_record.team_member&.party&.display_name %>
+              </dd>
+            </div>
+            <div class="tc-kv">
+              <dt class="tc-kv__key">Engagement</dt>
+              <dd class="tc-kv__value font-mono text-xs"><%= @document_record.engagement_id || "—" %></dd>
+            </div>
+            <div class="tc-kv">
+              <dt class="tc-kv__key">Submitted</dt>
+              <dd class="tc-kv__value font-mono text-xs"><%= @document_record.submitted_on %></dd>
+            </div>
+            <div class="tc-kv">
+              <dt class="tc-kv__key">Expires</dt>
+              <dd class="tc-kv__value font-mono text-xs"><%= @document_record.expires_on || "—" %></dd>
+            </div>
+            <div class="tc-kv">
+              <dt class="tc-kv__key">Verified by</dt>
+              <dd class="tc-kv__value"><%= @document_record.verified_by_id ? @document_record.verified_by&.email : "—" %></dd>
+            </div>
+            <div class="tc-kv">
+              <dt class="tc-kv__key">Verified on</dt>
+              <dd class="tc-kv__value font-mono text-xs"><%= @document_record.verified_on || "—" %></dd>
+            </div>
+            <div class="tc-kv">
+              <dt class="tc-kv__key">Verification notes</dt>
+              <dd class="tc-kv__value"><%= @document_record.verification_notes.presence || "—" %></dd>
+            </div>
+            <div class="tc-kv">
+              <dt class="tc-kv__key">Rejection reason</dt>
+              <dd class="tc-kv__value"><%= @document_record.rejection_reason.presence || "—" %></dd>
+            </div>
+          </dl>
+        </div>
+      </section>
+    </aside>
+  </div>
 </div>

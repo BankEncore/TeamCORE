@@ -1,88 +1,154 @@
 <% content_for :title, "Pending document review — TeamCORE Admin" %>
-<div class="mb-4 flex flex-wrap gap-3 items-center">
-  <%= link_to "← Dashboard", admin_root_path, class: "text-sky-700 text-sm" %>
-  <%= link_to "All document records", admin_document_records_path, class: "text-sky-700 text-sm" %>
-</div>
-<h1 class="text-2xl font-semibold mb-2">Pending document review</h1>
-<p class="text-sm text-slate-600 mb-4">Submitted records in the current agency awaiting review (exception worklist, not reporting).</p>
+<div class="tc-page-stack">
+  <header class="tc-page-header">
+    <div>
+      <p class="tc-page-header__eyebrow">Compliance queue</p>
+      <h1 class="tc-page-header__title">Pending document review</h1>
+      <p class="tc-page-header__subtitle">
+        Submitted records in the current agency awaiting review (operational worklist, not reporting).
+      </p>
+    </div>
+    <div class="tc-page-header__actions">
+      <div class="tc-action-bar">
+        <%= link_to "Dashboard", admin_root_path, class: "#{tc_link_classes} text-sm" %>
+        <%= link_to "All document records", admin_document_records_path, class: "#{tc_link_classes} text-sm" %>
+      </div>
+    </div>
+  </header>
 
-<%= form_with url: admin_document_reviews_path, method: :get, data: { turbo: false }, class: "border border-slate-200 rounded p-4 bg-white mb-6 space-y-3 text-sm" do %>
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-    <div>
-      <%= label_tag :document_type_id, "Document type", class: "block text-slate-600 text-xs mb-1" %>
-      <%= select_tag :document_type_id,
-            options_from_collection_for_select(@document_types, :id, :name, params[:document_type_id]),
-            include_blank: "— any —",
-            class: "w-full border border-slate-300 rounded px-2 py-1" %>
+  <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
+    <div class="tc-panel">
+      <div class="tc-panel__body">
+        <div class="text-xs font-semibold uppercase tracking-wide" style="color: var(--tc-text-subtle);">Pending</div>
+        <div class="mt-1 text-2xl font-semibold tabular-nums" style="color: var(--tc-text);"><%= @queue_metrics[:pending_count] %></div>
+      </div>
     </div>
-    <div>
-      <%= label_tag :team_member_id, "Team member id", class: "block text-slate-600 text-xs mb-1" %>
-      <%= text_field_tag :team_member_id, params[:team_member_id], class: "w-full border border-slate-300 rounded px-2 py-1", placeholder: "numeric" %>
+    <div class="tc-panel">
+      <div class="tc-panel__body">
+        <div class="text-xs font-semibold uppercase tracking-wide" style="color: var(--tc-text-subtle);">Oldest submitted</div>
+        <div class="mt-1 text-sm font-semibold" style="color: var(--tc-text);"><%= @queue_metrics[:oldest_submitted_on] || "—" %></div>
+      </div>
     </div>
-    <div>
-      <%= label_tag :engagement_id, "Engagement id", class: "block text-slate-600 text-xs mb-1" %>
-      <%= text_field_tag :engagement_id, params[:engagement_id], class: "w-full border border-slate-300 rounded px-2 py-1", placeholder: "numeric" %>
+    <div class="tc-panel">
+      <div class="tc-panel__body">
+        <div class="text-xs font-semibold uppercase tracking-wide" style="color: var(--tc-text-subtle);">Expiring ≤ 30d</div>
+        <div class="mt-1 text-2xl font-semibold tabular-nums" style="color: var(--tc-text);"><%= @queue_metrics[:expiring_soon_count] %></div>
+      </div>
     </div>
-    <div>
-      <%= label_tag :relationship_type, "Engagement relationship", class: "block text-slate-600 text-xs mb-1" %>
-      <%= select_tag :relationship_type,
-            options_for_select([ [ "— any —", "" ] ] + Engagement::RELATIONSHIP_TYPES.map { |t| [ t, t ] }, params[:relationship_type]),
-            class: "w-full border border-slate-300 rounded px-2 py-1" %>
-    </div>
-    <div>
-      <%= label_tag :submitted_on_from, "Submitted from (ISO)", class: "block text-slate-600 text-xs mb-1" %>
-      <%= text_field_tag :submitted_on_from, params[:submitted_on_from], class: "w-full border border-slate-300 rounded px-2 py-1" %>
-    </div>
-    <div>
-      <%= label_tag :submitted_on_to, "Submitted to (ISO)", class: "block text-slate-600 text-xs mb-1" %>
-      <%= text_field_tag :submitted_on_to, params[:submitted_on_to], class: "w-full border border-slate-300 rounded px-2 py-1" %>
-    </div>
-    <div>
-      <%= label_tag :expires_on_from, "Expires from (ISO)", class: "block text-slate-600 text-xs mb-1" %>
-      <%= text_field_tag :expires_on_from, params[:expires_on_from], class: "w-full border border-slate-300 rounded px-2 py-1" %>
-    </div>
-    <div>
-      <%= label_tag :expires_on_to, "Expires to (ISO)", class: "block text-slate-600 text-xs mb-1" %>
-      <%= text_field_tag :expires_on_to, params[:expires_on_to], class: "w-full border border-slate-300 rounded px-2 py-1" %>
+    <div class="tc-panel">
+      <div class="tc-panel__body">
+        <div class="text-xs font-semibold uppercase tracking-wide" style="color: var(--tc-text-subtle);">Verification required</div>
+        <div class="mt-1 text-2xl font-semibold tabular-nums" style="color: var(--tc-text);"><%= @queue_metrics[:verification_required_count] %></div>
+      </div>
     </div>
   </div>
-  <div class="flex gap-2">
-    <%= submit_tag "Apply filters", class: "rounded bg-slate-900 text-white px-3 py-2 text-sm cursor-pointer" %>
-    <%= link_to "Reset", admin_document_reviews_path, class: "text-sky-700 text-sm py-2" %>
-  </div>
-<% end %>
 
-<% if @document_records.empty? %>
-  <p class="text-sm text-slate-600">No submitted documents match the filters.</p>
-<% else %>
-  <div class="overflow-x-auto border border-slate-200 rounded bg-white">
-    <table class="min-w-full text-xs">
-      <thead class="bg-slate-100">
-        <tr>
-          <th class="text-left p-2">Record</th>
-          <th class="text-left p-2">Type</th>
-          <th class="text-left p-2">Verification required<br><span class="font-normal text-slate-600">(on type)</span></th>
-          <th class="text-left p-2">Team member</th>
-          <th class="text-left p-2">Engagement</th>
-          <th class="text-left p-2">Relationship</th>
-          <th class="text-left p-2">Submitted</th>
-          <th class="text-left p-2">Expires</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% @document_records.each do |rec| %>
-          <tr class="border-t border-slate-200">
-            <td class="p-2"><%= link_to "##{rec.id}", admin_document_record_path(rec), class: "text-sky-700 underline font-mono" %></td>
-            <td class="p-2"><%= rec.document_type&.name %> <span class="text-slate-500">(<%= rec.document_type&.code %>)</span></td>
-            <td class="p-2 font-mono"><%= rec.document_type&.verification_required ? "yes" : "no" %></td>
-            <td class="p-2"><%= rec.team_member_id %> <%= rec.team_member&.party&.display_name %></td>
-            <td class="p-2 font-mono"><%= rec.engagement_id || "—" %></td>
-            <td class="p-2 font-mono"><%= rec.engagement&.relationship_type || "—" %></td>
-            <td class="p-2 font-mono"><%= rec.submitted_on %></td>
-            <td class="p-2 font-mono"><%= rec.expires_on || "—" %></td>
+  <%= form_with url: admin_document_reviews_path, method: :get, data: { turbo: false }, class: "tc-form-section tc-form-section--dense" do %>
+    <div class="tc-form-section__header">
+      <h2 class="tc-form-section__title">Filters</h2>
+    </div>
+    <div class="tc-form-grid tc-form-grid--dense">
+      <div class="tc-field tc-field--compact">
+        <%= label_tag :document_type_id, "Document type", class: "tc-label" %>
+        <%= select_tag :document_type_id,
+              options_from_collection_for_select(@document_types, :id, :name, params[:document_type_id]),
+              include_blank: "— any —",
+              class: "tc-select" %>
+      </div>
+      <div class="tc-field tc-field--compact">
+        <%= label_tag :team_member_id, "Team member id", class: "tc-label" %>
+        <%= text_field_tag :team_member_id, params[:team_member_id], class: "tc-input", placeholder: "numeric" %>
+      </div>
+      <div class="tc-field tc-field--compact">
+        <%= label_tag :engagement_id, "Engagement id", class: "tc-label" %>
+        <%= text_field_tag :engagement_id, params[:engagement_id], class: "tc-input", placeholder: "numeric" %>
+      </div>
+      <div class="tc-field tc-field--compact">
+        <%= label_tag :relationship_type, "Engagement relationship", class: "tc-label" %>
+        <%= select_tag :relationship_type,
+              options_for_select([ [ "— any —", "" ] ] + Engagement::RELATIONSHIP_TYPES.map { |t| [ t, t ] }, params[:relationship_type]),
+              class: "tc-select" %>
+      </div>
+      <div class="tc-field tc-field--compact">
+        <%= label_tag :submitted_on_from, "Submitted from (ISO)", class: "tc-label" %>
+        <%= text_field_tag :submitted_on_from, params[:submitted_on_from], class: "tc-input" %>
+      </div>
+      <div class="tc-field tc-field--compact">
+        <%= label_tag :submitted_on_to, "Submitted to (ISO)", class: "tc-label" %>
+        <%= text_field_tag :submitted_on_to, params[:submitted_on_to], class: "tc-input" %>
+      </div>
+      <div class="tc-field tc-field--compact">
+        <%= label_tag :expires_on_from, "Expires from (ISO)", class: "tc-label" %>
+        <%= text_field_tag :expires_on_from, params[:expires_on_from], class: "tc-input" %>
+      </div>
+      <div class="tc-field tc-field--compact">
+        <%= label_tag :expires_on_to, "Expires to (ISO)", class: "tc-label" %>
+        <%= text_field_tag :expires_on_to, params[:expires_on_to], class: "tc-input" %>
+      </div>
+    </div>
+    <div class="mt-3 flex flex-wrap gap-2 border-t pt-3" style="border-color: var(--tc-border);">
+      <%= submit_tag "Apply filters", class: "tc-btn tc-btn--primary" %>
+      <%= link_to "Reset", admin_document_reviews_path, class: "tc-btn tc-btn--secondary" %>
+    </div>
+  <% end %>
+
+  <% if @document_records.empty? %>
+    <p class="text-sm" style="color: var(--tc-text-muted);">No submitted documents match the filters.</p>
+  <% else %>
+    <div class="tc-table-wrap">
+      <table class="tc-data-table tc-data-table--compact text-xs">
+        <thead>
+          <tr>
+            <th>Team member</th>
+            <th>Document type</th>
+            <th>Urgency</th>
+            <th>Engagement</th>
+            <th>Submitted</th>
+            <th>Expires</th>
+            <th class="tc-data-table__cell-actions">Action</th>
+            <th class="tc-data-table__cell-muted">Record</th>
           </tr>
-        <% end %>
-      </tbody>
-    </table>
-  </div>
-<% end %>
+        </thead>
+        <tbody>
+          <% today = Date.current %>
+          <% @document_records.each do |rec| %>
+            <% verif = rec.document_type&.verification_required %>
+            <% exp = rec.expires_on %>
+            <% expiring_soon = exp.present? && exp <= today + 30.days %>
+            <% urgent_expiry = exp.present? && exp <= today + 14.days %>
+            <tr class="<%= "tc-row--warning" if urgent_expiry %>">
+              <td class="tc-data-table__primary">
+                <%= rec.team_member&.party&.display_name.presence || "—" %>
+                <div class="tc-data-table__secondary font-mono">TM <%= rec.team_member_id %></div>
+              </td>
+              <td>
+                <%= rec.document_type&.name %>
+                <div class="tc-data-table__secondary font-mono"><%= rec.document_type&.code %></div>
+              </td>
+              <td>
+                <% if verif %>
+                  <span class="tc-badge tc-badge--pending-review">Verification required</span>
+                <% else %>
+                  <span class="tc-badge tc-badge--neutral">Standard</span>
+                <% end %>
+                <% if expiring_soon && exp %>
+                  <span class="mt-1 inline-block tc-badge tc-badge--expiring-soon">Expiring soon</span>
+                <% end %>
+          </td>
+              <td class="tc-data-table__cell-muted font-mono text-xs">
+                <%= rec.engagement_id || "—" %>
+                <% if rec.engagement %>
+                  <div><%= rec.engagement.relationship_type %></div>
+                <% end %>
+              </td>
+              <td class="font-mono text-xs"><%= rec.submitted_on %></td>
+              <td class="font-mono text-xs"><%= rec.expires_on || "—" %></td>
+              <td class="tc-data-table__cell-actions"><%= link_to "Review", admin_document_record_path(rec), class: tc_link_classes %></td>
+              <td class="tc-data-table__cell-muted font-mono">#<%= rec.id %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% end %>
+</div>

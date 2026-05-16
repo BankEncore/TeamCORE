@@ -1,84 +1,98 @@
 <% content_for :title, "Report — Document compliance" %>
-<div class="mb-4"><%= link_to "← Reports hub", admin_reports_root_path, class: "text-sky-700 text-sm" %></div>
-<h1 class="text-2xl font-semibold mb-4">Document compliance exceptions</h1>
+<div class="tc-page-stack">
+  <header class="tc-page-header">
+    <div>
+      <p class="tc-page-header__eyebrow">Reports</p>
+      <h1 class="tc-page-header__title">Document compliance exceptions</h1>
+    </div>
+    <div class="tc-page-header__actions">
+      <%= link_to "Reports hub", admin_reports_root_path, class: "#{tc_link_classes} text-sm" %>
+    </div>
+  </header>
 
-<%= form_with url: admin_reports_document_compliance_index_path, method: :get, data: { turbo: false }, class: "tc-panel p-4 mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm" do %>
-  <div>
-    <%= label_tag :as_of_date, "As of (ISO)", class: "block text-xs text-slate-600 mb-1" %>
-    <%= date_field_tag :as_of_date, @as_of_date, class: "w-full border rounded px-2 py-1" %>
-  </div>
-  <div>
-    <%= label_tag :alert_type, "Alert type", class: "block text-xs text-slate-600 mb-1" %>
-    <%= select_tag :alert_type, options_for_select([["— any —", ""]] + %w[missing expired expiring_soon rejected pending_verification].zip(%w[missing expired expiring_soon rejected pending_verification]), params[:alert_type]), class: "w-full border rounded px-2 py-1" %>
-  </div>
-  <div>
-    <%= label_tag :severity, "Severity", class: "block text-xs text-slate-600 mb-1" %>
-    <%= select_tag :severity, options_for_select([["— any —", ""]] + %w[blocking warning info].zip(%w[blocking warning info]), params[:severity]), class: "w-full border rounded px-2 py-1" %>
-  </div>
-  <div>
-    <%= label_tag :relationship_type, "Engagement relationship type", class: "block text-xs text-slate-600 mb-1" %>
-    <%= select_tag :relationship_type, options_for_select([["— any —", ""]] + Engagement::RELATIONSHIP_TYPES.zip(Engagement::RELATIONSHIP_TYPES), params[:relationship_type]), class: "w-full border rounded px-2 py-1" %>
-  </div>
-  <div>
-    <%= label_tag :engagement_status, "Engagement status", class: "block text-xs text-slate-600 mb-1" %>
-    <%= select_tag :engagement_status, options_for_select([["— any —", ""]] + Engagement::STATUSES.zip(Engagement::STATUSES), params[:engagement_status]), class: "w-full border rounded px-2 py-1" %>
-  </div>
-  <div>
-    <%= label_tag :document_type_id, "Document type id", class: "block text-xs text-slate-600 mb-1" %>
-    <%= text_field_tag :document_type_id, params[:document_type_id], class: "w-full border rounded px-2 py-1" %>
-  </div>
-  <div>
-    <%= label_tag :team_member_id, "Team member id", class: "block text-xs text-slate-600 mb-1" %>
-    <%= text_field_tag :team_member_id, params[:team_member_id], class: "w-full border rounded px-2 py-1" %>
-  </div>
-  <div>
-    <%= label_tag :expires_on_or_before, "Expires on or before", class: "block text-xs text-slate-600 mb-1" %>
-    <%= date_field_tag :expires_on_or_before, params[:expires_on_or_before], class: "w-full border rounded px-2 py-1" %>
-  </div>
-  <div class="flex items-center gap-2 pt-6">
-    <%= check_box_tag :include_terminal, "1", params[:include_terminal].present? %>
-    <%= label_tag :include_terminal, "Include terminal engagements" %>
-  </div>
-  <div class="flex items-end">
-    <%= submit_tag "Apply", class: "tc-btn tc-btn--primary" %>
-  </div>
-<% end %>
+  <%= form_with url: admin_reports_document_compliance_index_path, method: :get, data: { turbo: false }, class: "tc-form-section tc-form-section--dense mb-6" do %>
+    <div class="tc-form-section__header">
+      <h2 class="tc-form-section__title">Filters</h2>
+    </div>
+    <div class="tc-form-grid tc-form-grid--dense">
+      <div class="tc-field tc-field--compact">
+        <%= label_tag :as_of_date, "As of (ISO)", class: "tc-label" %>
+        <%= date_field_tag :as_of_date, @as_of_date, class: "tc-input" %>
+      </div>
+      <div class="tc-field tc-field--compact">
+        <%= label_tag :alert_type, "Alert type", class: "tc-label" %>
+        <%= select_tag :alert_type, options_for_select([["— any —", ""]] + %w[missing expired expiring_soon rejected pending_verification].zip(%w[missing expired expiring_soon rejected pending_verification]), params[:alert_type]), class: "tc-select" %>
+      </div>
+      <div class="tc-field tc-field--compact">
+        <%= label_tag :severity, "Severity", class: "tc-label" %>
+        <%= select_tag :severity, options_for_select([["— any —", ""]] + %w[blocking warning info].zip(%w[blocking warning info]), params[:severity]), class: "tc-select" %>
+      </div>
+      <div class="tc-field tc-field--compact">
+        <%= label_tag :relationship_type, "Engagement relationship type", class: "tc-label" %>
+        <%= select_tag :relationship_type, options_for_select([["— any —", ""]] + Engagement::RELATIONSHIP_TYPES.zip(Engagement::RELATIONSHIP_TYPES), params[:relationship_type]), class: "tc-select" %>
+      </div>
+      <div class="tc-field tc-field--compact">
+        <%= label_tag :engagement_status, "Engagement status", class: "tc-label" %>
+        <%= select_tag :engagement_status, options_for_select([["— any —", ""]] + Engagement::STATUSES.zip(Engagement::STATUSES), params[:engagement_status]), class: "tc-select" %>
+      </div>
+      <div class="tc-field tc-field--compact">
+        <%= label_tag :document_type_id, "Document type id", class: "tc-label" %>
+        <%= text_field_tag :document_type_id, params[:document_type_id], class: "tc-input" %>
+      </div>
+      <div class="tc-field tc-field--compact">
+        <%= label_tag :team_member_id, "Team member id", class: "tc-label" %>
+        <%= text_field_tag :team_member_id, params[:team_member_id], class: "tc-input" %>
+      </div>
+      <div class="tc-field tc-field--compact">
+        <%= label_tag :expires_on_or_before, "Expires on or before", class: "tc-label" %>
+        <%= date_field_tag :expires_on_or_before, params[:expires_on_or_before], class: "tc-input" %>
+      </div>
+      <div class="tc-field tc-field--compact flex items-center gap-2 pt-6">
+        <%= check_box_tag :include_terminal, "1", params[:include_terminal].present? %>
+        <%= label_tag :include_terminal, "Include terminal engagements", class: "tc-label mb-0" %>
+      </div>
+      <div class="tc-field tc-field--compact flex items-end">
+        <%= submit_tag "Apply", class: "tc-btn tc-btn--primary" %>
+      </div>
+    </div>
+  <% end %>
 
-<div class="overflow-x-auto tc-panel">
-  <table class="tc-data-table tc-data-table--compact text-xs min-w-full">
-    <thead>
-      <tr>
-        <th>Team member</th>
-        <th>Engagement</th>
-        <th>Alert</th>
-        <th>Severity</th>
-        <th>Document type</th>
-        <th>Expires</th>
-        <th>Team360</th>
-        <th>Record</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% @flat_rows.each do |r| %>
-        <% a = r.alert %>
-        <% e = r.engagement %>
-        <% tm = e.team_member %>
-        <% dtype = @document_types_by_id[a.document_type_id] %>
+  <div class="tc-table-wrap">
+    <table class="tc-data-table tc-data-table--compact text-xs">
+      <thead>
         <tr>
-          <td><%= tm.party.display_name %></td>
-          <td class="font-mono"><%= link_to e.id, admin_engagement_path(e), class: "text-sky-700 underline" %></td>
-          <td class="font-mono"><%= a.alert_type %></td>
-          <td><%= a.severity %></td>
-          <td><%= dtype ? "#{dtype.name} (#{dtype.code})" : "##{a.document_type_id}" %></td>
-          <td class="font-mono"><%= a.expires_on || "—" %></td>
-          <td><%= link_to "Team360", admin_team_member_team360_path(tm), class: "text-sky-700 underline" %></td>
-          <td>
-            <% if a.document_record_id %>
-              <%= link_to "Record", admin_document_record_path(a.document_record_id), class: "text-sky-700 underline" %>
-            <% else %>—<% end %>
-          </td>
+          <th>Team member</th>
+          <th>Engagement</th>
+          <th>Alert</th>
+          <th>Severity</th>
+          <th>Document type</th>
+          <th>Expires</th>
+          <th>Team360</th>
+          <th>Record</th>
         </tr>
-      <% end %>
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        <% @flat_rows.each do |r| %>
+          <% a = r.alert %>
+          <% e = r.engagement %>
+          <% tm = e.team_member %>
+          <% dtype = @document_types_by_id[a.document_type_id] %>
+          <tr>
+            <td class="tc-data-table__primary"><%= tm.party.display_name %></td>
+            <td class="font-mono"><%= link_to e.id, admin_engagement_path(e), class: tc_link_classes %></td>
+            <td class="font-mono"><%= a.alert_type %></td>
+            <td><span class="<%= tc_status_badge_classes(a.severity) %>"><%= a.severity %></span></td>
+            <td><%= dtype ? "#{dtype.name} (#{dtype.code})" : "##{a.document_type_id}" %></td>
+            <td class="font-mono"><%= a.expires_on || "—" %></td>
+            <td><%= link_to "Team360", admin_team_member_team360_path(tm), class: tc_link_classes %></td>
+            <td>
+              <% if a.document_record_id %>
+                <%= link_to "Record", admin_document_record_path(a.document_record_id), class: tc_link_classes %>
+              <% else %>—<% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
 </div>

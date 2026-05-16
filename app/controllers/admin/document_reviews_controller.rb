@@ -8,10 +8,21 @@ module Admin
     before_action :require_document_verifier
 
     def index
-      scope =
+      base_queue =
         DocumentRecord
-          .includes(:document_type, { team_member: :party }, :engagement)
           .where(agency_id: current_agency.id, status: "submitted")
+
+      today = Date.current
+      @queue_metrics = {
+        pending_count: base_queue.count,
+        oldest_submitted_on: base_queue.minimum(:submitted_on),
+        expiring_soon_count: base_queue.where.not(expires_on: nil).where("expires_on <= ?", today + 30.days).count,
+        verification_required_count: base_queue.joins(:document_type).where(document_types: { verification_required: true }).count
+      }
+
+      scope =
+        base_queue
+          .includes(:document_type, { team_member: :party }, :engagement)
           .order(submitted_on: :desc, id: :desc)
 
       scope = scope.where(document_type_id: params[:document_type_id].to_i) if numeric_id?(params[:document_type_id])
