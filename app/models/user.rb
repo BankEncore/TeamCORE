@@ -7,6 +7,9 @@ class User < ApplicationRecord
   has_many :agencies, through: :user_agencies
   has_many :verified_document_records, class_name: "DocumentRecord", foreign_key: :verified_by_id, inverse_of: :verified_by,
     dependent: :restrict_with_exception
+  has_many :draw_balance_events, foreign_key: :actor_id, inverse_of: :actor, dependent: :nullify
+  has_many :contractor_charge_waivers, foreign_key: :actor_id, inverse_of: :actor, dependent: :restrict_with_exception
+  has_many :contractor_charge_recoveries, foreign_key: :actor_id, inverse_of: :actor, dependent: :nullify
 
   normalizes :email, with: ->(e) { e.strip.downcase }
 
