@@ -92,7 +92,8 @@
 
 - **`CommissionCalculation`** — agency, engagement, optional `pay_period_id`, optional `revenue_input_id`; rate and money columns; **`status`** `draft` \| `finalized`.
 - **`Financials::ApplyCommissionAndDraw`** produces/updates a **draft** calculation from `RevenueInput` and assignment terms; **raises** if an existing calculation for that revenue input is **finalized** (recalc blocked).
-- Admin revenue UI: **edit** / **calculate** blocked while finalized; index hides **Calc** for those rows.
+- Admin **`CommissionCalculationsController#finalize`** sets **`draft` → `finalized`** from the engagement commission index (recalc and revenue edits then respect the lock).
+- Admin revenue UI: **edit** / **calculate** blocked while finalized; revenue index hides **Calc** for those rows.
 
 ### Explicitly deferred
 

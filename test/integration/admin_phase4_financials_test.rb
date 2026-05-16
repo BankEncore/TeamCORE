@@ -123,6 +123,68 @@ class AdminPhase4FinancialsTest < ActionDispatch::IntegrationTest
     assert CommissionCalculation.exists?(revenue_input_id: rev.id)
   end
 
+  test "admin finalizes draft commission calculation" do
+    pp = PayPeriod.create!(agency: @agency, start_on: Date.new(2024, 7, 16), end_on: Date.new(2024, 7, 31), label: "Jul-2")
+    rev = RevenueInput.create!(
+      agency: @agency,
+      engagement: @ee[:engagement],
+      pay_period: pp,
+      period_start_on: pp.start_on,
+      period_end_on: pp.end_on,
+      commissionable_revenue_cents: 500_000,
+      source_type: "manual"
+    )
+    Financials::ApplyCommissionAndDraw.call(revenue_input: rev, actor: @user)
+    calc = CommissionCalculation.find_by!(revenue_input_id: rev.id)
+    assert_equal "draft", calc.status
+
+    post finalize_admin_engagement_commission_calculation_path(@ee[:engagement], calc)
+    assert_redirected_to admin_engagement_commission_calculations_path(@ee[:engagement])
+    assert_equal "finalized", calc.reload.status
+  end
+
+  test "admin cannot re-finalize commission calculation" do
+    pp = PayPeriod.create!(agency: @agency, start_on: Date.new(2024, 7, 20), end_on: Date.new(2024, 7, 31), label: "Jul-2b")
+    rev = RevenueInput.create!(
+      agency: @agency,
+      engagement: @ee[:engagement],
+      pay_period: pp,
+      period_start_on: pp.start_on,
+      period_end_on: pp.end_on,
+      commissionable_revenue_cents: 400_000,
+      source_type: "manual"
+    )
+    Financials::ApplyCommissionAndDraw.call(revenue_input: rev, actor: @user)
+    calc = CommissionCalculation.find_by!(revenue_input_id: rev.id)
+    post finalize_admin_engagement_commission_calculation_path(@ee[:engagement], calc)
+    assert_equal "finalized", calc.reload.status
+
+    post finalize_admin_engagement_commission_calculation_path(@ee[:engagement], calc)
+    follow_redirect!
+    assert_match(/draft/i, flash[:alert].to_s)
+  end
+
+  test "calculate commission blocked after admin finalizes" do
+    pp = PayPeriod.create!(agency: @agency, start_on: Date.new(2024, 7, 22), end_on: Date.new(2024, 7, 31), label: "Jul-2c")
+    rev = RevenueInput.create!(
+      agency: @agency,
+      engagement: @ee[:engagement],
+      pay_period: pp,
+      period_start_on: pp.start_on,
+      period_end_on: pp.end_on,
+      commissionable_revenue_cents: 300_000,
+      source_type: "manual"
+    )
+    Financials::ApplyCommissionAndDraw.call(revenue_input: rev, actor: @user)
+    calc = CommissionCalculation.find_by!(revenue_input_id: rev.id)
+    post finalize_admin_engagement_commission_calculation_path(@ee[:engagement], calc)
+    assert_equal "finalized", calc.reload.status
+
+    post calculate_commission_admin_engagement_revenue_input_path(@ee[:engagement], rev)
+    follow_redirect!
+    assert_match(/locked/i, flash[:alert].to_s)
+  end
+
   test "revenue csv import" do
     body = <<~CSV
       period_start_on,period_end_on,commissionable_revenue,source_type

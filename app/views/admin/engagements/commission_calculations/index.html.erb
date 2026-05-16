@@ -7,7 +7,7 @@
     <table class="tc-data-table text-xs">
       <thead>
         <tr>
-          <th>ID</th><th>Revenue</th><th>Rate</th><th>Raw comm.</th><th>Draw +</th><th>Rec</th><th>Gross pay</th><th>Ending draw</th><th>Status</th>
+          <th>ID</th><th>Revenue</th><th>Rate</th><th>Raw comm.</th><th>Draw +</th><th>Rec</th><th>Gross pay</th><th>Ending draw</th><th>Status</th><th></th>
         </tr>
       </thead>
       <tbody>
@@ -22,6 +22,13 @@
             <td><%= tc_money(c.gross_commission_pay_cents) %></td>
             <td><%= tc_money(c.ending_draw_balance_cents) %></td>
             <td class="font-mono"><%= c.status %></td>
+            <td>
+              <% if c.status == "draft" %>
+                <%= button_to "Finalize", finalize_admin_engagement_commission_calculation_path(@engagement, c),
+                      method: :post,
+                      class: "tc-btn tc-btn--quiet text-xs" %>
+              <% end %>
+            </td>
           </tr>
         <% end %>
       </tbody>
