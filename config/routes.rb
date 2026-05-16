@@ -28,7 +28,9 @@ Rails.application.routes.draw do
     get "parties/new/organization", to: "parties#new_organization", as: :new_organization_party
     post "parties/organization", to: "parties#create_organization", as: :organization_parties
 
-    resources :team_members, only: %i[index show new create edit update]
+    resources :team_members, only: %i[index show new create edit update] do
+      resource :team360, only: %i[show], controller: "team360"
+    end
     resources :engagements, only: %i[index show new create edit update] do
       resources :placements, controller: "engagement_placements", only: %i[index show new create edit update]
       resources :supervision_assignments, controller: "engagement_supervisions", only: %i[index show new create edit update]
@@ -45,6 +47,15 @@ Rails.application.routes.draw do
     end
     resources :document_alerts, only: %i[index]
     resources :document_reviews, only: %i[index]
+
+    namespace :reports do
+      root to: "home#show"
+      resources :team_members, only: %i[index]
+      resources :engagements, only: %i[index]
+      resources :document_compliance, only: %i[index]
+      resources :contractor_documentation, only: %i[index]
+      resources :subcontractors, only: %i[index]
+    end
   end
 
   root "home#index"

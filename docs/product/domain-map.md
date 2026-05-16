@@ -637,12 +637,14 @@ Phase 1 must come before documents, Team360, compensation, payroll, settlement, 
 
 | Domain / Area         | Purpose                                                          |
 | --------------------- | ---------------------------------------------------------------- |
-| Team360               | Create the unified profile view.                                 |
+| Team360               | Create the unified profile view ([`team360.md`](../domain/team360.md)). |
 | Team360 panels        | Display identity, engagement, organization, and compliance data. |
-| Operational reporting | Create filterable operational lists and exception views.         |
+| Operational reporting | Filterable operational lists and hub ([`operational-reporting.md`](../domain/operational-reporting.md)). |
 | Drill-through         | Allow reports to navigate to Team360 or source records.          |
 
 Some Team360 panels may be placeholders until Phases 4 and 5 populate financial, time, leave, payroll, and settlement data.
+
+**Phase 3 decisions:** **TC-3-D01–D09** in [`open-decisions.md`](open-decisions.md).
 
 ---
 

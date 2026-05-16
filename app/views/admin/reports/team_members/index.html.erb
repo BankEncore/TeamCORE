@@ -1,0 +1,87 @@
+<% content_for :title, "Report — Team member roster" %>
+<div class="mb-4 flex flex-wrap gap-3 text-sm">
+  <%= link_to "← Reports hub", admin_reports_root_path, class: "text-sky-700" %>
+</div>
+<h1 class="text-2xl font-semibold mb-4">Team member roster</h1>
+
+<%= form_with url: admin_reports_team_members_path, method: :get, data: { turbo: false }, class: "tc-panel p-4 mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm" do %>
+  <div>
+    <%= label_tag :as_of_date, "As of (ISO)", class: "block text-xs text-slate-600 mb-1" %>
+    <%= date_field_tag :as_of_date, @as_of_date, class: "w-full border border-slate-300 rounded px-2 py-1" %>
+  </div>
+  <div>
+    <%= label_tag :party_type, "Party type", class: "block text-xs text-slate-600 mb-1" %>
+    <%= select_tag :party_type, options_for_select([["— any —", ""]] + Party::PARTY_TYPES.zip(Party::PARTY_TYPES), params[:party_type]), class: "w-full border rounded px-2 py-1" %>
+  </div>
+  <div>
+    <%= label_tag :team_member_status, "Team member status", class: "block text-xs text-slate-600 mb-1" %>
+    <%= select_tag :team_member_status, options_for_select([["— any —", ""]] + LifecycleStatusable::STATUSES.zip(LifecycleStatusable::STATUSES), params[:team_member_status]), class: "w-full border rounded px-2 py-1" %>
+  </div>
+  <div>
+    <%= label_tag :engagement_relationship_type, "Has engagement type", class: "block text-xs text-slate-600 mb-1" %>
+    <%= select_tag :engagement_relationship_type, options_for_select([["— any —", ""]] + Engagement::RELATIONSHIP_TYPES.zip(Engagement::RELATIONSHIP_TYPES), params[:engagement_relationship_type]), class: "w-full border rounded px-2 py-1" %>
+  </div>
+  <div>
+    <%= label_tag :engagement_status, "Has engagement status", class: "block text-xs text-slate-600 mb-1" %>
+    <%= select_tag :engagement_status, options_for_select([["— any —", ""]] + Engagement::STATUSES.zip(Engagement::STATUSES), params[:engagement_status]), class: "w-full border rounded px-2 py-1" %>
+  </div>
+  <div>
+    <%= label_tag :department_id, "Dept id (effective placement)", class: "block text-xs text-slate-600 mb-1" %>
+    <%= text_field_tag :department_id, params[:department_id], class: "w-full border rounded px-2 py-1" %>
+  </div>
+  <div>
+    <%= label_tag :location_id, "Location id", class: "block text-xs text-slate-600 mb-1" %>
+    <%= text_field_tag :location_id, params[:location_id], class: "w-full border rounded px-2 py-1" %>
+  </div>
+  <div>
+    <%= label_tag :team_id, "Team id", class: "block text-xs text-slate-600 mb-1" %>
+    <%= text_field_tag :team_id, params[:team_id], class: "w-full border rounded px-2 py-1" %>
+  </div>
+  <div>
+    <%= label_tag :supervisor_engagement_id, "Supervisor engagement id", class: "block text-xs text-slate-600 mb-1" %>
+    <%= text_field_tag :supervisor_engagement_id, params[:supervisor_engagement_id], class: "w-full border rounded px-2 py-1" %>
+  </div>
+  <div>
+    <%= label_tag :document_readiness_status, "Readiness (focused eng.)", class: "block text-xs text-slate-600 mb-1" %>
+    <%= select_tag :document_readiness_status,
+          options_for_select([["— any —", ""]] + Documents::ReadinessEvaluator::READINESS_STATUSES.zip(Documents::ReadinessEvaluator::READINESS_STATUSES), params[:document_readiness_status]),
+          class: "w-full border rounded px-2 py-1" %>
+  </div>
+  <div class="flex items-end">
+    <%= submit_tag "Apply", class: "tc-btn tc-btn--primary" %>
+  </div>
+<% end %>
+
+<div class="overflow-x-auto tc-panel">
+  <table class="tc-data-table tc-data-table--compact text-sm min-w-full">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Party type</th>
+        <th>TM #</th>
+        <th>TM status</th>
+        <th>Focused engagement</th>
+        <th>Readiness</th>
+        <th>Alerts</th>
+        <th>Team360</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @roster_rows.each do |row| %>
+        <% tm = row[:team_member] %>
+        <tr>
+          <td><%= row[:display_name] %></td>
+          <td class="font-mono text-xs"><%= row[:party_type] %></td>
+          <td class="font-mono"><%= tm.team_member_number.presence || tm.id %></td>
+          <td class="font-mono text-xs"><%= tm.status %></td>
+          <td class="text-xs"><%= row[:engagement_summary] %></td>
+          <td class="font-mono text-xs"><%= row[:readiness_status] || "—" %></td>
+          <td><%= row[:alert_count] %></td>
+          <td>
+            <%= link_to "Open", admin_team_member_team360_path(tm), class: "text-sky-700 underline" %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

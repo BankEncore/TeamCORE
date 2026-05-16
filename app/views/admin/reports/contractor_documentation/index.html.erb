@@ -1,0 +1,81 @@
+<% content_for :title, "Report — Contractor documentation" %>
+<div class="mb-4"><%= link_to "← Reports hub", admin_reports_root_path, class: "text-sky-700 text-sm" %></div>
+<h1 class="text-2xl font-semibold mb-4">Contractor documentation exceptions</h1>
+<p class="text-sm text-slate-600 mb-4">Contractor-class engagements only. Filters use <code class="font-mono text-xs">DocumentType.category</code> — TC-3-D08 / TC-09-D03.</p>
+
+<%= form_with url: admin_reports_contractor_documentation_index_path, method: :get, data: { turbo: false }, class: "tc-panel p-4 mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm" do %>
+  <div>
+    <%= label_tag :as_of_date, "As of (ISO)", class: "block text-xs text-slate-600 mb-1" %>
+    <%= date_field_tag :as_of_date, @as_of_date, class: "w-full border rounded px-2 py-1" %>
+  </div>
+  <div>
+    <%= label_tag :relationship_type, "Relationship type", class: "block text-xs text-slate-600 mb-1" %>
+    <%= select_tag :relationship_type,
+          options_for_select([["— any contractor class —", ""]] + @contractor_rel_types.zip(@contractor_rel_types), params[:relationship_type]),
+          class: "w-full border rounded px-2 py-1" %>
+  </div>
+  <div>
+    <%= label_tag :document_category, "Document type category", class: "block text-xs text-slate-600 mb-1" %>
+    <%= select_tag :document_category, options_for_select([["— any —", ""]] + @document_categories.zip(@document_categories), params[:document_category]), class: "w-full border rounded px-2 py-1" %>
+  </div>
+  <div>
+    <%= label_tag :alert_type, "Alert type", class: "block text-xs text-slate-600 mb-1" %>
+    <%= select_tag :alert_type, options_for_select([["— any —", ""]] + %w[missing expired expiring_soon rejected pending_verification].zip(%w[missing expired expiring_soon rejected pending_verification]), params[:alert_type]), class: "w-full border rounded px-2 py-1" %>
+  </div>
+  <div>
+    <%= label_tag :severity, "Severity", class: "block text-xs text-slate-600 mb-1" %>
+    <%= select_tag :severity, options_for_select([["— any —", ""]] + %w[blocking warning info].zip(%w[blocking warning info]), params[:severity]), class: "w-full border rounded px-2 py-1" %>
+  </div>
+  <div>
+    <%= label_tag :readiness_status, "Engagement readiness", class: "block text-xs text-slate-600 mb-1" %>
+    <%= select_tag :readiness_status, options_for_select([["— any —", ""]] + Documents::ReadinessEvaluator::READINESS_STATUSES.zip(Documents::ReadinessEvaluator::READINESS_STATUSES), params[:readiness_status]), class: "w-full border rounded px-2 py-1" %>
+  </div>
+  <div>
+    <%= label_tag :expires_on_or_before, "Expires on or before", class: "block text-xs text-slate-600 mb-1" %>
+    <%= date_field_tag :expires_on_or_before, params[:expires_on_or_before], class: "w-full border rounded px-2 py-1" %>
+  </div>
+  <div class="flex items-center gap-2 pt-6">
+    <%= check_box_tag :include_terminal, "1", params[:include_terminal].present? %>
+    <%= label_tag :include_terminal, "Include terminal engagements" %>
+  </div>
+  <div class="flex items-end">
+    <%= submit_tag "Apply", class: "tc-btn tc-btn--primary" %>
+  </div>
+<% end %>
+
+<div class="overflow-x-auto tc-panel">
+  <table class="tc-data-table tc-data-table--compact text-xs min-w-full">
+    <thead>
+      <tr>
+        <th>Team member</th>
+        <th>Engagement</th>
+        <th>Type</th>
+        <th>Alert</th>
+        <th>Category</th>
+        <th>Team360</th>
+        <th>Record</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @flat_rows.each do |r| %>
+        <% a = r.alert %>
+        <% e = r.engagement %>
+        <% tm = e.team_member %>
+        <% dtype = @document_types_by_id[a.document_type_id] %>
+        <tr>
+          <td><%= tm.party.display_name %></td>
+          <td class="font-mono"><%= link_to e.id, admin_engagement_path(e), class: "text-sky-700 underline" %></td>
+          <td class="font-mono"><%= e.relationship_type %></td>
+          <td class="font-mono"><%= a.alert_type %> · <%= a.severity %></td>
+          <td class="font-mono"><%= dtype&.category || "—" %></td>
+          <td><%= link_to "Team360", admin_team_member_team360_path(tm), class: "text-sky-700 underline" %></td>
+          <td>
+            <% if a.document_record_id %>
+              <%= link_to "Record", admin_document_record_path(a.document_record_id), class: "text-sky-700 underline" %>
+            <% else %>—<% end %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

@@ -1,0 +1,367 @@
+<%# @snapshot, @as_of_date, @team_member (instance variables) %>
+<% content_for :title, "Team360 — #{@snapshot.identity[:display_name]}" %>
+<div class="tc-page tc-page-stack">
+  <div class="mb-2">
+    <%= link_to "← Team member", admin_team_member_path(@team_member), class: "text-sm", style: "color: var(--tc-primary);" %>
+  </div>
+
+  <header class="tc-record-header">
+    <div class="tc-record-header__top">
+      <div>
+        <div class="tc-record-header__eyebrow">Team360</div>
+        <h1 class="tc-record-header__title"><%= @snapshot.identity[:display_name] %></h1>
+        <p class="tc-record-header__subtitle">
+          Party <%= @snapshot.identity[:party_type] %> · TM #<%= @snapshot.identity[:team_member_id] %>
+          <% if @snapshot.identity[:team_member_number].present? %>
+            · <%= @snapshot.identity[:team_member_number] %>
+          <% end %>
+          · status <span class="font-mono"><%= @snapshot.identity[:team_member_status] %></span>
+        </p>
+        <div class="tc-record-header__badges">
+          <span class="tc-status-badge tc-status-badge--neutral">As of <%= @as_of_date.iso8601 %></span>
+          <% if @snapshot.readiness_result %>
+            <span class="tc-status-badge tc-status-badge--info">Readiness: <%= @snapshot.readiness_result.readiness_status %></span>
+          <% end %>
+        </div>
+      </div>
+      <div class="tc-record-header__actions">
+        <%= form_with url: admin_team_member_team360_path(@team_member), method: :get, data: { turbo: false }, class: "flex flex-wrap gap-2 items-end text-sm" do %>
+          <% if params[:engagement_id].present? %>
+            <%= hidden_field_tag :engagement_id, params[:engagement_id] %>
+          <% end %>
+          <%= label_tag :as_of_date, "As of", class: "text-white/80 text-xs block w-full" %>
+          <%= date_field_tag :as_of_date, @as_of_date, class: "rounded border border-white/30 bg-white/10 text-white px-2 py-1 text-sm" %>
+          <%= submit_tag "Apply", class: "tc-btn tc-btn--secondary" %>
+        <% end %>
+      </div>
+    </div>
+  </header>
+
+  <% if @snapshot.engagement_summaries.size > 1 %>
+    <div class="tc-panel">
+      <div class="tc-panel__header">
+        <div>
+          <div class="tc-panel__title">Focused engagement</div>
+          <p class="tc-panel__subtitle">Display selection for organization and document panels (TC-3-D03).</p>
+        </div>
+      </div>
+      <div class="tc-panel__body">
+        <%= form_with url: admin_team_member_team360_path(@team_member), method: :get, data: { turbo: false }, class: "flex flex-wrap gap-3 items-end" do %>
+          <%= hidden_field_tag :as_of_date, @as_of_date.iso8601 %>
+          <div>
+            <%= label_tag :engagement_id, "Engagement", class: "block text-xs text-slate-600 mb-1" %>
+            <%= select_tag :engagement_id,
+                  options_for_select(
+                    @snapshot.engagement_summaries.map { |s|
+                      [ "##{s[:id]} #{s[:relationship_type]} — #{s[:status]}", s[:id] ]
+                    },
+                    @snapshot.focused_engagement_id
+                  ),
+                  class: "border border-slate-300 rounded px-2 py-1 text-sm" %>
+          </div>
+          <%= submit_tag "Update focus", class: "tc-btn tc-btn--primary" %>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <div class="tc-record-layout">
+    <div class="tc-record-main tc-team360">
+      <section class="tc-panel">
+        <div class="tc-panel__header">
+          <div class="tc-panel__title">Identity</div>
+        </div>
+        <div class="tc-panel__body">
+          <dl class="tc-kv-grid">
+            <dt>Party</dt>
+            <dd>
+              <%= link_to "Party ##{@snapshot.identity[:party_id]}", admin_party_path(@snapshot.identity[:party_id]), class: "text-sky-700 underline" %>
+            </dd>
+            <dt>Display name</dt>
+            <dd><%= @snapshot.identity[:display_name] %></dd>
+            <dt>Party type</dt>
+            <dd class="font-mono"><%= @snapshot.identity[:party_type] %></dd>
+            <dt>Team member #</dt>
+            <dd><%= @snapshot.identity[:team_member_id] %></dd>
+            <dt>TM number</dt>
+            <dd><%= @snapshot.identity[:team_member_number].presence || "—" %></dd>
+            <dt>TM status</dt>
+            <dd class="font-mono"><%= @snapshot.identity[:team_member_status] %></dd>
+          </dl>
+        </div>
+      </section>
+
+      <section class="tc-panel">
+        <div class="tc-panel__header">
+          <div class="tc-panel__title">Contacts</div>
+        </div>
+        <div class="tc-panel__body">
+          <% if @snapshot.contacts.blank? %>
+            <p class="text-sm text-slate-600">No party contact methods on file.</p>
+          <% else %>
+            <ul class="text-sm space-y-2">
+              <% @snapshot.contacts.each do |c| %>
+                <li>
+                  <span class="font-mono text-xs text-slate-500"><%= c[:contact_type] %></span>
+                  <%= c[:value] %>
+                  <% if c[:is_primary] %>· primary<% end %>
+                  · <span class="font-mono"><%= c[:status] %></span>
+                </li>
+              <% end %>
+            </ul>
+          <% end %>
+        </div>
+      </section>
+
+      <section class="tc-panel">
+        <div class="tc-panel__header">
+          <div class="tc-panel__title">Engagements</div>
+        </div>
+        <div class="tc-panel__body overflow-x-auto">
+          <table class="tc-data-table tc-data-table--compact text-sm">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th>Title</th>
+                <th>Dates</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @snapshot.engagement_summaries.each do |s| %>
+                <tr>
+                  <td class="font-mono"><%= s[:id] %></td>
+                  <td class="font-mono"><%= s[:relationship_type] %></td>
+                  <td>
+                    <span class="tc-status-badge <%= s[:suspended] ? "tc-status-badge--warning" : (s[:terminal] ? "tc-status-badge--neutral" : "tc-status-badge--success") %>">
+                      <%= s[:status] %>
+                    </span>
+                  </td>
+                  <td><%= s[:title].presence || "—" %></td>
+                  <td class="font-mono text-xs">
+                    <%= s[:start_on] %> / <%= s[:end_on] || "—" %>
+                    <% if s[:expected_end_on] %><br/>exp <%= s[:expected_end_on] %><% end %>
+                  </td>
+                  <td>
+                    <%= link_to "Open", admin_engagement_path(s[:id]), class: "text-sky-700 underline text-xs" %>
+                    <% if @snapshot.focused_engagement_id == s[:id] %>
+                      <span class="text-xs text-slate-500">· focus</span>
+                    <% end %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="tc-panel">
+        <div class="tc-panel__header">
+          <div>
+            <div class="tc-panel__title">Organization context</div>
+            <% if @snapshot.focused_engagement_id %>
+              <p class="tc-panel__subtitle">From engagement <%= @snapshot.focused_engagement_id %> · effective rows for <%= @as_of_date.iso8601 %>.</p>
+            <% end %>
+          </div>
+        </div>
+        <div class="tc-panel__body">
+          <% oc = @snapshot.organization_context %>
+          <% if oc.blank? %>
+            <p class="text-sm text-slate-600">No focused engagement.</p>
+          <% else %>
+            <dl class="tc-kv-grid text-sm">
+              <dt>Department</dt>
+              <dd>
+                <% if oc[:department] %>
+                  <%= oc[:department][:name] %>
+                  <span class="font-mono text-xs text-slate-500">(<%= oc[:department][:status] %>)</span>
+                <% else %>—<% end %>
+              </dd>
+              <dt>Location</dt>
+              <dd>
+                <% if oc[:location] %>
+                  <%= oc[:location][:name] %>
+                  <span class="font-mono text-xs text-slate-500">(<%= oc[:location][:status] %>)</span>
+                <% else %>—<% end %>
+              </dd>
+              <dt>Team</dt>
+              <dd>
+                <% if oc[:team] %>
+                  <%= oc[:team][:name] %>
+                  <span class="font-mono text-xs text-slate-500">(<%= oc[:team][:status] %>)</span>
+                <% else %>—<% end %>
+              </dd>
+              <dt>Placement effective</dt>
+              <dd class="font-mono text-xs">
+                <% if oc[:placement_effective] %>
+                  <%= oc[:placement_effective][:start_on] %> — <%= oc[:placement_effective][:end_on] || "—" %>
+                <% else %>—<% end %>
+              </dd>
+              <dt>Supervisor</dt>
+              <dd>
+                <% if oc[:supervision] %>
+                  <%= oc[:supervision][:supervisor_display] || "Engagement ##{oc[:supervision][:supervisor_engagement_id]}" %>
+                  <span class="font-mono text-xs text-slate-500">
+                    · <%= oc[:supervision][:relationship_type] %>
+                    · <%= oc[:supervision][:start_on] %> — <%= oc[:supervision][:end_on] || "—" %>
+                  </span>
+                <% else %>—<% end %>
+              </dd>
+            </dl>
+            <p class="mt-3 text-xs text-slate-500">
+              <%= link_to "Engagement ##{oc[:engagement_id]}", admin_engagement_path(oc[:engagement_id]), class: "text-sky-700 underline" %>
+            </p>
+          <% end %>
+        </div>
+      </section>
+
+      <% if @snapshot.readiness_result %>
+        <%= render partial: "admin/engagements/document_alerts",
+              locals: { readiness: @snapshot.readiness_result, document_types_by_id: @snapshot.document_types_by_id } %>
+
+        <section class="tc-panel">
+          <div class="tc-panel__header">
+            <div class="tc-panel__title">Document readiness summary</div>
+            <p class="tc-panel__subtitle">Counts from <code class="font-mono text-xs">ReadinessResult</code> only.</p>
+          </div>
+          <div class="tc-panel__body">
+            <% req = @snapshot.readiness_result.requirements %>
+            <% counts = req.group_by(&:requirement_outcome).transform_values(&:size) %>
+            <div class="tc-team360__metric-row">
+              <% %w[missing pending_verification satisfied rejected expired expiring_soon not_applicable].each do |k| %>
+                <div class="tc-team360__metric">
+                  <div class="tc-team360__metric-value"><%= counts[k] || 0 %></div>
+                  <div class="tc-team360__metric-label"><%= k %></div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </section>
+
+        <section class="tc-panel">
+          <div class="tc-panel__header">
+            <div class="tc-panel__title">Verification summary</div>
+            <p class="tc-panel__subtitle">Outcomes from evaluator rows; record columns are display-only (TC-3-D09).</p>
+          </div>
+          <div class="tc-panel__body overflow-x-auto">
+            <table class="tc-data-table tc-data-table--compact text-xs">
+              <thead>
+                <tr>
+                  <th>Req</th>
+                  <th>Outcome</th>
+                  <th>Record status</th>
+                  <th>Record</th>
+                  <th>Verifier / dates</th>
+                  <th>Rejection</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% @snapshot.readiness_result.requirements.each do |row| %>
+                  <% rec = row.document_record_id ? @snapshot.records_by_id[row.document_record_id] : nil %>
+                  <tr>
+                    <td class="font-mono"><%= row.document_requirement_id %></td>
+                    <td class="font-mono"><%= row.requirement_outcome %></td>
+                    <td class="font-mono"><%= row.record_review_status || "—" %></td>
+                    <td>
+                      <% if rec %>
+                        <%= link_to "Record ##{rec.id}", admin_document_record_path(rec), class: "text-sky-700 underline" %>
+                        · <span class="font-mono"><%= rec.status %></span>
+                      <% elsif row.document_record_id %>
+                        #<%= row.document_record_id %>
+                      <% else %>
+                        —
+                      <% end %>
+                    </td>
+                    <td class="font-mono">
+                      <% if rec&.verified_by %>
+                        <%= rec.verified_by.email %>
+                      <% end %>
+                      <% if rec&.verified_on %>
+                        <br/><%= rec.verified_on %>
+                      <% end %>
+                      <% if rec&.submitted_on %>
+                        <br/>sub <%= rec.submitted_on %>
+                      <% end %>
+                    </td>
+                    <td><%= rec&.rejection_reason.presence || "—" %></td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+            <p class="mt-2 text-xs text-slate-500">
+              <%= link_to "Pending review queue", admin_document_reviews_path, class: "text-sky-700 underline" %>
+            </p>
+          </div>
+        </section>
+      <% else %>
+        <section class="tc-panel tc-panel--muted">
+          <div class="tc-panel__body text-sm text-slate-600">No focused engagement — document readiness not evaluated.</div>
+        </section>
+      <% end %>
+
+      <section class="tc-panel">
+        <div class="tc-panel__header">
+          <div class="tc-panel__title">Subcontractor context</div>
+        </div>
+        <div class="tc-panel__body">
+          <% if @snapshot.subcontractor_rows.blank? %>
+            <p class="text-sm text-slate-600">No incoming subcontractor PartyRelationship rows for this party.</p>
+          <% else %>
+            <ul class="text-sm space-y-3">
+              <% @snapshot.subcontractor_rows.each do |row| %>
+                <li class="border-b border-slate-100 pb-2 last:border-0">
+                  <span class="font-mono text-xs text-slate-500">source → target</span>
+                  <%= link_to row[:source_party].presence || "Party ##{row[:source_party_id]}", admin_party_path(row[:source_party_id]), class: "text-sky-700 underline" %>
+                  · rel <%= row[:id] %> · <%= row[:status] %>
+                  <% if row[:effective_start] || row[:effective_end] %>
+                    · eff. <%= row[:effective_start] || "—" %> — <%= row[:effective_end] || "—" %>
+                  <% end %>
+                  <br/>
+                  <% if row[:promoted] %>
+                    <span class="tc-status-badge tc-status-badge--info">Promoted workforce</span>
+                    <% if row[:subcontractor_engagement_status] %>
+                      <span class="font-mono text-xs">subcontractor engagement <%= row[:subcontractor_engagement_status] %></span>
+                    <% end %>
+                  <% else %>
+                    <span class="tc-status-badge tc-status-badge--neutral">Related-only</span>
+                  <% end %>
+                </li>
+              <% end %>
+            </ul>
+          <% end %>
+        </div>
+      </section>
+
+      <% %w[
+        compensation settlement time_leave payroll audit_timeline
+      ].each do |key| %>
+        <section class="tc-panel tc-panel--muted">
+          <div class="tc-panel__header">
+            <div class="tc-panel__title"><%= key.humanize %></div>
+            <p class="tc-panel__subtitle">TODO(TC-29) · Deferred domain — placeholder only (TC-3-D07).</p>
+          </div>
+          <div class="tc-panel__body text-sm text-slate-600">
+            This panel is not implemented in Phase 3.
+          </div>
+        </section>
+      <% end %>
+    </div>
+
+    <aside class="tc-record-context tc-record-context--sticky">
+      <section class="tc-panel">
+        <div class="tc-panel__header">
+          <div class="tc-panel__title">Quick links</div>
+        </div>
+        <div class="tc-panel__body text-sm space-y-2">
+          <%= link_to "Team member admin", admin_team_member_path(@team_member), class: "block text-sky-700 underline" %>
+          <%= link_to "Party", admin_party_path(@snapshot.identity[:party_id]), class: "block text-sky-700 underline" %>
+          <% @snapshot.engagement_summaries.first(5).each do |s| %>
+            <%= link_to "Engagement ##{s[:id]}", admin_engagement_path(s[:id]), class: "block text-sky-700 underline" %>
+          <% end %>
+        </div>
+      </section>
+    </aside>
+  </div>
+</div>

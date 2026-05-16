@@ -2,7 +2,7 @@
 
 This register tracks product and modeling decisions for TeamCORE. Not every item needs the same rigor: use the **decision handling model** below so Phase 0 can close without pretending Phase 4–6 design is final.
 
-**Companion docs:** [`domain-map.md`](domain-map.md), [`overview.md`](overview.md), [`roadmap-decision-log.md`](roadmap-decision-log.md), [`../roadmap/phase-1-readiness-checklist.md`](../roadmap/phase-1-readiness-checklist.md), [`employee-contractor-applicability-matrix.md`](employee-contractor-applicability-matrix.md), [`glossary.md`](glossary.md), [`../domain/party-team-member.md`](../domain/party-team-member.md), **[`../domain/engagement.md`](../domain/engagement.md)** (TC-03), **[`../domain/engagement-status.md`](../domain/engagement-status.md)** (TC-04), **[`../domain/documents-compliance.md`](../domain/documents-compliance.md)** (TC-06), **[`../domain/document-alerts.md`](../domain/document-alerts.md)** (TC-07), **[`../domain/document-verification.md`](../domain/document-verification.md)** (TC-08), **[`../domain/contractor-classification-support.md`](../domain/contractor-classification-support.md)** (TC-09).
+**Companion docs:** [`domain-map.md`](domain-map.md), [`overview.md`](overview.md), [`roadmap-decision-log.md`](roadmap-decision-log.md), [`../roadmap/phase-1-readiness-checklist.md`](../roadmap/phase-1-readiness-checklist.md), [`employee-contractor-applicability-matrix.md`](employee-contractor-applicability-matrix.md), [`glossary.md`](glossary.md), [`../domain/party-team-member.md`](../domain/party-team-member.md), **[`../domain/engagement.md`](../domain/engagement.md)** (TC-03), **[`../domain/engagement-status.md`](../domain/engagement-status.md)** (TC-04), **[`../domain/documents-compliance.md`](../domain/documents-compliance.md)** (TC-06), **[`../domain/document-alerts.md`](../domain/document-alerts.md)** (TC-07), **[`../domain/document-verification.md`](../domain/document-verification.md)** (TC-08), **[`../domain/contractor-classification-support.md`](../domain/contractor-classification-support.md)** (TC-09), **[`../domain/team360.md`](../domain/team360.md)** (TC-10 / TC-11), **[`../domain/operational-reporting.md`](../domain/operational-reporting.md)** (TC-12).
 
 ---
 
@@ -80,7 +80,40 @@ This register tracks product and modeling decisions for TeamCORE. Not every item
 | TC-09-D06 | Reuse existing **`readiness_status`** values; no new classification-readiness vocabulary | 2 |
 | TC-09-D07 | Contractor organization engagements may receive contractor classification-support requirements where configured | 2 |
 | TC-09-D08 | Contractor-only tax/W-9-style requirements must not use **`relationship_type: any`** unless intentionally universal | 2 |
+| TC-3-D01 | Team360: read-only assembly; **no** persisted profile / **`team360s`** table | 2 |
+| TC-3-D02 | Team360 and reports: optional **`as_of_date`** param; default **`Date.current`** for placement, supervision, evaluator | 2 |
+| TC-3-D03 | **`focused_engagement`** is **display selection only** (non-persisted); drives org/doc panels; not legal/payroll primary | 2 |
+| TC-3-D04 | Operational report rows drill to Team360 and source admin records | 2 |
+| TC-3-D05 | Phase 3 permissions: agency scope + existing admin auth only; **no** partial TC-29 masking | 2 |
+| TC-3-D06 | **No** reporting snapshot tables in Phase 3; query models + evaluator at request time | 2 |
+| TC-3-D07 | Deferred-domain Team360 panels: **placeholder** static copy only | 2 |
+| TC-3-D08 | Report filters use **existing domain vocabulary** (engagement status/type, evaluator alert fields, org ids, as-of) | 2 |
+| TC-3-D09 | Presenters format only; **do not** compute readiness outcomes, alert severity, or classification in views | 2 |
 
+
+### TC-3-D01–D09 — Phase 3 Team360 and operational reporting
+
+**Status:** Accepted for Phase 3 implementation  
+**Tier:** 2  
+**Detail:** Authoritative narrative in **[`../domain/team360.md`](../domain/team360.md)** and **[`../domain/operational-reporting.md`](../domain/operational-reporting.md)**.
+
+**Summary**
+
+| ID | Decision |
+| --- | --- |
+| TC-3-D01 | **No `team360s` table.** Team360 = assembler + snapshot / read path only. |
+| TC-3-D02 | **`as_of_date`** on Team360 and reports (default today) for placement, supervision, document evaluation. |
+| TC-3-D03 | **`focused_engagement`** chooses which engagement feeds org + document panels; **not persisted**; not primary legal/compliance designation. |
+| TC-3-D04 | Report rows link to Team360 and authoritative records (engagement, document record, party, etc.). |
+| TC-3-D05 | **No panel-level permission branches** in Phase 3 beyond existing admin + agency scope; **TC-29** for masking later (`TODO(TC-29)` acceptable). |
+| TC-3-D06 | **No persisted report snapshots** in Phase 3. |
+| TC-3-D07 | Compensation / payroll / settlement / time / leave / durable audit: **placeholders** only (no fake data). |
+| TC-3-D08 | Filters use model/evaluator vocabulary; no ad-hoc parallel status labels in query strings. |
+| TC-3-D09 | Presentation layer: labels, badges, links; **evaluator** owns requirement outcomes and alert severities; mapping DB `engagement.status` → label is formatting, not re-computation. |
+
+**Handoff:** Full **permission-aware Team360** and durable audit timeline remain **Phase 6 / TC-29 / TC-30** per [`domain-map.md`](domain-map.md).
+
+---
 
 ### OD-001 — Party vs Team Member
 

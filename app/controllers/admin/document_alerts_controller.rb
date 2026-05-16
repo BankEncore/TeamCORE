@@ -3,12 +3,14 @@
 module Admin
   # Read-only aggregate of derived document alerts across engagements (TC-07).
   class DocumentAlertsController < Admin::BaseController
+    include Admin::ReportParamParsing
+
     FlatAlertRow = Struct.new(:engagement, :alert, keyword_init: true)
 
     before_action :require_current_agency!
 
     def index
-      @as_of_date = parse_date_param(params[:as_of_date]) || Date.current
+      @as_of_date = parse_report_date(params[:as_of_date]) || Date.current
       engagements = Engagement.where(agency_id: current_agency.id)
 
       engagements =
@@ -37,7 +39,7 @@ module Admin
         rows.select! { |r| r.alert.team_member_id == tm_id }
       end
 
-      if (cutoff = parse_date_param(params[:expires_on_or_before])).present?
+      if (cutoff = parse_report_date(params[:expires_on_or_before])).present?
         rows.select! { |r| r.alert.expires_on.present? && r.alert.expires_on <= cutoff }
       end
 
@@ -50,21 +52,6 @@ module Admin
 
     def include_terminal_engagements?
       ActiveModel::Type::Boolean.new.cast(params[:include_terminal])
-    end
-
-    def parse_date_param(value)
-      return if value.blank?
-
-      Date.iso8601(value.to_s)
-    rescue ArgumentError
-      nil
-    end
-
-    def parse_non_negative_int_param(value)
-      return if value.blank?
-      return unless value.to_s.match?(/\A\d+\z/)
-
-      value.to_i
     end
 
     def sort_flat_rows(rows)
