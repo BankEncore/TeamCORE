@@ -1428,3 +1428,671 @@ Start with this split now. It is small enough to manage, but already gives you s
 06_workspaces.css   Team360 and workspace layouts
 ```
 
+---
+
+# **UX guidance for TeamCORE forms/workflows**
+
+For TeamCORE, I would design forms and workflows around one principle:
+
+**Operators should always know what they are doing, why it matters, what system state will change, and whether approval/review is required.**
+
+TeamCORE forms should feel less like generic SaaS forms and more like **controlled operational workflows**.
+
+---
+
+# **1\. Form design principles**
+
+## **1\. Keep forms procedural**
+
+Avoid large “edit everything” screens when the action is really a workflow.
+
+Better:
+
+```
+Create engagement
+→ Select relationship type
+→ Enter effective dates
+→ Assign operating unit
+→ Assign position
+→ Review requirements
+→ Confirm
+```
+
+Instead of:
+
+```
+One giant team member form with 60 fields
+```
+
+For TeamCORE, the form should match the business process.
+
+---
+
+## **2\. Separate profile editing from operational actions**
+
+Do not mix low-risk profile edits with high-risk lifecycle actions.
+
+| Action | UX pattern |
+| ----- | ----- |
+| Update phone number | Simple edit form |
+| Upload document | Focused document form |
+| Verify document | Review/decision workflow |
+| Start engagement | Guided workflow |
+| End engagement | Confirmation workflow |
+| Assign position | Effective-dated workflow |
+| Suspend worker | Reason-coded controlled action |
+| Reject document | Decision form with required note |
+
+This prevents accidental state changes.
+
+---
+
+## **3\. Use “review before commit” for important workflows**
+
+For actions that affect readiness, engagement, compliance, access, or compensation, use a confirmation step.
+
+Example:
+
+```
+Step 1: Enter details
+Step 2: Review changes
+Step 3: Confirm and save
+```
+
+The review screen should show:
+
+* what will be created or changed  
+* effective date  
+* resulting status  
+* affected requirements  
+* whether the person becomes ready/not ready  
+* audit note, if required
+
+---
+
+# **2\. Recommended workflow types**
+
+## **A. Simple edit form**
+
+Use for low-risk updates.
+
+Examples:
+
+* preferred name  
+* phone number  
+* email address  
+* mailing address  
+* emergency contact  
+* internal notes
+
+Pattern:
+
+```
+[Form Section]
+Field
+Field
+Field
+
+[Cancel] [Save Changes]
+```
+
+UX rules:
+
+* No wizard.  
+* Inline validation.  
+* Preserve original context after save.  
+* Return to the same Team360 section.
+
+---
+
+## **B. Focused action form**
+
+Use for actions with one clear purpose.
+
+Examples:
+
+* upload document  
+* assign manager  
+* add note  
+* update expiration date  
+* assign contractor organization
+
+Pattern:
+
+```
+Action: Upload Document
+
+Context:
+Jane Smith · Contractor · Not Ready
+
+Form:
+Document Type
+File
+Expiration Date
+Notes
+
+[Cancel] [Upload Document]
+```
+
+UX rules:
+
+* Keep the page title action-oriented.  
+* Show the affected person at the top.  
+* Include only fields relevant to the action.  
+* Do not expose unrelated team member fields.
+
+---
+
+## **C. Decision workflow**
+
+Use where a user must make a controlled decision.
+
+Examples:
+
+* verify document  
+* reject document  
+* approve onboarding exception  
+* resolve missing requirement  
+* approve contractor activation
+
+Pattern:
+
+```
+Review Document
+
+Document:
+E&O Insurance
+Uploaded: May 15, 2026
+Expires: June 15, 2027
+
+Decision:
+( ) Verify
+( ) Reject
+( ) Request replacement
+
+Notes:
+[Required for reject/request replacement]
+
+[Cancel] [Submit Decision]
+```
+
+UX rules:
+
+* Make the decision explicit.  
+* Require notes for negative or exceptional outcomes.  
+* Show the source record being reviewed.  
+* Record reviewer, date, decision, and notes.  
+* Avoid ambiguous buttons like “Submit” alone.
+
+Use:
+
+```
+[Verify Document]
+[Reject Document]
+```
+
+Not:
+
+```
+[Save]
+```
+
+---
+
+## **D. Guided lifecycle workflow**
+
+Use for multi-step actions.
+
+Examples:
+
+* onboard team member  
+* create contractor engagement  
+* add subcontractor under contractor organization  
+* offboard team member  
+* convert contractor to employee  
+* assign position with document requirements
+
+Pattern:
+
+```
+Step 1: Relationship
+Step 2: Engagement Details
+Step 3: Position / Assignment
+Step 4: Requirements
+Step 5: Review & Confirm
+```
+
+UX rules:
+
+* Show progress.  
+* Allow back navigation.  
+* Autosave draft only if you are ready to manage abandoned drafts.  
+* Otherwise keep it linear and explicit.  
+* Do not activate final state until confirmation.
+
+---
+
+# **3\. Team360 workflow entry points**
+
+Team360 should not own all workflows, but it should provide deep links into them. This aligns with the prior Team360 direction: a practical command center with header actions, readiness panels, document tables, and context alerts rather than a monolithic editor.
+
+## **Recommended Team360 action placement**
+
+| Location | Actions |
+| ----- | ----- |
+| Header action bar | Edit Profile, Add Document, Assign Position, More Actions |
+| Readiness panel | View Requirements, Resolve Missing Items |
+| Documents table | Upload, Replace, Verify, Reject, View History |
+| Engagement panel | Start, End, Suspend, Change Type |
+| Position panel | Assign, Change, End Assignment |
+| Context alerts | Resolve, Review, Dismiss if allowed |
+| Recent activity | View full audit trail |
+
+---
+
+# **4\. Form page layout**
+
+Use a consistent two-column workflow layout.
+
+```
+┌────────────────────────────────────────────────────────────────────┐
+│ Page title                                                         │
+│ Short explanation                                                   │
+└────────────────────────────────────────────────────────────────────┘
+
+┌────────────────────────────────────────────┬───────────────────────┐
+│ Main Form                                  │ Context Panel          │
+│                                            │                       │
+│ Section 1                                  │ Jane Smith             │
+│ Section 2                                  │ Contractor             │
+│ Section 3                                  │ Current readiness      │
+│                                            │ Related requirements   │
+│ [Cancel] [Save / Continue / Confirm]       │ Recent activity        │
+└────────────────────────────────────────────┴───────────────────────┘
+```
+
+## **Main column**
+
+Use for:
+
+* actual form fields  
+* decision inputs  
+* confirmation summary  
+* validation errors
+
+## **Right context column**
+
+Use for:
+
+* team member quick facts  
+* current status  
+* current engagement  
+* relevant requirement status  
+* warnings  
+* effective-date implications
+
+This keeps users from making changes without context.
+
+---
+
+# **5\. Field grouping guidance**
+
+Group fields by meaning, not by database table.
+
+## **Example: Create Engagement**
+
+Bad grouping:
+
+```
+TeamMember fields
+Engagement fields
+PositionRecord fields
+DocumentRequirement fields
+```
+
+Better grouping:
+
+```
+Relationship
+- Engagement type
+- Contractor organization
+- Start date
+
+Assignment
+- Operating unit
+- Position
+- Manager
+- Capacity/FTE
+
+Compliance impact
+- Requirement profile
+- Required documents
+- Activation behavior
+```
+
+The user should not need to understand the schema to complete the workflow.
+
+---
+
+# **6\. Required fields and validation**
+
+## **Use validation in three layers**
+
+| Layer | Purpose |
+| ----- | ----- |
+| Field-level | Missing or malformed input |
+| Section-level | Incomplete section |
+| Workflow-level | Business rule failure |
+
+Example:
+
+```
+Field-level:
+Expiration date is required for E&O Insurance.
+
+Section-level:
+This document cannot be submitted until file, document type, and expiration date are complete.
+
+Workflow-level:
+This team member cannot be activated because Contractor Agreement is still missing.
+```
+
+## **Validation style**
+
+Use plain, operational language:
+
+```
+Expiration date is required.
+```
+
+Not:
+
+```
+Expiration can't be blank.
+```
+
+Use:
+
+```
+This document expired before the engagement start date.
+```
+
+Not:
+
+```
+Invalid expiration.
+```
+
+---
+
+# **7\. Confirmation screens**
+
+Use confirmation screens for actions with audit/compliance impact.
+
+## **Confirmation screen should show**
+
+```
+You are about to:
+- Create a contractor engagement for Jane Smith
+- Start the engagement on May 15, 2026
+- Assign the person to Retail Sales
+- Require W-9, Contractor Agreement, and E&O Insurance
+- Leave readiness status as Not Ready until missing documents are satisfied
+```
+
+Buttons:
+
+```
+[Back] [Create Engagement]
+```
+
+For destructive or state-changing actions:
+
+```
+[Cancel] [End Engagement]
+[Cancel] [Reject Document]
+[Cancel] [Suspend Team Member]
+```
+
+Avoid generic confirmation buttons.
+
+---
+
+# **8\. Workflow status language**
+
+Keep workflow status vocabulary controlled.
+
+## **Use clear lifecycle states**
+
+| State | Meaning |
+| ----- | ----- |
+| Draft | Not submitted or incomplete |
+| Pending Review | Submitted and awaiting authorized review |
+| Active | Current and operational |
+| Suspended | Temporarily blocked |
+| Ended | Completed or no longer active |
+| Rejected | Reviewed and not accepted |
+| Superseded | Replaced by a newer record |
+
+## **Separate document review from requirement outcome**
+
+This is important.
+
+| Concept | Example status |
+| ----- | ----- |
+| Document review status | Pending Review, Verified, Rejected |
+| Requirement outcome | Missing, Satisfied, Expired, Expiring Soon, Blocked |
+| Team readiness | Ready, Not Ready, Pending Review, Blocked |
+
+Do not overload “verified” to mean everything.
+
+---
+
+# **9\. Button guidance**
+
+## **Standard button hierarchy**
+
+| Button | Use |
+| ----- | ----- |
+| Primary | Main safe workflow action |
+| Secondary | Cancel, back, alternate non-destructive action |
+| Teal | Document/action-specific secondary workflow |
+| Accent | Rare promotional or emphasized action |
+| Danger | Destructive, rejecting, suspending, terminating |
+| Quiet | Low-emphasis table actions |
+
+Examples:
+
+```
+[Cancel] [Save Changes]
+[Back] [Continue]
+[Cancel] [Verify Document]
+[Cancel] [Reject Document]
+[Back] [Create Engagement]
+[Cancel] [End Engagement]
+```
+
+Avoid:
+
+```
+[Submit]
+[OK]
+[Done]
+```
+
+---
+
+# **10\. Workflow examples**
+
+## **Document upload**
+
+```
+Upload Document
+
+Context:
+Jane Smith
+Contractor
+Readiness: Not Ready
+Missing: E&O Insurance
+
+Fields:
+- Requirement
+- Document type
+- File
+- Issue date
+- Expiration date
+- Notes
+
+After upload:
+- Record status = Pending Review
+- Requirement outcome = Pending Review or Not Satisfied
+- Readiness recalculates
+```
+
+---
+
+## **Document verification**
+
+```
+Verify Document
+
+Context:
+Jane Smith
+Requirement: E&O Insurance
+Current readiness: Not Ready
+
+Review:
+- Uploaded file
+- Requirement details
+- Expiration date
+- Applies to contractor engagement
+
+Decision:
+- Verify
+- Reject
+- Request replacement
+
+Required note:
+- Required for reject
+- Optional for verify
+
+After decision:
+- Document review status updates
+- Verifier and verification date recorded
+- Requirement outcome recalculates
+- Team360 readiness updates
+```
+
+---
+
+## **Start engagement**
+
+```
+Start Engagement
+
+Step 1: Relationship
+- Employee / contractor / subcontractor
+- Related organization, if applicable
+
+Step 2: Details
+- Start date
+- End date, if applicable
+- Operating unit
+- Manager
+
+Step 3: Assignment
+- Position
+- Capacity/FTE
+- Location
+
+Step 4: Requirements
+- Requirements generated from relationship + position
+
+Step 5: Review & Confirm
+- Engagement summary
+- Required documents
+- Initial readiness result
+```
+
+---
+
+## **End engagement**
+
+```
+End Engagement
+
+Context:
+Jane Smith
+Current engagement: Contractor
+Start date: Jan 1, 2026
+Current readiness: Ready
+
+Fields:
+- End date
+- End reason
+- Notes
+- Access review required?
+- Final settlement review required?
+
+Confirmation:
+Ending this engagement will:
+- Mark the engagement ended
+- Remove active readiness
+- Trigger offboarding checklist
+- Preserve document and audit history
+
+[Cancel] [End Engagement]
+```
+
+---
+
+# **11\. Workflow guardrails**
+
+## **Add guardrails where mistakes would matter**
+
+Examples:
+
+* Cannot verify your own uploaded document, if segregation of duties is required.  
+* Cannot activate a contractor with missing blocking requirements.  
+* Cannot end engagement before start date.  
+* Cannot assign a position outside the selected operating unit, unless authorized.  
+* Cannot delete verified documents; supersede or revoke instead.  
+* Rejected documents must retain rejection reason and reviewer.  
+* Expired documents should not silently satisfy requirements.
+
+---
+
+# **12\. Recommended MVP form/workflow set**
+
+For early Team360, I would define these workflows first:
+
+| Workflow | Pattern | Priority |
+| ----- | ----- | ----- |
+| Edit team member profile | Simple edit | High |
+| Create engagement | Guided workflow | High |
+| Assign position | Focused or guided action | High |
+| Upload document | Focused action | High |
+| Verify/reject document | Decision workflow | High |
+| Replace document | Focused action | Medium |
+| End engagement | Confirmation workflow | Medium |
+| Add note | Simple action | Medium |
+| View audit history | Read-only workflow | Medium |
+| Suspend/reactivate | Controlled workflow | Later |
+
+---
+
+# **Bottom line**
+
+TeamCORE forms should be:
+
+* **action-specific**  
+* **context-rich**  
+* **effective-dated where needed**  
+* **review-before-commit for important changes**  
+* **strict about vocabulary**  
+* **clear about resulting system state**  
+* **designed around operational workflows, not database tables**
+
+The strongest UX pattern for Team360 is:
+
+**Team360 shows what is true now; workflows explain what will change next.**
