@@ -17,12 +17,12 @@
     <%= f.date_field :period_end_on, class: "tc-input" %>
   </div>
   <div class="tc-field">
-    <%= f.label :commissionable_revenue_cents, class: "tc-label" %>
-    <%= f.number_field :commissionable_revenue_cents, class: "tc-input" %>
+    <%= f.label :commissionable_revenue_money, "Commissionable revenue", class: "tc-label" %>
+    <%= f.text_field :commissionable_revenue_money, class: "tc-input", placeholder: "0.00", inputmode: "decimal", autocomplete: "off" %>
   </div>
   <div class="tc-field">
-    <%= f.label :gross_sales_cents, class: "tc-label" %>
-    <%= f.number_field :gross_sales_cents, class: "tc-input" %>
+    <%= f.label :gross_sales_money, "Gross sales (optional)", class: "tc-label" %>
+    <%= f.text_field :gross_sales_money, class: "tc-input", placeholder: "0.00", inputmode: "decimal", autocomplete: "off" %>
   </div>
   <div class="tc-field">
     <%= f.label :source_type, class: "tc-label" %>

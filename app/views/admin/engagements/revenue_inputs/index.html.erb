@@ -9,7 +9,7 @@
     <%= file_field_tag :csv_file, accept: "text/csv,.csv", class: "text-sm" %>
     <%= submit_tag "Upload", class: "tc-btn tc-btn--secondary" %>
   <% end %>
-  <p class="text-xs text-slate-500 mt-1">Headers: period_start_on, period_end_on, commissionable_revenue_cents, optional pay_period_id, gross_sales_cents, source_type, notes</p>
+  <p class="text-xs text-slate-500 mt-1">Use <code class="font-mono">commissionable_revenue</code> (dollars, e.g. 1500.00) or <code class="font-mono">commissionable_revenue_cents</code> (integer cents). Optional: <code class="font-mono">gross_sales</code> / <code class="font-mono">gross_sales_cents</code>, <code class="font-mono">pay_period_id</code>, <code class="font-mono">source_type</code>, <code class="font-mono">notes</code>.</p>
 
   <div class="tc-table-wrap mt-4">
     <table class="tc-data-table text-xs">
@@ -19,7 +19,7 @@
           <tr>
             <td class="font-mono"><%= r.id %></td>
             <td><%= r.period_start_on %> – <%= r.period_end_on %></td>
-            <td class="font-mono"><%= r.commissionable_revenue_cents %></td>
+            <td><%= tc_money(r.commissionable_revenue_cents) %></td>
             <td class="font-mono"><%= r.source_type %></td>
             <td>
               <%= button_to "Calc", calculate_commission_admin_engagement_revenue_input_path(@engagement, r), method: :post, class: "tc-btn tc-btn--quiet text-xs" %>

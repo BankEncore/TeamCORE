@@ -41,7 +41,7 @@ class AdminPhase4FinancialsTest < ActionDispatch::IntegrationTest
           name: "Adm commission",
           plan_type: "commission_only",
           status: "active",
-          default_commission_rate_bps: 500
+          default_commission_rate_percent: "5.00"
         }
       }
     end
@@ -57,7 +57,7 @@ class AdminPhase4FinancialsTest < ActionDispatch::IntegrationTest
           pay_period_id: pp.id,
           period_start_on: "2024-07-01",
           period_end_on: "2024-07-15",
-          commissionable_revenue_cents: 2_000_000,
+          commissionable_revenue_money: "20000.00",
           source_type: "manual",
           notes: "adm test"
         }
@@ -73,8 +73,8 @@ class AdminPhase4FinancialsTest < ActionDispatch::IntegrationTest
 
   test "revenue csv import" do
     body = <<~CSV
-      period_start_on,period_end_on,commissionable_revenue_cents,source_type
-      2024-08-01,2024-08-15,99999,imported_csv
+      period_start_on,period_end_on,commissionable_revenue,source_type
+      2024-08-01,2024-08-15,999.99,imported_csv
     CSV
     file = Rack::Test::UploadedFile.new(StringIO.new(body), "text/csv", original_filename: "rev.csv")
 
@@ -93,8 +93,8 @@ class AdminPhase4FinancialsTest < ActionDispatch::IntegrationTest
         contractor_charge: {
           charge_type: "technology_fee",
           status: "open",
-          original_amount_cents: 5000,
-          open_balance_cents: 5000
+          original_amount_money: "50.00",
+          open_balance_money: "50.00"
         }
       }
     end
@@ -109,8 +109,8 @@ class AdminPhase4FinancialsTest < ActionDispatch::IntegrationTest
         contractor_charge: {
           charge_type: "onboarding_fee",
           status: "open",
-          original_amount_cents: 1000,
-          open_balance_cents: 1000
+          original_amount_money: "10.00",
+          open_balance_money: "10.00"
         }
       }
     end

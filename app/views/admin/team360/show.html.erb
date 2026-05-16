@@ -359,16 +359,16 @@
               <ul class="list-none space-y-1 p-0 m-0 text-xs">
                 <li><span class="font-medium"><%= fin[:assignment_summary][:plan_name] %>
                   (<%= fin[:assignment_summary][:plan_type] %>)</span></li>
-                <li class="font-mono">Rate <%= fin[:assignment_summary][:commission_rate_bps] %> bps</li>
+                <li>Rate <%= tc_percent_from_bps(fin[:assignment_summary][:commission_rate_bps]) %></li>
                 <% if fin[:assignment_summary][:minimum_amount_cents].to_i.positive? %>
-                  <li class="font-mono">Min gross commission <%= fin[:assignment_summary][:minimum_amount_cents] %> c</li>
+                  <li>Min gross commission <%= tc_money(fin[:assignment_summary][:minimum_amount_cents]) %></li>
                 <% end %>
               </ul>
             <% else %>
               <p class="text-slate-600">No plan assignment effective on <%= @as_of_date %>.</p>
             <% end %>
             <% if fin[:draw_balance_cents].present? %>
-              <p class="font-mono text-xs mt-2">Draw balance: <%= fin[:draw_balance_cents] %> c</p>
+              <p class="text-xs mt-2">Draw balance: <%= tc_money(fin[:draw_balance_cents]) %></p>
             <% end %>
           </div>
         </section>
@@ -382,14 +382,14 @@
               <% if fin[:contractor_charges].present? %>
                 <p class="text-xs">
                   Open-ish charge rows: <%= fin[:contractor_charges][:open_count] %> ·
-                  balance <%= fin[:contractor_charges][:open_balance_cents] %> c
+                  balance <%= tc_money(fin[:contractor_charges][:open_balance_cents]) %>
                 </p>
               <% end %>
               <% if fin[:last_settlement].present? %>
                 <p class="text-xs font-mono">
                   Last line: run #<%= fin[:last_settlement][:run_id] %>
                   (<%= fin[:last_settlement][:status] %>)
-                  · net <%= fin[:last_settlement][:net_cents] %> c
+                  · net <%= tc_money(fin[:last_settlement][:net_cents]) %>
                   · <%= fin[:last_settlement][:period_start_on] %>–<%= fin[:last_settlement][:period_end_on] %>
                 </p>
               <% else %>

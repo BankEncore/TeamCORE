@@ -1,9 +1,13 @@
 # frozen_string_literal: true
 
 class ContractorChargeWaiver < ApplicationRecord
+  include CurrencyCentsFields
+
   belongs_to :agency
   belongs_to :contractor_charge
   belongs_to :actor, class_name: "User"
+
+  currency_cents_fields :amount
 
   validates :amount_cents, numericality: { greater_than: 0 }
   validate :charge_has_sufficient_balance

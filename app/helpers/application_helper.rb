@@ -1,6 +1,20 @@
 # frozen_string_literal: true
 
 module ApplicationHelper
+  # Display integer cents as locale currency (DB storage unchanged).
+  def tc_money(cents)
+    return "—" if cents.nil?
+
+    number_to_currency(cents.to_i / 100.0)
+  end
+
+  # Basis points → e.g. 10.00% (1000 bps). DB stores bps.
+  def tc_percent_from_bps(bps)
+    return "—" if bps.nil?
+
+    number_to_percentage(bps.to_d / 100, precision: 2, strip_insignificant_zeros: false)
+  end
+
   def subcontractor_workforce_tier_label(party, agency)
     tm = party&.team_members&.find_by(agency_id: agency.id)
     eng = tm&.engagements&.where(relationship_type: "subcontractor")&.order(:id)&.last

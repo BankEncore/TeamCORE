@@ -26,8 +26,8 @@
           class: "tc-select" %>
   </div>
   <div class="tc-field">
-    <%= f.label :snapshot_commission_rate_bps, class: "tc-label" %>
-    <%= f.number_field :snapshot_commission_rate_bps, class: "tc-input" %>
+    <%= f.label :snapshot_commission_rate_percent, "Commission rate", class: "tc-label" %>
+    <%= f.text_field :snapshot_commission_rate_percent, class: "tc-input", placeholder: "10.00", inputmode: "decimal", autocomplete: "off" %>
   </div>
   <div class="tc-field">
     <%= f.label :snapshot_minimum_basis, class: "tc-label" %>
@@ -40,8 +40,8 @@
           class: "tc-select" %>
   </div>
   <div class="tc-field">
-    <%= f.label :snapshot_minimum_amount_cents, class: "tc-label" %>
-    <%= f.number_field :snapshot_minimum_amount_cents, class: "tc-input" %>
+    <%= f.label :snapshot_minimum_amount_money, "Snapshot minimum gross commission", class: "tc-label" %>
+    <%= f.text_field :snapshot_minimum_amount_money, class: "tc-input", placeholder: "0.00", inputmode: "decimal", autocomplete: "off" %>
   </div>
   <div class="tc-field">
     <%= f.label :snapshot_recovery_rule, class: "tc-label" %>
@@ -52,6 +52,14 @@
           ),
           { include_blank: "—" },
           class: "tc-select" %>
+  </div>
+  <div class="tc-field">
+    <%= f.label :snapshot_salary_annual_money, "Snapshot annual salary", class: "tc-label" %>
+    <%= f.text_field :snapshot_salary_annual_money, class: "tc-input", placeholder: "0.00", inputmode: "decimal", autocomplete: "off" %>
+  </div>
+  <div class="tc-field">
+    <%= f.label :snapshot_hourly_rate_money, "Snapshot hourly rate", class: "tc-label" %>
+    <%= f.text_field :snapshot_hourly_rate_money, class: "tc-input", placeholder: "0.00", inputmode: "decimal", autocomplete: "off" %>
   </div>
   <%= f.submit class: "tc-btn tc-btn--primary" %>
 <% end %>

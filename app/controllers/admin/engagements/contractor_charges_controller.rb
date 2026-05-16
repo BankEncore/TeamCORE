@@ -50,7 +50,7 @@ module Admin
 
       def charge_params
         params.require(:contractor_charge).permit(
-          :charge_type, :status, :original_amount_cents, :open_balance_cents, :due_on, :description
+          :charge_type, :status, :original_amount_money, :open_balance_money, :due_on, :description
         )
       end
     end

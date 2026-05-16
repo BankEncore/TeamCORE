@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
 class CompensationPlanAssignment < ApplicationRecord
+  include CurrencyCentsFields
+  include BpsPercentFields
+
   belongs_to :agency
   belongs_to :engagement
   belongs_to :compensation_plan
@@ -18,6 +21,9 @@ class CompensationPlanAssignment < ApplicationRecord
   def self.current_for_engagement(engagement, as_of: Date.current)
     where(engagement_id: engagement.id).effective_on(as_of).order(effective_start_on: :desc).first
   end
+
+  currency_cents_fields :snapshot_minimum_amount, :snapshot_salary_annual, :snapshot_hourly_rate
+  bps_percent_fields :snapshot_commission_rate
 
   private
 

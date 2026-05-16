@@ -61,8 +61,8 @@ module Admin
         revenue_input_ids: params[:revenue_input_ids].to_s.split(/[\s,]+/),
         commission_calculation_ids: params[:commission_calculation_ids].to_s.split(/[\s,]+/),
         contractor_charge_ids: params[:contractor_charge_ids].to_s.split(/[\s,]+/),
-        manual_positive: params[:manual_positive].presence || 0,
-        manual_negative: params[:manual_negative].presence || 0
+        manual_positive: parse_money_cents_param(params[:manual_positive_money]),
+        manual_negative: parse_money_cents_param(params[:manual_negative_money])
       )
       @run.update!(status: "calculated") if @run.status == "draft"
       redirect_to admin_contractor_settlement_run_path(@run), notice: "Settlement line added."
@@ -78,6 +78,13 @@ module Admin
 
     def run_params
       params.require(:contractor_settlement_run).permit(:period_start_on, :period_end_on)
+    end
+
+    def parse_money_cents_param(raw)
+      s = raw.to_s.strip
+      return 0 if s.empty?
+
+      Teamcore::Money.cents_from_decimal_string(s)
     end
   end
 end

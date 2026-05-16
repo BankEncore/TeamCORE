@@ -7,19 +7,20 @@
     <table class="tc-data-table text-xs">
       <thead>
         <tr>
-          <th>ID</th><th>Rev ¢</th><th>Raw</th><th>Draw +</th><th>Rec</th><th>Gross pay</th><th>Ending draw</th><th>Status</th>
+          <th>ID</th><th>Revenue</th><th>Rate</th><th>Raw comm.</th><th>Draw +</th><th>Rec</th><th>Gross pay</th><th>Ending draw</th><th>Status</th>
         </tr>
       </thead>
       <tbody>
         <% @calculations.each do |c| %>
           <tr>
             <td class="font-mono"><%= c.id %></td>
-            <td class="font-mono"><%= c.commissionable_revenue_cents %></td>
-            <td class="font-mono"><%= c.calculated_commission_cents %></td>
-            <td class="font-mono"><%= c.draw_added_cents %></td>
-            <td class="font-mono"><%= c.draw_recovery_cents %></td>
-            <td class="font-mono"><%= c.gross_commission_pay_cents %></td>
-            <td class="font-mono"><%= c.ending_draw_balance_cents %></td>
+            <td><%= tc_money(c.commissionable_revenue_cents) %></td>
+            <td><%= tc_percent_from_bps(c.commission_rate_bps) %></td>
+            <td><%= tc_money(c.calculated_commission_cents) %></td>
+            <td><%= tc_money(c.draw_added_cents) %></td>
+            <td><%= tc_money(c.draw_recovery_cents) %></td>
+            <td><%= tc_money(c.gross_commission_pay_cents) %></td>
+            <td><%= tc_money(c.ending_draw_balance_cents) %></td>
             <td class="font-mono"><%= c.status %></td>
           </tr>
         <% end %>

@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
 class CompensationPlan < ApplicationRecord
+  include CurrencyCentsFields
+  include BpsPercentFields
+
   belongs_to :agency
   has_many :compensation_plan_assignments, dependent: :restrict_with_exception
 
@@ -27,6 +30,9 @@ class CompensationPlan < ApplicationRecord
   def self.recovery_rule_select_values(current)
     (RECOVERY_RULES + [ current ].compact).uniq
   end
+
+  currency_cents_fields :minimum_commission_amount, :salary_annual, :hourly_rate
+  bps_percent_fields :default_commission_rate
 
   validates :name, :plan_type, :status, presence: true
   validates :plan_type, inclusion: { in: PLAN_TYPES }

@@ -5,14 +5,14 @@
   <%= link_to "New plan", new_admin_compensation_plan_path, class: "tc-btn tc-btn--primary" %>
   <div class="tc-table-wrap mt-4">
     <table class="tc-data-table text-sm">
-      <thead><tr><th>ID</th><th>Name</th><th>Type</th><th>Rate bps</th><th></th></tr></thead>
+      <thead><tr><th>ID</th><th>Name</th><th>Type</th><th>Rate</th><th></th></tr></thead>
       <tbody>
         <% @compensation_plans.each do |cp| %>
           <tr>
             <td class="font-mono"><%= cp.id %></td>
             <td><%= cp.name %></td>
             <td class="font-mono"><%= cp.plan_type %></td>
-            <td class="font-mono"><%= cp.default_commission_rate_bps %></td>
+            <td><%= tc_percent_from_bps(cp.default_commission_rate_bps) %></td>
             <td><%= link_to "Open", admin_compensation_plan_path(cp), class: tc_link_classes %></td>
           </tr>
         <% end %>

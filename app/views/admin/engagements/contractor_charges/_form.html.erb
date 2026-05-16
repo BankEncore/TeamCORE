@@ -20,12 +20,12 @@
           class: "tc-select" %>
   </div>
   <div class="tc-field">
-    <%= f.label :original_amount_cents, class: "tc-label" %>
-    <%= f.number_field :original_amount_cents, class: "tc-input" %>
+    <%= f.label :original_amount_money, "Original amount", class: "tc-label" %>
+    <%= f.text_field :original_amount_money, class: "tc-input", placeholder: "0.00", inputmode: "decimal", autocomplete: "off" %>
   </div>
   <div class="tc-field">
-    <%= f.label :open_balance_cents, class: "tc-label" %>
-    <%= f.number_field :open_balance_cents, class: "tc-input" %>
+    <%= f.label :open_balance_money, "Open balance", class: "tc-label" %>
+    <%= f.text_field :open_balance_money, class: "tc-input", placeholder: "0.00", inputmode: "decimal", autocomplete: "off" %>
   </div>
   <div class="tc-field">
     <%= f.label :due_on, class: "tc-label" %>

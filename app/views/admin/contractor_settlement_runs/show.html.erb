@@ -15,9 +15,9 @@
         <% @lines.each do |ln| %>
           <tr>
             <td class="font-mono"><%= ln.engagement_id %></td>
-            <td class="font-mono"><%= ln.gross_commission_cents %></td>
-            <td class="font-mono"><%= ln.charge_deductions_cents %></td>
-            <td class="font-mono"><%= ln.net_settlement_cents %></td>
+            <td><%= tc_money(ln.gross_commission_cents) %></td>
+            <td><%= tc_money(ln.charge_deductions_cents) %></td>
+            <td><%= tc_money(ln.net_settlement_cents) %></td>
           </tr>
         <% end %>
       </tbody>
@@ -46,12 +46,12 @@
         <%= text_field_tag :contractor_charge_ids, nil, class: "tc-input" %>
       </div>
       <div class="tc-field">
-        <%= label_tag :manual_positive, "Manual + (cents)", class: "tc-label" %>
-        <%= number_field_tag :manual_positive, 0, class: "tc-input" %>
+        <%= label_tag :manual_positive_money, "Manual + (dollars)", class: "tc-label" %>
+        <%= text_field_tag :manual_positive_money, "0.00", class: "tc-input", placeholder: "0.00", inputmode: "decimal", autocomplete: "off" %>
       </div>
       <div class="tc-field">
-        <%= label_tag :manual_negative, "Manual − (cents)", class: "tc-label" %>
-        <%= number_field_tag :manual_negative, 0, class: "tc-input" %>
+        <%= label_tag :manual_negative_money, "Manual − (dollars)", class: "tc-label" %>
+        <%= text_field_tag :manual_negative_money, "0.00", class: "tc-input", placeholder: "0.00", inputmode: "decimal", autocomplete: "off" %>
       </div>
       <%= submit_tag "Compose line", class: "tc-btn tc-btn--secondary" %>
     <% end %>

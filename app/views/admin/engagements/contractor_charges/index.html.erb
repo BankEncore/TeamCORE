@@ -12,7 +12,7 @@
             <td class="font-mono"><%= ch.id %></td>
             <td class="font-mono"><%= ch.charge_type %></td>
             <td><%= ch.status %></td>
-            <td class="font-mono"><%= ch.open_balance_cents %></td>
+            <td><%= tc_money(ch.open_balance_cents) %></td>
             <td>
               <%= link_to "Open", admin_engagement_contractor_charge_path(@engagement, ch), class: tc_link_classes %>
             </td>

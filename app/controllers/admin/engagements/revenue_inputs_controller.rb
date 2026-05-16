@@ -60,15 +60,30 @@ module Admin
         count = 0
         CSV.foreach(file.path, headers: true) do |row|
           h = row.to_h
-          next if h.values_at("period_start_on", "period_end_on", "commissionable_revenue_cents").compact.empty?
+          next if h["period_start_on"].blank? || h["period_end_on"].blank?
+          next if h["commissionable_revenue_cents"].blank? && h["commissionable_revenue"].blank?
+
+          revenue_cents =
+            if h["commissionable_revenue_cents"].present?
+              h["commissionable_revenue_cents"].to_i
+            else
+              Teamcore::Money.cents_from_decimal_string(h["commissionable_revenue"])
+            end
+
+          gross_cents =
+            if h["gross_sales_cents"].present?
+              h["gross_sales_cents"].to_i
+            elsif h["gross_sales"].present?
+              Teamcore::Money.cents_from_decimal_string(h["gross_sales"])
+            end
 
           @engagement.revenue_inputs.create!(
             agency_id: current_agency.id,
             pay_period_id: h["pay_period_id"].presence&.to_i,
             period_start_on: Date.parse(h["period_start_on"]),
             period_end_on: Date.parse(h["period_end_on"]),
-            commissionable_revenue_cents: h["commissionable_revenue_cents"].to_i,
-            gross_sales_cents: h["gross_sales_cents"].presence&.to_i,
+            commissionable_revenue_cents: revenue_cents,
+            gross_sales_cents: gross_cents,
             source_type: h["source_type"].presence || "imported_csv",
             notes: h["notes"]
           )
@@ -92,7 +107,7 @@ module Admin
       def revenue_params
         params.require(:revenue_input).permit(
           :pay_period_id, :period_start_on, :period_end_on,
-          :commissionable_revenue_cents, :gross_sales_cents,
+          :commissionable_revenue_money, :gross_sales_money,
           :source_type, :notes
         )
       end

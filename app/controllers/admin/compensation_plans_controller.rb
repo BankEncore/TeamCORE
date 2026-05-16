@@ -45,8 +45,8 @@ module Admin
     def plan_params
       params.require(:compensation_plan).permit(
         :name, :plan_type, :status,
-        :salary_annual_cents, :hourly_rate_cents, :default_commission_rate_bps,
-        :minimum_commission_basis, :minimum_commission_amount_cents, :recovery_rule
+        :salary_annual_money, :hourly_rate_money, :default_commission_rate_percent,
+        :minimum_commission_basis, :minimum_commission_amount_money, :recovery_rule
       )
     end
   end

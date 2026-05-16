@@ -55,9 +55,9 @@ module Admin
       def assignment_params
         params.require(:compensation_plan_assignment).permit(
           :compensation_plan_id, :effective_start_on, :effective_end_on,
-          :snapshot_plan_name, :snapshot_plan_type, :snapshot_commission_rate_bps,
-          :snapshot_minimum_basis, :snapshot_minimum_amount_cents, :snapshot_recovery_rule,
-          :snapshot_salary_annual_cents, :snapshot_hourly_rate_cents
+          :snapshot_plan_name, :snapshot_plan_type, :snapshot_commission_rate_percent,
+          :snapshot_minimum_basis, :snapshot_minimum_amount_money, :snapshot_recovery_rule,
+          :snapshot_salary_annual_money, :snapshot_hourly_rate_money
         )
       end
     end

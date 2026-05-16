@@ -31,7 +31,7 @@ module Admin
       end
 
       def waiver_params
-        params.require(:contractor_charge_waiver).permit(:amount_cents, :reason)
+        params.require(:contractor_charge_waiver).permit(:amount_money, :reason)
       end
     end
   end

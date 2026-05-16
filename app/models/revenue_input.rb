@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class RevenueInput < ApplicationRecord
+  include CurrencyCentsFields
+
   belongs_to :agency
   belongs_to :engagement
   belongs_to :pay_period, optional: true
@@ -20,6 +22,8 @@ class RevenueInput < ApplicationRecord
   def self.source_type_options_for_select
     SOURCE_TYPES.map { |t| [ SOURCE_TYPE_LABELS[t] || t.humanize, t ] }
   end
+
+  currency_cents_fields :commissionable_revenue, :gross_sales
 
   validates :period_start_on, :period_end_on, presence: true
   validates :commissionable_revenue_cents, numericality: { greater_than_or_equal_to: 0 }

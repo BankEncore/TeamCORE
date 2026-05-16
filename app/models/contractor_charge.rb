@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class ContractorCharge < ApplicationRecord
+  include CurrencyCentsFields
+
   belongs_to :agency
   belongs_to :engagement
   has_many :contractor_charge_waivers, dependent: :restrict_with_exception
@@ -24,6 +26,8 @@ class ContractorCharge < ApplicationRecord
   def self.charge_type_select_values(current_type)
     (CHARGE_TYPES + [ current_type ].compact).uniq
   end
+
+  currency_cents_fields :original_amount, :open_balance
 
   validates :charge_type, :status, presence: true
   validates :status, inclusion: { in: STATUSES }
