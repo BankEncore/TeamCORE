@@ -56,7 +56,8 @@ module Team360
         readiness_result: readiness_result,
         document_types_by_id: doc_types_by_id,
         records_by_id: records_by_id,
-        subcontractor_rows: build_subcontractor_rows(party)
+        subcontractor_rows: build_subcontractor_rows(party),
+        phase4_financial: build_phase4_financial(focused)
       )
     end
 
@@ -156,6 +157,52 @@ module Team360
         end
 
       [ doc_types_by_id, records_by_id ]
+    end
+
+    def build_phase4_financial(focused_engagement)
+      return { focused_engagement_id: nil } unless focused_engagement
+
+      assignment = CompensationPlanAssignment.current_for_engagement(focused_engagement, as_of: @as_of_date)
+      draw = focused_engagement.commission_draw_balance
+      out = {
+        focused_engagement_id: focused_engagement.id,
+        relationship_type: focused_engagement.relationship_type,
+        assignment_summary: assignment && {
+          plan_name: assignment.snapshot_plan_name,
+          plan_type: assignment.snapshot_plan_type,
+          effective_start_on: assignment.effective_start_on,
+          effective_end_on: assignment.effective_end_on,
+          commission_rate_bps: assignment.snapshot_commission_rate_bps,
+          minimum_amount_cents: assignment.snapshot_minimum_amount_cents
+        },
+        draw_balance_cents: (focused_engagement.allows_employee_commission_draw? ? draw&.balance_cents : nil)
+      }
+
+      if focused_engagement.allows_contractor_charges_and_settlement?
+        charges = focused_engagement.contractor_charges.where(status: %w[open draft])
+        out[:contractor_charges] = {
+          open_count: charges.count,
+          open_balance_cents: charges.sum(:open_balance_cents)
+        }
+        last_line = ContractorSettlementLine
+          .includes(:contractor_settlement_run)
+          .where(engagement_id: focused_engagement.id)
+          .order(id: :desc)
+          .first
+        out[:last_settlement] =
+          if last_line
+            run = last_line.contractor_settlement_run
+            {
+              run_id: run.id,
+              status: run.status,
+              period_start_on: run.period_start_on,
+              period_end_on: run.period_end_on,
+              net_cents: last_line.net_settlement_cents
+            }
+          end
+      end
+
+      out
     end
 
     def build_subcontractor_rows(party)
