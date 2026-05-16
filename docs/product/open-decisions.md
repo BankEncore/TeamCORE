@@ -2,7 +2,7 @@
 
 This register tracks product and modeling decisions for TeamCORE. Not every item needs the same rigor: use the **decision handling model** below so Phase 0 can close without pretending Phase 4–6 design is final.
 
-**Companion docs:** [`domain-map.md`](domain-map.md), [`overview.md`](overview.md), [`roadmap-decision-log.md`](roadmap-decision-log.md), [`../roadmap/phase-1-readiness-checklist.md`](../roadmap/phase-1-readiness-checklist.md), [`employee-contractor-applicability-matrix.md`](employee-contractor-applicability-matrix.md), [`glossary.md`](glossary.md), [`../domain/party-team-member.md`](../domain/party-team-member.md), **[`../domain/engagement.md`](../domain/engagement.md)** (TC-03), **[`../domain/engagement-status.md`](../domain/engagement-status.md)** (TC-04), **[`../domain/documents-compliance.md`](../domain/documents-compliance.md)** (TC-06), **[`../domain/document-alerts.md`](../domain/document-alerts.md)** (TC-07), **[`../domain/document-verification.md`](../domain/document-verification.md)** (TC-08).
+**Companion docs:** [`domain-map.md`](domain-map.md), [`overview.md`](overview.md), [`roadmap-decision-log.md`](roadmap-decision-log.md), [`../roadmap/phase-1-readiness-checklist.md`](../roadmap/phase-1-readiness-checklist.md), [`employee-contractor-applicability-matrix.md`](employee-contractor-applicability-matrix.md), [`glossary.md`](glossary.md), [`../domain/party-team-member.md`](../domain/party-team-member.md), **[`../domain/engagement.md`](../domain/engagement.md)** (TC-03), **[`../domain/engagement-status.md`](../domain/engagement-status.md)** (TC-04), **[`../domain/documents-compliance.md`](../domain/documents-compliance.md)** (TC-06), **[`../domain/document-alerts.md`](../domain/document-alerts.md)** (TC-07), **[`../domain/document-verification.md`](../domain/document-verification.md)** (TC-08), **[`../domain/contractor-classification-support.md`](../domain/contractor-classification-support.md)** (TC-09).
 
 ---
 
@@ -72,6 +72,14 @@ This register tracks product and modeling decisions for TeamCORE. Not every item
 | TC-08-D05 | Verification authorization — MVP coarse verifier gate; TC-29 matrix later | 2 |
 | TC-08-D06 | Pending-review queue is **`DocumentRecord.status = submitted`** (optional **`verification_required`** hint) | 2 |
 | TC-08-D07 | Review **`status`** / review metadata change only via **`Documents::ReviewDocumentRecord`**, not generic CRUD (**TC-08**) | 2 |
+| TC-09-D01 | Contractor classification support is a lens over TC-06–TC-08, not a new compliance engine | 2 |
+| TC-09-D02 | Legal-safe wording: “classification support status,” not legal classification language | 2 |
+| TC-09-D03 | Use **`DocumentType.category`** + specific **`DocumentType.code`**; no new category enums unless migrated | 2 |
+| TC-09-D04 | Related-only subcontractors excluded; promoted subcontractors evaluate via **`subcontractor`** Engagement | 2 |
+| TC-09-D05 | Operational reporting deferred to **TC-12**; TC-09 documents report requirements | 2 |
+| TC-09-D06 | Reuse existing **`readiness_status`** values; no new classification-readiness vocabulary | 2 |
+| TC-09-D07 | Contractor organization engagements may receive contractor classification-support requirements where configured | 2 |
+| TC-09-D08 | Contractor-only tax/W-9-style requirements must not use **`relationship_type: any`** unless intentionally universal | 2 |
 
 
 ### OD-001 — Party vs Team Member
@@ -279,6 +287,28 @@ Compliance — requirement rules, completeness, expirations, readiness signals, 
 **Decision (summary):** Keep **`verified_by_id`**, **`verified_on`**, **`verification_notes`** (**D01**) — rejects record reviewer + timestamp in the same columns. **`rejection_reason`** mandatory for **`rejected`** (**D02**). **`void`** uses **`status`** + notes only — no **`voided_by`** schema in MVP; durable void audit deferred (**D03**, **TC-30**). **Append-only corrections** — forbid **`rejected` → `submitted`** (**D04**). **Verifier gate** MVP = admin + agency scope; fine roles → **TC-29** (**D05**). **Worklist source** **`submitted`** records; optional **`DocumentType#verification_required`** column in queue (**D06**). **TC-08-D07:** **`DocumentRecord`** review status and review-only columns (**verifier IDs/dates**, **`rejection_reason`**, **`verification_notes`**) cannot change via generic **`document_records`** mass assignment (`create`/`update`); only **`Documents::ReviewDocumentRecord`** and explicit **`POST`** review endpoints.
 
 **Companion:** **[`domain/document-verification.md`](../domain/document-verification.md)**
+
+---
+
+### TC-09-D01 … TC-09-D08 — Contractor classification support (TC-09)
+
+**Status:** Accepted for TC-09 documentation and Phase 2 alignment  
+**Tier:** 2  
+
+**Decision (summary):**
+
+| ID | Decision |
+| --- | --- |
+| **TC-09-D01** | TC-09 is a contractor-focused **compliance-support lens** over **`Documents::ReadinessEvaluator`** / TC-07 alerts / TC-08 verification — **not** a parallel compliance engine or new schema-heavy bounded context. |
+| **TC-09-D02** | Surface aggregate UX as **“Classification support status”** (and supporting-documentation language). Do **not** imply legal conclusions (“legally compliant,” “properly classified,” “misclassified”). |
+| **TC-09-D03** | Configure specificity with **`DocumentType.category`** (broad bucket) + **`DocumentType.code`** (agency-configured kind). Do **not** invent new **`DocumentType::CATEGORIES`** values unless product migrates the catalog. |
+| **TC-09-D04** | **Related-only** subcontractors (**PartyRelationship** without **`subcontractor`** Engagement) have **no** engagement-driven evaluation. **Promoted** subcontractors evaluate through **`Engagement.relationship_type = subcontractor`** when requirements exist. |
+| **TC-09-D05** | Full operational reporting stays **TC-12**. TC-09 **documents** report/filter intent and drill-through targets. |
+| **TC-09-D06** | Reuse **`Documents::ReadinessEvaluator`** aggregate **`readiness_status`** (`ready`, `not_ready`, `warning`, `not_applicable`) and existing **`requirement_outcome`** vocabulary — **no** new readiness enums for “legal classification.” |
+| **TC-09-D07** | **`contractor_organization`** engagements **may** receive contractor classification-support requirements (tax form, agreement, insurance, renewal, certification, classification-support documentation) **where configured** — same document stack as other contractor-class types unless product excludes by rule. |
+| **TC-09-D08** | Requirements intended **only** for contractor-class engagements (**tax/W-9-style** and similar) **must not** use **`DocumentRequirement.relationship_type = any`** unless the document is **intentionally universal** (exceptional; not the default for contractor tax artifacts). |
+
+**Companion:** **[`domain/contractor-classification-support.md`](../domain/contractor-classification-support.md)**
 
 ---
 

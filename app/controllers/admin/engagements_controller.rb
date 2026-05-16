@@ -30,8 +30,20 @@ module Admin
       end
 
       @document_readiness = Documents::ReadinessEvaluator.new(engagement: @engagement).call
-      type_ids = @document_readiness.alerts.map(&:document_type_id).uniq
-      @alert_document_types_by_id = DocumentType.where(id: type_ids).index_by(&:id)
+      type_ids =
+        (
+          @document_readiness.requirements.map(&:document_type_id) +
+          @document_readiness.alerts.map(&:document_type_id)
+        ).uniq
+      @document_types_by_id = DocumentType.where(id: type_ids).index_by(&:id)
+      @contractor_classification_support =
+        if @engagement.contractor_class?
+          Admin::ContractorClassificationSupportPresenter.new(
+            engagement: @engagement,
+            readiness: @document_readiness,
+            document_types_by_id: @document_types_by_id
+          )
+        end
     end
 
     def new
@@ -77,7 +89,11 @@ module Admin
     private
 
     def set_engagement
-      @engagement = Engagement.where(agency_id: current_agency.id).find(params[:id])
+      @engagement =
+        Engagement
+          .where(agency_id: current_agency.id)
+          .includes(team_member: { party: %i[person_profile organization_profile] })
+          .find(params[:id])
     end
 
     def base_engagement_attrs

@@ -52,7 +52,7 @@ Canonical entries, acceptance status, OD-IDs, and follow-ups live in **`open-dec
 | **Team Member** | Workforce participant profile linked to a party and used by TeamCORE operational workflows. |
 | **Engagement** | Employment or contractor relationship between a team member and the agency, including lifecycle, status, relationship type, supervisor, placement, renewal, and expiry semantics. |
 | **Documents** | Document types; uploaded artifacts and file references; document metadata; versions; and expiration dates associated with artifact records. |
-| **Compliance** | Requirement sets, completeness checks, readiness interpretation; missing/expired/expiring-soon indicators; activation readiness; and contractor classification support records. |
+| **Compliance** | Requirement sets, completeness checks, readiness interpretation; missing/expired/expiring-soon indicators; activation readiness; and contractor classification support records (hub: [`contractor-classification-support.md`](../domain/contractor-classification-support.md) — **TC-09**). |
 | **Team360** | Permission-aware aggregated profile/read model for one team member, backed by authoritative records in other domains. |
 | **Operational Reporting** | Filterable lists, summaries, exception views, and drill-through reporting surfaces. |
 | **Compensation** | What the agency may owe a team member, including salary, hourly rate, commission rate, compensation plan assignment, draws, and draw recovery rules. |
@@ -629,7 +629,7 @@ Phase 1 must come before documents, Team360, compensation, payroll, settlement, 
 | Document requirements             | Define required documents by engagement or other rule.        |
 | Compliance                        | Track missing, expired, and expiring-soon requirements.       |
 | Activation readiness              | Signal whether required configured conditions are satisfied.  |
-| Contractor classification support | Track supporting records without making legal determinations. |
+| Contractor classification support | Track supporting records without making legal determinations. Domain hub: [`contractor-classification-support.md`](../domain/contractor-classification-support.md) (**TC-09**). |
 
 ---
 
