@@ -507,4 +507,113 @@ class DocumentsReadinessEvaluatorTest < ActiveSupport::TestCase
     assert_equal "expired", w9_row.requirement_outcome
     assert_equal "not_ready", result.readiness_status
   end
+
+  # TC-09 — contractor classification support applicability (contractor-only requirements)
+  test "employee engagement does not include contractor-only requirement rows" do
+    ic_tax_type = DocumentType.create!(
+      agency: @agency,
+      code: "tc09_contractor_tax",
+      name: "Contractor tax form",
+      category: "tax_form",
+      verification_required: true,
+      status: "active"
+    )
+    contractor_only = DocumentRequirement.create!(
+      agency: @agency,
+      document_type: ic_tax_type,
+      name: "Contractor W-9 style",
+      requirement_scope: "engagement",
+      relationship_type: "individual_contractor",
+      required: true,
+      verification_required: true,
+      status: "active"
+    )
+
+    result = Documents::ReadinessEvaluator.new(engagement: @engagement, as_of_date: Date.new(2025, 6, 1)).call
+
+    refute result.requirements.any? { |r| r.document_requirement_id == contractor_only.id }
+  end
+
+  test "individual contractor missing required tax doc yields not_ready and missing alert" do
+    ic_party = Party.create!(agency: @agency, party_type: "person", display_name: "IC Person")
+    PersonProfile.create!(party: ic_party, first_name: "IC", last_name: "Person")
+    ic_party.reload
+    ic_tm = TeamMember.create!(agency: @agency, party: ic_party)
+    ic_eng = Engagement.create!(
+      agency: @agency,
+      team_member: ic_tm,
+      relationship_type: "individual_contractor",
+      status: "pending"
+    )
+    ic_eng.update!(status: "active", start_on: Date.new(2025, 1, 1))
+
+    ic_tax_type = DocumentType.create!(
+      agency: @agency,
+      code: "tc09_ic_w9",
+      name: "IC W-9",
+      category: "tax_form",
+      verification_required: true,
+      status: "active"
+    )
+    ic_req = DocumentRequirement.create!(
+      agency: @agency,
+      document_type: ic_tax_type,
+      name: "W-9 required",
+      requirement_scope: "engagement",
+      relationship_type: "individual_contractor",
+      required: true,
+      verification_required: true,
+      status: "active"
+    )
+
+    agr_type = DocumentType.create!(
+      agency: @agency,
+      code: "tc09_ic_agr",
+      name: "IC Agreement",
+      category: "contractor_agreement",
+      requires_expiration_date: true,
+      default_expiring_soon_days: 30,
+      verification_required: true,
+      status: "active"
+    )
+    agr_req = DocumentRequirement.create!(
+      agency: @agency,
+      document_type: agr_type,
+      name: "Agreement",
+      requirement_scope: "engagement",
+      relationship_type: "individual_contractor",
+      required: true,
+      verification_required: true,
+      expiration_required: true,
+      expiring_soon_days: 45,
+      status: "active"
+    )
+
+    as_of = Date.new(2025, 6, 1)
+    DocumentRecord.create!(
+      agency: @agency,
+      document_type: agr_type,
+      engagement: ic_eng,
+      team_member: ic_tm,
+      status: "verified",
+      submitted_on: Date.new(2025, 1, 1),
+      verified_by: @user,
+      verified_on: Date.new(2025, 1, 2),
+      expires_on: as_of + 20.days,
+      filename: "agr.pdf",
+      content_type: "application/pdf"
+    )
+
+    result = Documents::ReadinessEvaluator.new(engagement: ic_eng, as_of_date: as_of).call
+
+    assert_equal "not_ready", result.readiness_status
+    tax_row = result.requirements.find { |r| r.document_requirement_id == ic_req.id }
+    agr_row = result.requirements.find { |r| r.document_requirement_id == agr_req.id }
+
+    assert_equal "missing", tax_row.requirement_outcome
+    assert_equal "expiring_soon", agr_row.requirement_outcome
+    assert_includes result.alerts.map(&:alert_type), "missing"
+    assert_includes result.alerts.map(&:alert_type), "expiring_soon"
+    assert_includes Documents::ReadinessEvaluator::READINESS_STATUSES, result.readiness_status
+  end
 end

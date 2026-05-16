@@ -369,6 +369,8 @@ UserAgency.where(user: admin_user, agency: second_agency).first_or_create!
 
 # TC-06 — document configuration & readiness (issue #7)
 # Hub: docs/domain/documents-compliance.md
+# TC-09 — contractor classification support applicability (docs/domain/contractor-classification-support.md):
+# Tax/agreement requirements are scoped to contractor-class engagement types only, not relationship_type "any".
 w9_type = DocumentType.find_or_initialize_by(agency:, code: "w9")
 w9_type.assign_attributes(
   name: "W-9",
@@ -405,20 +407,61 @@ handbook_type.assign_attributes(
 )
 handbook_type.save!
 
-DocumentRequirement.find_or_initialize_by(
-  agency:,
-  document_type: w9_type,
-  requirement_scope: "engagement",
-  relationship_type: "any"
-).tap do |req|
-  req.assign_attributes(
-    name: "W-9 on file",
-    required: true,
-    verification_required: true,
-    expiration_required: false,
-    status: "active"
-  )
-  req.save!
+# Retire legacy engagement / team_member W-9 rows scoped to "any" (TC-09-D08).
+DocumentRequirement.where(agency:, document_type: w9_type, requirement_scope: "engagement", relationship_type: "any")
+  .update_all(status: "inactive")
+DocumentRequirement.where(agency:, document_type: w9_type, requirement_scope: "team_member", relationship_type: "any")
+  .update_all(status: "inactive")
+
+%w[individual_contractor contractor_organization subcontractor].each do |rel|
+  DocumentRequirement.find_or_initialize_by(
+    agency:,
+    document_type: w9_type,
+    requirement_scope: "engagement",
+    relationship_type: rel
+  ).tap do |req|
+    req.assign_attributes(
+      name: "W-9 on file",
+      required: true,
+      verification_required: true,
+      expiration_required: false,
+      status: "active"
+    )
+    req.save!
+  end
+
+  DocumentRequirement.find_or_initialize_by(
+    agency:,
+    document_type: w9_type,
+    requirement_scope: "team_member",
+    relationship_type: rel
+  ).tap do |req|
+    req.assign_attributes(
+      name: "Team member W-9 (identity scope)",
+      required: false,
+      verification_required: true,
+      expiration_required: false,
+      status: "active"
+    )
+    req.save!
+  end
+
+  DocumentRequirement.find_or_initialize_by(
+    agency:,
+    document_type: contract_agreement_type,
+    requirement_scope: "engagement",
+    relationship_type: rel
+  ).tap do |req|
+    req.assign_attributes(
+      name: "Executed contractor agreement",
+      required: true,
+      verification_required: true,
+      expiration_required: true,
+      expiring_soon_days: 45,
+      status: "active"
+    )
+    req.save!
+  end
 end
 
 DocumentRequirement.find_or_initialize_by(
@@ -438,62 +481,9 @@ DocumentRequirement.find_or_initialize_by(
   req.save!
 end
 
-DocumentRequirement.find_or_initialize_by(
-  agency:,
-  document_type: contract_agreement_type,
-  requirement_scope: "engagement",
-  relationship_type: "individual_contractor"
-).tap do |req|
-  req.assign_attributes(
-    name: "Executed contractor agreement",
-    required: true,
-    verification_required: true,
-    expiration_required: true,
-    expiring_soon_days: 45,
-    status: "active"
-  )
-  req.save!
-end
-
-DocumentRequirement.find_or_initialize_by(
-  agency:,
-  document_type: w9_type,
-  requirement_scope: "team_member",
-  relationship_type: "any"
-).tap do |req|
-  req.assign_attributes(
-    name: "Team member W-9 (identity scope)",
-    required: false,
-    verification_required: true,
-    expiration_required: false,
-    status: "active"
-  )
-  req.save!
-end
-
-demo_admin = User.find_by!(email: "admin@example.com")
 vdate = Date.new(2024, 2, 1)
 
-# Jane employee — verified W-9 on engagement + acknowledged handbook (submitted only; satisfied without verification)
-jane_w9 = DocumentRecord.find_or_initialize_by(
-  agency:,
-  document_type: w9_type,
-  engagement: jane_eng,
-  team_member: jane_tm
-)
-jane_w9.assign_attributes(
-  filename: "w9-demo.pdf",
-  content_type: "application/pdf",
-  byte_size: 12_288,
-  display_name: "W-9 (Jane)",
-  status: "verified",
-  submitted_on: vdate,
-  verified_by: demo_admin,
-  verified_on: vdate,
-  storage_key: "seed/w9-jane"
-)
-jane_w9.save!
-
+# Jane employee — handbook only (contractor tax/agreement requirements do not apply — TC-09).
 jane_handbook = DocumentRecord.find_or_initialize_by(
   agency:,
   document_type: handbook_type,

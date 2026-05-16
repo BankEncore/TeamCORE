@@ -29,6 +29,9 @@
     <% end %>
   </div>
 <% end %>
+<% if @contractor_classification_support.present? %>
+  <%= render partial: "contractor_classification_support", locals: { presenter: @contractor_classification_support } %>
+<% end %>
 <% if @engagement.title.present? || @engagement.notes.present? %>
   <p class="text-sm mb-2"><%= @engagement.title %></p>
   <p class="text-sm text-slate-600 mb-4"><%= simple_format(@engagement.notes) if @engagement.notes.present? %></p>
@@ -40,7 +43,7 @@
     <code class="font-mono">readiness_status</code>: <%= @document_readiness.readiness_status %> · as of <%= @document_readiness.as_of_date %>
   </p>
   <%= render partial: "document_alerts",
-        locals: { readiness: @document_readiness, document_types_by_id: @alert_document_types_by_id } %>
+        locals: { readiness: @document_readiness, document_types_by_id: @document_types_by_id } %>
   <h3 class="text-sm font-medium text-slate-800 mb-2 mt-6">Requirements (evaluation rows)</h3>
   <table class="min-w-full text-xs border border-slate-200 bg-white mt-2">
     <thead class="bg-slate-100"><tr>

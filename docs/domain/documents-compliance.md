@@ -2,7 +2,7 @@
 
 **Epic / issue:** Document Configuration and Readiness Foundation — [GitHub issue #7](https://github.com/BankEncore/TeamCORE/issues/7) (**TC-06**).
 
-**Cross-links:** Product [**OD-005** / **OD-006**](../product/open-decisions.md); domain map [**Documents** / **Compliance**](../product/domain-map.md); [**Glossary**](../product/glossary.md) (document and compliance terms); [**Engagement**](./engagement.md) (applicability spine, `relationship_type`); [**Subcontractor relationships**](./subcontractor-relationships.md) (**TC-05**); engagement status semantics [`engagement-status.md`](engagement-status.md); **TC-07 alerts** [`document-alerts.md`](document-alerts.md); **TC-08 verification** [`document-verification.md`](document-verification.md) (verify/reject/void via **`Documents::ReviewDocumentRecord`**; readiness still **`Documents::ReadinessEvaluator`**-derived — **TC-08-D07** blocks generic **`DocumentRecord`** status mutation).
+**Cross-links:** Product [**OD-005** / **OD-006**](../product/open-decisions.md); domain map [**Documents** / **Compliance**](../product/domain-map.md); [**Glossary**](../product/glossary.md) (document and compliance terms); [**Engagement**](./engagement.md) (applicability spine, `relationship_type`); [**Subcontractor relationships**](./subcontractor-relationships.md) (**TC-05**); engagement status semantics [`engagement-status.md`](engagement-status.md); **TC-07 alerts** [`document-alerts.md`](document-alerts.md); **TC-08 verification** [`document-verification.md`](document-verification.md) (verify/reject/void via **`Documents::ReviewDocumentRecord`**; readiness still **`Documents::ReadinessEvaluator`**-derived — **TC-08-D07** blocks generic **`DocumentRecord`** status mutation); **TC-09 contractor classification support lens** [`contractor-classification-support.md`](contractor-classification-support.md).
 
 ---
 
@@ -132,6 +132,8 @@ Authoritative subcontractor nuance: [`subcontractor-relationships.md`](subcontra
 ## Contractor classification support (TC-06-D05)
 
 Support contractor classification **documentation** via types, requirements, records, and **existing** profile fields (e.g. organization kind, legal name). TeamCORE **does not** make legal classification determinations in TC-06.
+
+**TC-09** is the contractor-focused hub (boundary, profile source map, document catalog reference, classification support status wording, reporting intent, audit note): [`contractor-classification-support.md`](contractor-classification-support.md).
 
 ---
 
