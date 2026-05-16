@@ -6,6 +6,24 @@
   <% if @run.status.in?(%w[draft calculated]) %>
     <%= button_to "Finalize", finalize_admin_contractor_settlement_run_path(@run), method: :post, class: "tc-btn tc-btn--primary" %>
   <% end %>
+  <% if @run.status == "finalized" %>
+    <%= form_with url: mark_paid_admin_contractor_settlement_run_path(@run), method: :post, class: "mt-3 flex flex-wrap gap-2 items-end max-w-xl" do %>
+      <div class="tc-field flex-1 min-w-[12rem]">
+        <%= label_tag :reason, "Payment note (optional)", class: "tc-label" %>
+        <%= text_field_tag :reason, nil, class: "tc-input", placeholder: "Check #, date, memo" %>
+      </div>
+      <%= submit_tag "Mark paid", class: "tc-btn tc-btn--secondary" %>
+    <% end %>
+  <% end %>
+  <% if @run.status.in?(%w[draft calculated finalized]) %>
+    <%= form_with url: void_admin_contractor_settlement_run_path(@run), method: :post, class: "mt-3 space-y-2 max-w-xl" do %>
+      <div class="tc-field">
+        <%= label_tag :reason, "Void reason (optional)", class: "tc-label" %>
+        <%= text_field_tag :reason, nil, class: "tc-input", placeholder: "Why this run is voided" %>
+      </div>
+      <%= submit_tag "Void run", class: "tc-btn tc-btn--quiet" %>
+    <% end %>
+  <% end %>
 
   <h2 class="text-lg font-semibold mt-6">Lines</h2>
   <div class="tc-table-wrap">
@@ -56,4 +74,21 @@
       <%= submit_tag "Compose line", class: "tc-btn tc-btn--secondary" %>
     <% end %>
   <% end %>
+
+  <h2 class="text-lg font-semibold mt-6">Audit trail</h2>
+  <div class="tc-table-wrap">
+    <table class="tc-data-table text-xs">
+      <thead><tr><th>When</th><th>Event</th><th>Actor</th><th>Reason</th></tr></thead>
+      <tbody>
+        <% @events.each do |ev| %>
+          <tr>
+            <td class="font-mono whitespace-nowrap"><%= ev.created_at.in_time_zone.strftime("%Y-%m-%d %H:%M") %></td>
+            <td><%= ev.event_type %></td>
+            <td><%= ev.actor&.email || "—" %></td>
+            <td class="max-w-xs truncate" title="<%= ev.reason %>"><%= ev.reason.presence || "—" %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
 </div>

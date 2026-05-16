@@ -3,7 +3,7 @@
 module Admin
   class ContractorSettlementRunsController < Admin::BaseController
     before_action :require_current_agency!
-    before_action :set_run, only: %i[show finalize compose_line]
+    before_action :set_run, only: %i[show finalize compose_line void mark_paid]
 
     def index
       @runs = scoped(ContractorSettlementRun).order(id: :desc)
@@ -11,6 +11,7 @@ module Admin
 
     def show
       @lines = @run.contractor_settlement_lines.includes(:engagement)
+      @events = @run.contractor_settlement_run_events.includes(:actor).order(id: :desc)
       @contractor_engagements = scoped(Engagement).where(
         relationship_type: EngagementFinancialContext::CONTRACTOR_FINANCIAL_TYPES
       ).includes(team_member: :party).order(:id)
@@ -50,6 +51,44 @@ module Admin
         )
       end
       redirect_to admin_contractor_settlement_run_path(@run), notice: "Settlement finalized."
+    end
+
+    def void
+      unless @run.status.in?(%w[draft calculated finalized])
+        redirect_to admin_contractor_settlement_run_path(@run), alert: "Run cannot be voided from #{@run.status}."
+        return
+      end
+
+      reason = params[:reason].to_s.strip.presence || "Voided by admin"
+      ContractorSettlementRun.transaction do
+        @run.update!(status: "voided")
+        ContractorSettlementRunEvent.create!(
+          contractor_settlement_run: @run,
+          event_type: "voided",
+          actor: current_user,
+          reason:
+        )
+      end
+      redirect_to admin_contractor_settlement_run_path(@run), notice: "Settlement run voided."
+    end
+
+    def mark_paid
+      unless @run.status == "finalized"
+        redirect_to admin_contractor_settlement_run_path(@run), alert: "Mark paid only applies to finalized runs (#{@run.status})."
+        return
+      end
+
+      reason = params[:reason].to_s.strip.presence || "Payment recorded"
+      ContractorSettlementRun.transaction do
+        @run.update!(status: "paid_recorded")
+        ContractorSettlementRunEvent.create!(
+          contractor_settlement_run: @run,
+          event_type: "payment_recorded",
+          actor: current_user,
+          reason:
+        )
+      end
+      redirect_to admin_contractor_settlement_run_path(@run), notice: "Payment recorded on settlement run."
     end
 
     def compose_line

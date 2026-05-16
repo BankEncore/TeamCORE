@@ -6,9 +6,13 @@ module Admin
       before_action :require_current_agency!
       before_action :set_engagement
       before_action :set_revenue_input, only: %i[show edit update calculate_commission]
+      before_action :set_commission_lock, only: %i[edit update calculate_commission]
 
       def index
         @revenue_inputs = @engagement.revenue_inputs.order(id: :desc)
+        rev_ids = @revenue_inputs.map(&:id)
+        @finalized_revenue_input_ids =
+          CommissionCalculation.where(revenue_input_id: rev_ids, status: "finalized").pluck(:revenue_input_id).to_set
       end
 
       def show
@@ -34,6 +38,12 @@ module Admin
       end
 
       def update
+        if @revenue_commission_locked
+          redirect_to admin_engagement_revenue_inputs_path(@engagement),
+            alert: "This revenue input is locked because its commission calculation is finalized."
+          return
+        end
+
         if @revenue_input.update(revenue_params)
           redirect_to admin_engagement_revenue_inputs_path(@engagement), notice: "Updated."
         else
@@ -43,6 +53,12 @@ module Admin
       end
 
       def calculate_commission
+        if @revenue_commission_locked
+          redirect_to admin_engagement_revenue_inputs_path(@engagement),
+            alert: "This revenue input is locked because its commission calculation is finalized."
+          return
+        end
+
         Financials::ApplyCommissionAndDraw.call(revenue_input: @revenue_input, actor: current_user)
         redirect_to admin_engagement_commission_calculations_path(@engagement), notice: "Commission calculated."
       rescue ArgumentError => e
@@ -109,6 +125,13 @@ module Admin
           :pay_period_id, :period_start_on, :period_end_on,
           :commissionable_revenue_money, :gross_sales_money,
           :source_type, :notes
+        )
+      end
+
+      def set_commission_lock
+        @revenue_commission_locked = CommissionCalculation.exists?(
+          revenue_input_id: @revenue_input.id,
+          status: "finalized"
         )
       end
     end

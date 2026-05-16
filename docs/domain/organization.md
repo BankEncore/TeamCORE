@@ -246,7 +246,7 @@ The **same placement field set** applies to **both** engagement relationship typ
 | --- | --- | --- |
 | **Payroll / locality** | Department/location/tax-geography hooks may tie to payroll input and reporting (**Phase 5**) | Usually irrelevant to payroll rails; contractor uses **settlement** rail instead |
 | **Time / leave** | Location/department may gate self-service or approval routing (**employee-only MVP time/leave**) | Not on employee time rails in MVP (`overview`, `mvp-scope`) |
-| **Charges / settlement** | N/A | Department/team may drive **routing** for commission/support or operational ownership—not charge math itself (**Phase 4+**) |
+| **Charges / settlement** | N/A | Department/team may drive **routing** for commission/support or operational ownership—not charge math itself (workforce financials / later depth) |
 
 TC-03 should document any **explicit** “required for contractor but not employee” (or inverse) rules when engagement lifecycle and forms are designed.
 

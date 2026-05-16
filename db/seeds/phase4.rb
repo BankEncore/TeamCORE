@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Phase 4 demo financials: compensation catalog, assignments, pay periods, revenue,
+# Demo workforce financials: compensation catalog, assignments, pay periods, revenue,
 # commission + draw (employee), contractor charges / waiver, settlement compose (hybrid lineage).
 # Idempotent for typical re-runs. Requires baseline db/seeds.rb (Example Agency + demo engagements).
 

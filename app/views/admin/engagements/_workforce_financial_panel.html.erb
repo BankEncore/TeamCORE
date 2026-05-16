@@ -1,7 +1,7 @@
 <section class="tc-panel">
   <div class="tc-panel__header">
     <div>
-      <div class="tc-panel__title">Compensation & revenue (Phase 4)</div>
+      <div class="tc-panel__title">Compensation & revenue</div>
       <p class="tc-panel__subtitle">Operational records — edit in admin workflows, not here.</p>
     </div>
   </div>
@@ -11,34 +11,34 @@
       <%= link_to "Revenue inputs", admin_engagement_revenue_inputs_path(@engagement), class: "tc-btn tc-btn--secondary tc-btn--sm" %>
       <%= link_to "Commission calculations", admin_engagement_commission_calculations_path(@engagement), class: "tc-btn tc-btn--secondary tc-btn--sm" %>
     </div>
-    <% if @phase4_assignment.present? %>
+    <% if @workforce_financial_assignment.present? %>
       <dl class="tc-kv-grid text-xs">
         <dt>Current plan</dt>
-        <dd><%= @phase4_assignment.snapshot_plan_name %> (<%= @phase4_assignment.snapshot_plan_type %>)</dd>
+        <dd><%= @workforce_financial_assignment.snapshot_plan_name %> (<%= @workforce_financial_assignment.snapshot_plan_type %>)</dd>
         <dt>Commission rate</dt>
-        <dd><%= tc_percent_from_bps(@phase4_assignment.snapshot_commission_rate_bps) %></dd>
-        <% if @engagement.allows_employee_commission_draw? && @phase4_assignment.snapshot_minimum_amount_cents.to_i.positive? %>
+        <dd><%= tc_percent_from_bps(@workforce_financial_assignment.snapshot_commission_rate_bps) %></dd>
+        <% if @engagement.allows_employee_commission_draw? && @workforce_financial_assignment.snapshot_minimum_amount_cents.to_i.positive? %>
           <dt>Min commission</dt>
-          <dd><%= tc_money(@phase4_assignment.snapshot_minimum_amount_cents) %></dd>
+          <dd><%= tc_money(@workforce_financial_assignment.snapshot_minimum_amount_cents) %></dd>
         <% end %>
       </dl>
     <% else %>
       <p style="color: var(--tc-text-muted);">No effective compensation plan assignment for today.</p>
     <% end %>
-    <% if @engagement.allows_employee_commission_draw? && @phase4_draw_balance.present? %>
-      <p class="text-xs mt-2">Draw balance: <%= tc_money(@phase4_draw_balance.balance_cents) %></p>
+    <% if @engagement.allows_employee_commission_draw? && @workforce_financial_draw_balance.present? %>
+      <p class="text-xs mt-2">Draw balance: <%= tc_money(@workforce_financial_draw_balance.balance_cents) %></p>
     <% end %>
     <% if @engagement.allows_contractor_charges_and_settlement? %>
       <div class="flex flex-wrap gap-2 pt-2 border-t border-slate-200">
         <%= link_to "Contractor charges", admin_engagement_contractor_charges_path(@engagement), class: "tc-btn tc-btn--secondary tc-btn--sm" %>
       </div>
-      <% if @phase4_open_charges.present? %>
+      <% if @workforce_financial_open_charges.present? %>
         <p class="text-xs" style="color: var(--tc-text-muted);">
-          Open charge rows: <%= @phase4_open_charges.size %> (<%= tc_money(@phase4_open_charges.sum(&:open_balance_cents)) %> outstanding on sampled rows)
+          Open charge rows: <%= @workforce_financial_open_charges.size %> (<%= tc_money(@workforce_financial_open_charges.sum(&:open_balance_cents)) %> outstanding on sampled rows)
         </p>
       <% end %>
     <% elsif @engagement.relationship_type == "subcontractor" %>
-      <p class="text-xs" style="color: var(--tc-text-muted);">Subcontractor engagements are excluded from contractor charge/settlement in Phase 4 MVP.</p>
+      <p class="text-xs" style="color: var(--tc-text-muted);">Subcontractor engagements are excluded from contractor charges and settlement in MVP.</p>
     <% end %>
   </div>
 </section>

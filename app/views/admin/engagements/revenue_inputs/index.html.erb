@@ -22,7 +22,12 @@
             <td><%= tc_money(r.commissionable_revenue_cents) %></td>
             <td class="font-mono"><%= r.source_type %></td>
             <td>
-              <%= button_to "Calc", calculate_commission_admin_engagement_revenue_input_path(@engagement, r), method: :post, class: "tc-btn tc-btn--quiet text-xs" %>
+              <% locked = @finalized_revenue_input_ids.include?(r.id) %>
+              <% if locked %>
+                <span class="text-slate-500 text-xs">Calc locked</span>
+              <% else %>
+                <%= button_to "Calc", calculate_commission_admin_engagement_revenue_input_path(@engagement, r), method: :post, class: "tc-btn tc-btn--quiet text-xs" %>
+              <% end %>
               <%= link_to "Edit", edit_admin_engagement_revenue_input_path(@engagement, r), class: tc_link_classes %>
             </td>
           </tr>

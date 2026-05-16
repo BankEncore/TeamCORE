@@ -650,16 +650,18 @@ Some Team360 panels may be placeholders until Phases 4 and 5 populate financial,
 
 ### Phase 4 — Compensation, Contractor Charges, and Settlement Basics
 
+**Specs:** [`../roadmap/phase-4-developer-brief.md`](../roadmap/phase-4-developer-brief.md) **Modeling / locks:** [`../domain/workforce-financial-modeling.md`](../domain/workforce-financial-modeling.md) · [`../domain/compensation-financials.md`](../domain/compensation-financials.md) · [`../domain/contractor-charges.md`](../domain/contractor-charges.md) · [`../domain/contractor-settlement.md`](../domain/contractor-settlement.md).
+
 | Domain / Area           | Purpose                                                    |
 | ----------------------- | ---------------------------------------------------------- |
 | Compensation            | Assign salary, hourly, or commission compensation plans.   |
 | Revenue inputs          | Capture gross sales and commissionable revenue.            |
 | Flat-rate commission    | Support MVP commission calculation.                        |
-| Repayable draw recovery | Recover draws from future contractor settlements.          |
+| Minimum commission draw (TC-16) | **Employee-only:** repayable draw / recovery in the **compensation** rail — not via contractor settlement. |
 | Contractor charges      | Track fees, recoverables, balances, statuses, and waivers. |
-| Settlement shell        | Create basic contractor settlement records.                |
+| Settlement shell        | Contractor settlement runs/lines; void / paid-recorded lifecycle (see modeling doc §8). |
 
-Phase 4 depends on Engagement from Phase 1 and should update Team360 panels introduced in Phase 3.
+Compensation and contractor financial capabilities depend on Engagement from Phase 1 and extend Team360 with **read-only** panels (see [`../domain/team360.md`](../domain/team360.md)).
 
 ---
 

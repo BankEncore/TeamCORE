@@ -37,6 +37,8 @@ Rails.application.routes.draw do
       member do
         post :finalize
         post :compose_line
+        post :void
+        post :mark_paid
       end
     end
     resources :engagements, only: %i[index show new create edit update] do

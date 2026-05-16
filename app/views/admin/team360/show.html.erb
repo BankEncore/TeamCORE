@@ -347,8 +347,8 @@
         </div>
       </section>
 
-      <% if @snapshot.phase4_financial.present? && @snapshot.phase4_financial[:focused_engagement_id].present? %>
-        <% fin = @snapshot.phase4_financial %>
+      <% if @snapshot.workforce_financial.present? && @snapshot.workforce_financial[:focused_engagement_id].present? %>
+        <% fin = @snapshot.workforce_financial %>
         <section class="tc-panel">
           <div class="tc-panel__header">
             <div class="tc-panel__title">Compensation summary</div>
@@ -367,13 +367,29 @@
             <% else %>
               <p class="text-slate-600">No plan assignment effective on <%= @as_of_date %>.</p>
             <% end %>
+            <% if fin[:admin_links].present? %>
+              <p class="text-xs mt-3 space-x-3">
+                <% if (href = fin[:admin_links][:revenue_inputs]).present? %>
+                  <%= link_to "Revenue", href, class: tc_link_classes %>
+                <% end %>
+                <% if (href = fin[:admin_links][:commission_calculations]).present? %>
+                  <%= link_to "Commission", href, class: tc_link_classes %>
+                <% end %>
+                <% if (href = fin[:admin_links][:contractor_charges]).present? %>
+                  <%= link_to "Charges", href, class: tc_link_classes %>
+                <% end %>
+                <% if (href = fin[:admin_links][:settlement_runs_index]).present? %>
+                  <%= link_to "Settlements", href, class: tc_link_classes %>
+                <% end %>
+              </p>
+            <% end %>
             <% if fin[:draw_balance_cents].present? %>
               <p class="text-xs mt-2">Draw balance: <%= tc_money(fin[:draw_balance_cents]) %></p>
             <% end %>
           </div>
         </section>
 
-        <% if fin[:contractor_charges].present? || fin[:last_settlement].present? %>
+        <% if fin[:contractor_charges].present? || fin[:last_settlement].present? || fin[:settlement].present? %>
           <section class="tc-panel">
             <div class="tc-panel__header">
               <div class="tc-panel__title">Contractor charges & settlement</div>
@@ -384,9 +400,53 @@
                   Open-ish charge rows: <%= fin[:contractor_charges][:open_count] %> ·
                   balance <%= tc_money(fin[:contractor_charges][:open_balance_cents]) %>
                 </p>
+                <% if fin[:contractor_charges][:past_due_count].to_i.positive? %>
+                  <p class="text-xs text-amber-800">
+                    Past due: <%= fin[:contractor_charges][:past_due_count] %> ·
+                    <%= tc_money(fin[:contractor_charges][:past_due_balance_cents]) %>
+                  </p>
+                <% end %>
+                <% if fin[:contractor_charges][:next_due_on].present? %>
+                  <p class="text-xs">Next charge due: <%= fin[:contractor_charges][:next_due_on] %></p>
+                <% end %>
+                <% if fin[:contractor_charges][:recent_recoveries].present? %>
+                  <p class="text-xs font-medium mt-2">Recent recoveries</p>
+                  <ul class="list-none text-xs space-y-0.5 p-0 m-0 font-mono">
+                    <% fin[:contractor_charges][:recent_recoveries].each do |r| %>
+                      <li><%= r[:occurred_on] %> · <%= tc_money(r[:amount_cents]) %> · <%= r[:source_type] %> · charge <%= r[:contractor_charge_id] %></li>
+                    <% end %>
+                  </ul>
+                <% end %>
+                <% if fin[:contractor_charges][:recent_waivers].present? %>
+                  <p class="text-xs font-medium mt-2">Recent waivers</p>
+                  <ul class="list-none text-xs space-y-0.5 p-0 m-0 font-mono">
+                    <% fin[:contractor_charges][:recent_waivers].each do |w| %>
+                      <li><%= w[:created_at].in_time_zone.to_date %> · <%= tc_money(w[:amount_cents]) %> · charge <%= w[:contractor_charge_id] %></li>
+                    <% end %>
+                  </ul>
+                <% end %>
+              <% end %>
+              <% if fin[:settlement].present? && fin[:settlement][:open_runs].present? %>
+                <p class="text-xs font-medium mt-2">Open agency settlement runs</p>
+                <ul class="list-none text-xs space-y-0.5 p-0 m-0 font-mono">
+                  <% fin[:settlement][:open_runs].each do |r| %>
+                    <li>#<%= r[:id] %> <%= r[:status] %> · <%= r[:period_start_on] %>–<%= r[:period_end_on] %></li>
+                  <% end %>
+                </ul>
+              <% end %>
+              <% if fin[:settlement].present? && fin[:settlement][:recent_lines].present? %>
+                <p class="text-xs font-medium mt-2">Recent settlement lines (this engagement)</p>
+                <ul class="list-none text-xs space-y-0.5 p-0 m-0 font-mono">
+                  <% fin[:settlement][:recent_lines].each do |ln| %>
+                    <li>
+                      line <%= ln[:line_id] %> · run #<%= ln[:run_id] %> (<%= ln[:run_status] %>) ·
+                      net <%= tc_money(ln[:net_cents]) %> · <%= ln[:period_start_on] %>–<%= ln[:period_end_on] %>
+                    </li>
+                  <% end %>
+                </ul>
               <% end %>
               <% if fin[:last_settlement].present? %>
-                <p class="text-xs font-mono">
+                <p class="text-xs font-mono mt-2">
                   Last line: run #<%= fin[:last_settlement][:run_id] %>
                   (<%= fin[:last_settlement][:status] %>)
                   · net <%= tc_money(fin[:last_settlement][:net_cents]) %>

@@ -15,6 +15,10 @@ class CommissionCalculation < ApplicationRecord
   validates :status, inclusion: { in: STATUSES }
   validate :engagement_in_agency
 
+  def finalized?
+    status == "finalized"
+  end
+
   private
 
   def engagement_in_agency

@@ -15,6 +15,58 @@ class AdminPhase4FinancialsTest < ActionDispatch::IntegrationTest
     follow_redirect!
   end
 
+  test "revenue update blocked when commission finalized" do
+    pp = PayPeriod.create!(agency: @agency, start_on: Date.new(2024, 11, 1), end_on: Date.new(2024, 11, 15), label: "Nov-1")
+    rev = RevenueInput.create!(
+      agency: @agency,
+      engagement: @ee[:engagement],
+      pay_period: pp,
+      period_start_on: pp.start_on,
+      period_end_on: pp.end_on,
+      commissionable_revenue_cents: 800_000,
+      source_type: "manual"
+    )
+    Financials::ApplyCommissionAndDraw.call(revenue_input: rev, actor: @user)
+    CommissionCalculation.find_by!(revenue_input_id: rev.id).update!(status: "finalized")
+
+    patch admin_engagement_revenue_input_path(@ee[:engagement], rev), params: {
+      revenue_input: {
+        pay_period_id: pp.id,
+        period_start_on: "2024-11-01",
+        period_end_on: "2024-11-15",
+        commissionable_revenue_money: "8000.00",
+        source_type: "manual",
+        notes: "try edit"
+      }
+    }
+    follow_redirect!
+    assert_match(/locked/i, flash[:alert].to_s)
+  end
+
+  test "settlement run mark paid and void" do
+    run = ContractorSettlementRun.create!(
+      agency: @agency,
+      period_start_on: Date.new(2024, 12, 1),
+      period_end_on: Date.new(2024, 12, 31),
+      status: "finalized"
+    )
+    post mark_paid_admin_contractor_settlement_run_path(run), params: { reason: "ACH" }
+    assert_redirected_to admin_contractor_settlement_run_path(run)
+    assert_equal "paid_recorded", run.reload.status
+    assert ContractorSettlementRunEvent.exists?(contractor_settlement_run_id: run.id, event_type: "payment_recorded")
+
+    run2 = ContractorSettlementRun.create!(
+      agency: @agency,
+      period_start_on: Date.new(2025, 1, 1),
+      period_end_on: Date.new(2025, 1, 31),
+      status: "finalized"
+    )
+    post void_admin_contractor_settlement_run_path(run2), params: { reason: "duplicate" }
+    assert_redirected_to admin_contractor_settlement_run_path(run2)
+    assert_equal "voided", run2.reload.status
+    assert ContractorSettlementRunEvent.exists?(contractor_settlement_run_id: run2.id, event_type: "voided")
+  end
+
   test "pay periods index and create" do
     get admin_pay_periods_path
     assert_response :success
@@ -163,7 +215,7 @@ class AdminPhase4FinancialsTest < ActionDispatch::IntegrationTest
     assert_equal "finalized", run.reload.status
   end
 
-  test "team360 includes phase4 panel copy for focused engagement" do
+  test "team360 includes workforce financial panel copy for focused engagement" do
     get admin_team_member_team360_path(@ic[:team_member], params: { engagement_id: @ic[:engagement].id })
     assert_response :success
     assert_includes @response.body, "Compensation"

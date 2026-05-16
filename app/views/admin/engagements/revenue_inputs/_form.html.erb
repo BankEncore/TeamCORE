@@ -1,4 +1,10 @@
 <%= form_with model: [:admin, engagement, revenue_input], class: "space-y-4 max-w-xl" do |f| %>
+  <% locked = local_assigns[:locked] %>
+  <% if locked %>
+    <p class="text-amber-800 text-sm border border-amber-200 bg-amber-50 rounded-md p-3">
+      Commission for this period is finalized. Revenue and recalculation are locked.
+    </p>
+  <% end %>
   <% if revenue_input.errors.any? %>
     <div class="text-red-600 text-sm"><%= revenue_input.errors.full_messages.join(", ") %></div>
   <% end %>
@@ -35,5 +41,5 @@
     <%= f.label :notes, class: "tc-label" %>
     <%= f.text_area :notes, class: "tc-input", rows: 3 %>
   </div>
-  <%= f.submit class: "tc-btn tc-btn--primary" %>
+  <%= f.submit class: "tc-btn tc-btn--primary", disabled: locked %>
 <% end %>

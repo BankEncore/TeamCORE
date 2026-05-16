@@ -14,4 +14,9 @@ class User < ApplicationRecord
   normalizes :email, with: ->(e) { e.strip.downcase }
 
   validates :email, presence: true, uniqueness: { case_sensitive: false }
+
+  # Team360 §12.2 — employee draw visibility; permissive default until TC-29/30 role model.
+  def team360_show_employee_draw_balance?
+    true
+  end
 end

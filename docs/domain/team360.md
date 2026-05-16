@@ -19,7 +19,8 @@ Team360 **organizes and presents** authoritative data only. **No `team360s` tabl
 | --- | --- | --- |
 | **Factual** | Identity, contacts, engagements list, placements, supervision, subcontractor relationship links | Render authoritative model attributes and associations. |
 | **Computed** | Document readiness, alerts, requirement **outcomes** | Consume **`Documents::ReadinessEvaluator`** → **`Documents::ReadinessResult`** only for outcomes and alert severities ([`documents-compliance.md`](documents-compliance.md), [`document-alerts.md`](document-alerts.md)). |
-| **Placeholder** | Compensation, payroll, settlement, time/leave, durable audit timeline | Static copy only; no dummy rows (**TC-3-D07**). |
+| **Computed (workforce financials)** | Compensation summary, contractor charges & settlement (read model: `ProfileSnapshot#workforce_financial`) | No Team360-side writes. Payload from **`Team360::ProfileAssembler#build_workforce_financial`**; coarse **draw** visibility via **`User#team360_show_employee_draw_balance?`** until TC-29/30. Product rules: [developer brief §12](../roadmap/phase-4-developer-brief.md); modeling: [`compensation-financials.md`](compensation-financials.md), [`contractor-charges.md`](contractor-charges.md), [`contractor-settlement.md`](contractor-settlement.md); hub: [`workforce-financial-modeling.md`](workforce-financial-modeling.md). |
+| **Placeholder** | Employee payroll results, time/leave, durable audit timeline | Static copy only; no dummy rows (**TC-3-D07**). |
 
 ## `focused_engagement` (display selection)
 
@@ -54,4 +55,5 @@ Phase 3 uses existing **`Admin::BaseController`** agency scoping and coarse admi
 - [`organization.md`](organization.md) — Team360 organization context fields
 - [`documents-compliance.md`](documents-compliance.md), [`document-alerts.md`](document-alerts.md), [`document-verification.md`](document-verification.md)
 - [`subcontractor-relationships.md`](subcontractor-relationships.md)
+- Workforce financial **read** surfaces (not workflow owner): [`compensation-financials.md`](compensation-financials.md), [`contractor-charges.md`](contractor-charges.md), [`contractor-settlement.md`](contractor-settlement.md), [`workforce-financial-modeling.md`](workforce-financial-modeling.md), [developer brief §12](../roadmap/phase-4-developer-brief.md)
 - Operational lists and drill-through: [`operational-reporting.md`](operational-reporting.md)

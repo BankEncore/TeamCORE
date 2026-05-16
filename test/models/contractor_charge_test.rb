@@ -22,7 +22,7 @@ class ContractorChargeTest < ActiveSupport::TestCase
     assert ch.valid?, ch.errors.full_messages.join(", ")
   end
 
-  test "rejects subcontractor engagement in Phase 4 MVP" do
+  test "rejects subcontractor engagement for contractor charges MVP" do
     ch = ContractorCharge.new(
       agency: @agency,
       engagement: @sub[:engagement],

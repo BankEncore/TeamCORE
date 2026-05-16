@@ -20,8 +20,9 @@ Modeling notes for **TC-03 — Engagement Lifecycle** ([GitHub epic #4](https://
 | **EngagementOrganizationPlacement** | `engagement_organization_placements` | Yes |
 | **EngagementSupervisionAssignment** | `engagement_supervision_assignments` | Yes |
 | **Documents / compliance** | Engagement consumers | **TC-06** — [`documents-compliance.md`](documents-compliance.md) |
-| **Compensation / settlement** | Engagement consumers | No — future |
-| **Team360 UI** | Read paths only (requirements in this doc § Team360) | No — TC-10 |
+| **Compensation / revenue / draw** | Engagement consumers | **TC-13–TC-16** — [`compensation-financials.md`](compensation-financials.md) |
+| **Contractor charges / settlement** | Engagement consumers | **TC-17–TC-19** — [`contractor-charges.md`](contractor-charges.md), [`contractor-settlement.md`](contractor-settlement.md) |
+| **Team360 UI** | Read paths only (requirements in this doc § Team360) | **TC-10 / TC-11** + workforce financial panels — [`team360.md`](team360.md) |
 | **Operational reports** | Engagement + placement dimensions | No — TC-12 |
 | **Full RBAC / durable audit ledger** | Policy TC-29/TC-30 | No |
 

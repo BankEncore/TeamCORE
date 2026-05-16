@@ -132,4 +132,26 @@ class FinancialsApplyCommissionAndDrawTest < ActiveSupport::TestCase
     end
     assert_match(/commission rate/i, err.message)
   end
+
+  test "raises when commission already finalized for revenue input" do
+    plan = p4_commission_plan!(@agency, rate_bps: 1000, minimum_cents: nil)
+    p4_assign_plan!(agency: @agency, engagement: @ee[:engagement], plan:)
+
+    rev = RevenueInput.create!(
+      agency: @agency,
+      engagement: @ee[:engagement],
+      pay_period: @pp,
+      period_start_on: @pp.start_on,
+      period_end_on: @pp.end_on,
+      commissionable_revenue_cents: 1_000_000,
+      source_type: "manual"
+    )
+    Financials::ApplyCommissionAndDraw.call(revenue_input: rev, actor: nil)
+    CommissionCalculation.find_by!(revenue_input_id: rev.id).update!(status: "finalized")
+
+    err = assert_raises(ArgumentError) do
+      Financials::ApplyCommissionAndDraw.call(revenue_input: rev, actor: nil)
+    end
+    assert_match(/finalized/i, err.message)
+  end
 end

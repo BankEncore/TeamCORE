@@ -2,7 +2,7 @@
 
 module Financials
   # Builds or replaces a draft CommissionCalculation for a revenue_input using assignment snapshots
-  # and employee-only minimum commission draw rules (Phase 4 brief / TC-15–TC-16).
+  # and employee-only minimum commission draw rules (developer brief / TC-15–TC-16).
   class ApplyCommissionAndDraw
     def self.call(revenue_input:, actor: nil)
       new(revenue_input:, actor:).call
@@ -97,6 +97,10 @@ module Financials
 
     def upsert_calculation!(engagement:, agency:, pay_period:, rate:, revenue_cents:, raw_commission:, draw_added:, draw_recovery:, gross_pay:, ending_draw:)
       existing = CommissionCalculation.find_by(revenue_input_id: @revenue_input.id)
+      if existing&.finalized?
+        raise ArgumentError, "Cannot recalculate: commission for this revenue input is finalized"
+      end
+
       attrs = {
         agency_id: agency.id,
         engagement_id: engagement.id,

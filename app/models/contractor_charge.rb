@@ -55,7 +55,7 @@ class ContractorCharge < ApplicationRecord
     return if engagement.blank?
 
     unless engagement.allows_contractor_charges_and_settlement?
-      errors.add(:engagement, "must be individual_contractor or contractor_organization for contractor charges (Phase 4 MVP)")
+      errors.add(:engagement, "must be individual_contractor or contractor_organization for contractor charges (MVP)")
     end
   end
 end

@@ -14,7 +14,7 @@ module Team360
     :document_types_by_id,
     :records_by_id,
     :subcontractor_rows,
-    :phase4_financial,
+    :workforce_financial,
     keyword_init: true
   )
 end
