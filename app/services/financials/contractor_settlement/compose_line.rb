@@ -68,7 +68,7 @@ module Financials
           charges.find_each do |charge|
             next if charge.open_balance_cents <= 0
 
-            deduct = [charge.open_balance_cents, available].min
+            deduct = [ charge.open_balance_cents, available ].min
             next if deduct <= 0
 
             ContractorChargeRecovery.create!(

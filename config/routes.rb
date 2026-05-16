@@ -50,7 +50,7 @@ Rails.application.routes.draw do
           member { post :calculate_commission }
           collection { post :import_csv }
         end
-        resources :commission_calculations, only: [:index] do
+        resources :commission_calculations, only: [ :index ] do
           member do
             post :finalize
           end

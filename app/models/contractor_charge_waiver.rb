@@ -26,7 +26,7 @@ class ContractorChargeWaiver < ApplicationRecord
 
   def apply_waiver_to_charge
     ch = contractor_charge.reload
-    new_bal = [ch.open_balance_cents - amount_cents, 0].max
+    new_bal = [ ch.open_balance_cents - amount_cents, 0 ].max
     attrs = { open_balance_cents: new_bal }
     attrs[:status] = "waived" if new_bal.zero?
     ch.update!(attrs)

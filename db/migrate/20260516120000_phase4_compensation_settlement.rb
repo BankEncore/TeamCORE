@@ -9,7 +9,7 @@ class Phase4CompensationSettlement < ActiveRecord::Migration[8.1]
       t.string :label
       t.timestamps
     end
-    add_index :pay_periods, [:agency_id, :start_on, :end_on], name: "index_pay_periods_on_agency_and_bounds"
+    add_index :pay_periods, [ :agency_id, :start_on, :end_on ], name: "index_pay_periods_on_agency_and_bounds"
 
     create_table :compensation_plans do |t|
       t.references :agency, null: false, foreign_key: true
@@ -24,7 +24,7 @@ class Phase4CompensationSettlement < ActiveRecord::Migration[8.1]
       t.string :recovery_rule
       t.timestamps
     end
-    add_index :compensation_plans, [:agency_id, :status], name: "index_compensation_plans_on_agency_id_and_status"
+    add_index :compensation_plans, [ :agency_id, :status ], name: "index_compensation_plans_on_agency_id_and_status"
 
     create_table :compensation_plan_assignments do |t|
       t.references :agency, null: false, foreign_key: true
@@ -42,7 +42,7 @@ class Phase4CompensationSettlement < ActiveRecord::Migration[8.1]
       t.bigint :snapshot_hourly_rate_cents
       t.timestamps
     end
-    add_index :compensation_plan_assignments, [:engagement_id, :effective_start_on],
+    add_index :compensation_plan_assignments, [ :engagement_id, :effective_start_on ],
       name: "index_comp_plan_assignments_on_engagement_and_start"
 
     create_table :revenue_inputs do |t|
@@ -57,7 +57,7 @@ class Phase4CompensationSettlement < ActiveRecord::Migration[8.1]
       t.text :notes
       t.timestamps
     end
-    add_index :revenue_inputs, [:engagement_id, :pay_period_id], name: "index_revenue_inputs_on_engagement_and_pay_period"
+    add_index :revenue_inputs, [ :engagement_id, :pay_period_id ], name: "index_revenue_inputs_on_engagement_and_pay_period"
 
     create_table :commission_calculations do |t|
       t.references :agency, null: false, foreign_key: true
@@ -74,7 +74,7 @@ class Phase4CompensationSettlement < ActiveRecord::Migration[8.1]
       t.string :status, default: "draft", null: false
       t.timestamps
     end
-    add_index :commission_calculations, [:engagement_id, :pay_period_id], name: "index_commission_calcs_on_engagement_pay_period"
+    add_index :commission_calculations, [ :engagement_id, :pay_period_id ], name: "index_commission_calcs_on_engagement_pay_period"
 
     create_table :commission_draw_balances do |t|
       t.references :agency, null: false, foreign_key: true
@@ -106,7 +106,7 @@ class Phase4CompensationSettlement < ActiveRecord::Migration[8.1]
       t.text :description
       t.timestamps
     end
-    add_index :contractor_charges, [:engagement_id, :status], name: "index_contractor_charges_on_engagement_and_status"
+    add_index :contractor_charges, [ :engagement_id, :status ], name: "index_contractor_charges_on_engagement_and_status"
 
     create_table :contractor_charge_waivers do |t|
       t.references :agency, null: false, foreign_key: true
@@ -124,7 +124,7 @@ class Phase4CompensationSettlement < ActiveRecord::Migration[8.1]
       t.string :status, null: false, default: "draft"
       t.timestamps
     end
-    add_index :contractor_settlement_runs, [:agency_id, :period_start_on, :period_end_on],
+    add_index :contractor_settlement_runs, [ :agency_id, :period_start_on, :period_end_on ],
       name: "index_settlement_runs_on_agency_and_period"
 
     create_table :contractor_settlement_lines do |t|
@@ -158,7 +158,7 @@ class Phase4CompensationSettlement < ActiveRecord::Migration[8.1]
       t.timestamps
     end
     add_index :contractor_settlement_line_revenue_inputs,
-      [:contractor_settlement_line_id, :revenue_input_id],
+      [ :contractor_settlement_line_id, :revenue_input_id ],
       unique: true, name: "index_settlement_line_revenue_unique"
 
     create_table :contractor_settlement_line_commission_calculations do |t|
@@ -167,7 +167,7 @@ class Phase4CompensationSettlement < ActiveRecord::Migration[8.1]
       t.timestamps
     end
     add_index :contractor_settlement_line_commission_calculations,
-      [:contractor_settlement_line_id, :commission_calculation_id],
+      [ :contractor_settlement_line_id, :commission_calculation_id ],
       unique: true, name: "index_settlement_line_comm_calc_unique"
 
     create_table :contractor_settlement_run_events do |t|

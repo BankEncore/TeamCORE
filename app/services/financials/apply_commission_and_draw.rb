@@ -45,7 +45,7 @@ module Financials
             draw_recovery = 0
           else
             excess = raw_commission - min_amt
-            draw_recovery = [excess, balance_start].min
+            draw_recovery = [ excess, balance_start ].min
             gross_pay = raw_commission - draw_recovery
             ending_draw = balance_start - draw_recovery
           end
