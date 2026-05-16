@@ -25,6 +25,14 @@
       color: var(--tc-text);
     }
   
+    .tc-data-table--compact th {
+      @apply px-2 py-1.5;
+    }
+  
+    .tc-data-table--compact td {
+      @apply px-2 py-1.5;
+    }
+  
     .tc-data-table tbody {
       @apply divide-y;
       divide-color: var(--tc-border);
@@ -37,7 +45,16 @@
     .tc-data-table__cell-muted {
       color: var(--tc-text-muted);
     }
-  
+
+    /* Long prose (e.g. alert messages): override default td nowrap so text wraps inside the cell */
+    .tc-data-table td.tc-data-table__cell-wrap {
+      white-space: normal;
+      overflow-wrap: break-word;
+      word-break: break-word;
+      vertical-align: top;
+      max-width: min(36rem, 55vw);
+    }
+
     .tc-data-table__cell-actions {
       @apply text-right;
     }

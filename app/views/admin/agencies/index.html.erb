@@ -1,10 +1,24 @@
 <% content_for :title, "Agencies — TeamCORE Admin" %>
-<h1 class="text-2xl font-semibold mb-4">Agencies you can access</h1>
-<ul class="divide-y divide-slate-200 border border-slate-200 rounded-lg bg-white">
-  <% @agencies.each do |agency| %>
-    <li class="px-4 py-3 flex justify-between items-center">
-      <span><%= agency.name %> <span class="text-slate-500 text-sm">(<%= agency.code %>)</span></span>
-      <%= link_to "View", admin_agency_path(agency), class: "text-sky-700 hover:underline text-sm" %>
-    </li>
-  <% end %>
-</ul>
+<div class="tc-page-stack">
+  <header class="tc-page-header">
+    <div>
+      <p class="tc-page-header__eyebrow">Organization</p>
+      <h1 class="tc-page-header__title">Agencies you can access</h1>
+      <p class="tc-page-header__subtitle">Switch context from the header to work inside an agency.</p>
+    </div>
+  </header>
+
+  <div class="tc-panel p-0">
+    <ul class="m-0 divide-y list-none p-0" style="border-color: var(--tc-border);">
+      <% @agencies.each do |agency| %>
+        <li class="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+          <span class="text-sm font-medium" style="color: var(--tc-text);">
+            <%= agency.name %>
+            <span class="text-sm font-normal" style="color: var(--tc-text-muted);">(<%= agency.code %>)</span>
+          </span>
+          <%= link_to "View", admin_agency_path(agency), class: tc_link_classes %>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+</div>

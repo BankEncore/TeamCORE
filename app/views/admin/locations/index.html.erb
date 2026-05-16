@@ -1,18 +1,35 @@
 <% content_for :title, "Locations — TeamCORE Admin" %>
-<div class="flex justify-between items-center mb-4">
-  <h1 class="text-2xl font-semibold">Locations</h1>
-  <%= link_to "New location", new_admin_location_path, class: "rounded bg-slate-900 text-white px-3 py-2 text-sm" %>
+<div class="tc-page-stack">
+  <header class="tc-page-header">
+    <div>
+      <p class="tc-page-header__eyebrow">Organization</p>
+      <h1 class="tc-page-header__title">Locations</h1>
+    </div>
+    <div class="tc-page-header__actions">
+      <%= link_to "New location", new_admin_location_path, class: "tc-btn tc-btn--primary" %>
+    </div>
+  </header>
+
+  <div class="tc-table-wrap">
+    <table class="tc-data-table">
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @locations.each do |loc| %>
+          <tr>
+            <td class="tc-data-table__primary"><%= link_to loc.code, admin_location_path(loc), class: tc_link_classes %></td>
+            <td><%= loc.name %></td>
+            <td class="tc-data-table__cell-muted"><%= loc.location_type %></td>
+            <td><span class="<%= tc_status_badge_classes(loc.status) %>"><%= loc.status %></span></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
 </div>
-<table class="min-w-full text-sm border border-slate-200 bg-white rounded-lg overflow-hidden">
-  <thead class="bg-slate-100"><tr><th class="text-left p-2">Code</th><th class="text-left p-2">Name</th><th class="text-left p-2">Type</th><th class="text-left p-2">Status</th></tr></thead>
-  <tbody>
-    <% @locations.each do |loc| %>
-      <tr class="border-t border-slate-200">
-        <td class="p-2"><%= link_to loc.code, admin_location_path(loc), class: "text-sky-700 underline" %></td>
-        <td class="p-2"><%= loc.name %></td>
-        <td class="p-2"><%= loc.location_type %></td>
-        <td class="p-2"><%= loc.status %></td>
-      </tr>
-    <% end %>
-  </tbody>
-</table>

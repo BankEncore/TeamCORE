@@ -1,29 +1,42 @@
 <% content_for :title, "Document requirements — TeamCORE Admin" %>
-<div class="flex justify-between items-center mb-4">
-  <h1 class="text-2xl font-semibold">Document requirements</h1>
-  <%= link_to "New requirement", new_admin_document_requirement_path, class: "rounded bg-slate-900 text-white px-3 py-2 text-sm" %>
+<div class="tc-page-stack">
+  <header class="tc-page-header">
+    <div>
+      <p class="tc-page-header__eyebrow">Setup</p>
+      <h1 class="tc-page-header__title">Document requirements</h1>
+      <p class="tc-page-header__subtitle">Rules that drive document readiness by scope and relationship.</p>
+    </div>
+    <div class="tc-page-header__actions">
+      <%= link_to "New requirement", new_admin_document_requirement_path, class: "tc-btn tc-btn--primary" %>
+    </div>
+  </header>
+
+  <div class="tc-table-wrap">
+    <table class="tc-data-table tc-data-table--compact">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Scope</th>
+          <th>Relationship</th>
+          <th>Required</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @document_requirements.each do |req| %>
+          <tr>
+            <td class="tc-data-table__primary font-mono text-xs"><%= link_to req.id, edit_admin_document_requirement_path(req), class: tc_link_classes %></td>
+            <td><%= req.name.presence || "—" %></td>
+            <td class="tc-data-table__cell-muted font-mono text-xs"><%= req.document_type&.code %></td>
+            <td class="font-mono text-xs"><%= req.requirement_scope %></td>
+            <td class="font-mono text-xs"><%= req.relationship_type %></td>
+            <td><%= req.required %></td>
+            <td><span class="<%= tc_status_badge_classes(req.status) %>"><%= req.status %></span></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
 </div>
-<table class="min-w-full text-sm border border-slate-200 bg-white rounded-lg overflow-hidden">
-  <thead class="bg-slate-100"><tr>
-    <th class="text-left p-2">ID</th>
-    <th class="text-left p-2">Name</th>
-    <th class="text-left p-2">Type</th>
-    <th class="text-left p-2">Scope</th>
-    <th class="text-left p-2">Relationship</th>
-    <th class="text-left p-2">Required</th>
-    <th class="text-left p-2">Status</th>
-  </tr></thead>
-  <tbody>
-    <% @document_requirements.each do |req| %>
-      <tr class="border-t border-slate-200">
-        <td class="p-2"><%= link_to req.id, edit_admin_document_requirement_path(req), class: "text-sky-700 underline" %></td>
-        <td class="p-2"><%= req.name.presence || "—" %></td>
-        <td class="p-2"><%= req.document_type&.code %></td>
-        <td class="p-2"><%= req.requirement_scope %></td>
-        <td class="p-2"><%= req.relationship_type %></td>
-        <td class="p-2"><%= req.required %></td>
-        <td class="p-2"><%= req.status %></td>
-      </tr>
-    <% end %>
-  </tbody>
-</table>

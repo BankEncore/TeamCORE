@@ -1,41 +1,97 @@
 <% return unless defined?(current_user) && current_user %>
 
-<header class="border-b border-slate-200 bg-white">
-  <div class="max-w-5xl mx-auto px-4 py-3 flex flex-wrap gap-4 items-center justify-between">
-    <div class="font-semibold text-slate-800">TeamCORE Admin</div>
-    <nav class="flex flex-wrap gap-3 text-sm">
-      <%= link_to "Dashboard", admin_root_path, class: "text-sky-700 hover:underline" %>
-      <%= link_to "Agencies", admin_agencies_path, class: "text-sky-700 hover:underline" %>
-      <% if current_agency.present? %>
-        <%= link_to "Departments", admin_departments_path, class: "text-sky-700 hover:underline" %>
-        <%= link_to "Locations", admin_locations_path, class: "text-sky-700 hover:underline" %>
-        <%= link_to "Teams", admin_teams_path, class: "text-sky-700 hover:underline" %>
-        <%= link_to "Parties", admin_parties_path, class: "text-sky-700 hover:underline" %>
-        <%= link_to "Team members", admin_team_members_path, class: "text-sky-700 hover:underline" %>
-        <%= link_to "Engagements", admin_engagements_path, class: "text-sky-700 hover:underline" %>
-        <%= link_to "Document types", admin_document_types_path, class: "text-sky-700 hover:underline" %>
-        <%= link_to "Doc requirements", admin_document_requirements_path, class: "text-sky-700 hover:underline" %>
-        <%= link_to "Doc records", admin_document_records_path, class: "text-sky-700 hover:underline" %>
-        <%= link_to "Pending review", admin_document_reviews_path, class: "text-sky-700 hover:underline" %>
-        <%= link_to "Document alerts", admin_document_alerts_path, class: "text-sky-700 hover:underline" %>
-        <%= link_to "Reports", admin_reports_root_path, class: "text-sky-700 hover:underline" %>
-      <% end %>
-    </nav>
-    <div class="flex flex-wrap items-center gap-3 text-sm">
+<header class="tc-app-header">
+  <div class="tc-app-header__inner">
+    <%= link_to admin_root_path, class: "tc-app-header__brand" do %>
+      <%= image_tag "logo.png",
+            alt: "TeamCORE",
+            class: "tc-app-header__logo",
+            height: 36,
+            style: "width: auto; max-width: min(200px, 100%); max-height: 2.25rem; object-fit: contain;" %>
+    <% end %>
+    <div class="tc-app-header__tools">
       <% if current_user.agencies.many? %>
-        <%= form_with url: admin_agency_context_path, method: :patch, data: { turbo: false }, class: "flex items-center gap-2" do %>
+        <%= form_with url: admin_agency_context_path, method: :patch, data: { turbo: false }, class: "flex flex-wrap items-end gap-2" do %>
           <%= hidden_field_tag :return_to, request.fullpath %>
-          <%= label_tag :agency_id, "Agency", class: "text-slate-600" %>
-          <%= select_tag :agency_id,
-                options_from_collection_for_select(current_user.agencies.order(:name), :id, :name, current_agency&.id),
-                class: "border border-slate-300 rounded px-2 py-1 text-sm" %>
-          <%= submit_tag "Switch", class: "rounded bg-slate-800 text-white px-2 py-1 text-sm cursor-pointer" %>
+          <div class="tc-field tc-field--compact">
+            <%= label_tag :agency_id, "Agency", class: "tc-label" %>
+            <%= select_tag :agency_id,
+                  options_from_collection_for_select(current_user.agencies.order(:name), :id, :name, current_agency&.id),
+                  class: "tc-select min-w-[10rem]" %>
+          </div>
+          <%= submit_tag "Switch", class: "tc-btn tc-btn--secondary" %>
         <% end %>
       <% elsif current_agency.present? %>
-        <span class="text-slate-600"><%= current_agency.name %></span>
+        <span class="font-medium" style="color: color-mix(in srgb, white 90%, transparent);"><%= current_agency.name %></span>
       <% end %>
-      <span class="text-slate-500"><%= current_user.email %></span>
-      <%= button_to "Log out", logout_path, method: :delete, class: "text-sky-700 hover:underline bg-transparent border-0 cursor-pointer p-0" %>
+      <span class="hidden sm:inline" style="color: color-mix(in srgb, white 72%, transparent);"><%= current_user.email %></span>
+      <%= button_to "Log out", logout_path, method: :delete, class: "tc-btn tc-btn--quiet", form: { class: "inline" }, params: {}, data: { turbo: false } %>
     </div>
   </div>
 </header>
+
+<nav class="tc-section-nav" aria-label="Admin sections">
+  <div class="tc-section-nav__inner">
+    <div class="tc-section-nav__group">
+      <span class="tc-section-nav__label">Workspace</span>
+      <div class="tc-section-nav__links">
+        <%= tc_nav_link_to "Dashboard", admin_root_path %>
+        <% if current_agency.present? %>
+          <%= tc_nav_link_to "Team members", admin_team_members_path %>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="tc-section-nav__group">
+      <span class="tc-section-nav__label">Organization</span>
+      <div class="tc-section-nav__links">
+        <%= tc_nav_link_to "Agencies", admin_agencies_path %>
+        <% if current_agency.present? %>
+          <%= tc_nav_link_to "Departments", admin_departments_path %>
+          <%= tc_nav_link_to "Locations", admin_locations_path %>
+          <%= tc_nav_link_to "Teams", admin_teams_path %>
+        <% end %>
+      </div>
+    </div>
+
+    <% if current_agency.present? %>
+      <div class="tc-section-nav__group">
+        <span class="tc-section-nav__label">People</span>
+        <div class="tc-section-nav__links">
+          <%= tc_nav_link_to "Parties", admin_parties_path %>
+          <%= tc_nav_link_to "Engagements", admin_engagements_path %>
+        </div>
+      </div>
+
+      <div class="tc-section-nav__group">
+        <span class="tc-section-nav__label">Compliance</span>
+        <div class="tc-section-nav__links">
+          <%= tc_nav_link_to "Doc records", admin_document_records_path %>
+          <%= tc_nav_link_to "Pending review", admin_document_reviews_path %>
+          <%= tc_nav_link_to "Document alerts", admin_document_alerts_path %>
+        </div>
+      </div>
+
+      <div class="tc-section-nav__group">
+        <span class="tc-section-nav__label">Setup</span>
+        <div class="tc-section-nav__links">
+          <%= tc_nav_link_to "Document types", admin_document_types_path %>
+          <%= tc_nav_link_to "Requirements", admin_document_requirements_path %>
+        </div>
+      </div>
+
+      <div class="tc-section-nav__group">
+        <span class="tc-section-nav__label">Reports</span>
+        <div class="tc-section-nav__links">
+          <% reports_active = tc_reports_nav_active? %>
+          <%= link_to "Reports", admin_reports_root_path,
+                class: [
+                  "tc-section-nav__link",
+                  ("tc-section-nav__link--active" if reports_active),
+                ].compact.join(" "),
+                "aria-current": (reports_active ? "page" : nil) %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</nav>

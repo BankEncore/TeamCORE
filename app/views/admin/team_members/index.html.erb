@@ -1,17 +1,42 @@
 <% content_for :title, "Team members — TeamCORE Admin" %>
-<div class="flex justify-between items-center mb-4">
-  <h1 class="text-2xl font-semibold">Team members</h1>
-  <%= link_to "New team member", new_admin_team_member_path, class: "rounded bg-slate-900 text-white px-3 py-2 text-sm" %>
+<div class="tc-page-stack">
+  <header class="tc-page-header">
+    <div>
+      <p class="tc-page-header__eyebrow">People</p>
+      <h1 class="tc-page-header__title">Team members</h1>
+      <p class="tc-page-header__subtitle">
+        Employee, contractor, and affiliate workforce records linked to parties in this agency.
+      </p>
+    </div>
+    <div class="tc-page-header__actions">
+      <div class="tc-action-bar">
+        <%= link_to "New team member", new_admin_team_member_path, class: "tc-btn tc-btn--primary" %>
+      </div>
+    </div>
+  </header>
+
+  <div class="tc-table-wrap">
+    <table class="tc-data-table">
+      <thead>
+        <tr>
+          <th>Party</th>
+          <th>Number</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @team_members.each do |tm| %>
+          <tr>
+            <td class="tc-data-table__primary">
+              <%= link_to(tm.party.display_name.presence || "TM ##{tm.id}", admin_team_member_path(tm), class: tc_link_classes) %>
+            </td>
+            <td class="tc-data-table__cell-muted"><%= tm.team_member_number.presence || "—" %></td>
+            <td>
+              <span class="<%= tc_status_badge_classes(tm.status) %>"><%= tm.status %></span>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
 </div>
-<table class="min-w-full text-sm border border-slate-200 bg-white rounded-lg overflow-hidden">
-  <thead class="bg-slate-100"><tr><th class="text-left p-2">Party</th><th class="text-left p-2">Number</th><th class="text-left p-2">Status</th></tr></thead>
-  <tbody>
-    <% @team_members.each do |tm| %>
-      <tr class="border-t border-slate-200">
-        <td class="p-2"><%= link_to(tm.party.display_name.presence || "TM ##{tm.id}", admin_team_member_path(tm), class: "text-sky-700 underline") %></td>
-        <td class="p-2"><%= tm.team_member_number.presence || "—" %></td>
-        <td class="p-2"><%= tm.status %></td>
-      </tr>
-    <% end %>
-  </tbody>
-</table>

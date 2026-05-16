@@ -1,18 +1,36 @@
 <% content_for :title, "Engagements — TeamCORE Admin" %>
-<div class="flex justify-between items-center mb-4">
-  <h1 class="text-2xl font-semibold">Engagements</h1>
-  <%= link_to "New engagement", new_admin_engagement_path, class: "rounded bg-slate-900 text-white px-3 py-2 text-sm" %>
+<div class="tc-page-stack">
+  <header class="tc-page-header">
+    <div>
+      <p class="tc-page-header__eyebrow">People</p>
+      <h1 class="tc-page-header__title">Engagements</h1>
+      <p class="tc-page-header__subtitle">Workforce relationship records by team member.</p>
+    </div>
+    <div class="tc-page-header__actions">
+      <%= link_to "New engagement", new_admin_engagement_path, class: "tc-btn tc-btn--primary" %>
+    </div>
+  </header>
+
+  <div class="tc-table-wrap">
+    <table class="tc-data-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Member</th>
+          <th>Type</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @engagements.each do |e| %>
+          <tr>
+            <td class="tc-data-table__primary"><%= link_to e.id, admin_engagement_path(e), class: tc_link_classes %></td>
+            <td><%= e.team_member.party.display_name %></td>
+            <td class="tc-data-table__cell-muted"><%= e.relationship_type %></td>
+            <td><span class="<%= tc_status_badge_classes(e.status) %>"><%= e.status %></span></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
 </div>
-<table class="min-w-full text-sm border border-slate-200 bg-white rounded-lg overflow-hidden">
-  <thead class="bg-slate-100"><tr><th class="text-left p-2">ID</th><th class="text-left p-2">Member</th><th class="text-left p-2">Type</th><th class="text-left p-2">Status</th></tr></thead>
-  <tbody>
-    <% @engagements.each do |e| %>
-      <tr class="border-t border-slate-200">
-        <td class="p-2"><%= link_to e.id, admin_engagement_path(e), class: "text-sky-700 underline" %></td>
-        <td class="p-2"><%= e.team_member.party.display_name %></td>
-        <td class="p-2"><%= e.relationship_type %></td>
-        <td class="p-2"><%= e.status %></td>
-      </tr>
-    <% end %>
-  </tbody>
-</table>

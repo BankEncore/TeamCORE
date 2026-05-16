@@ -5,18 +5,13 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
-    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
-  <body class="bg-slate-50 text-slate-900 min-h-screen">
+  <body class="tc-workspace antialiased" style="color: var(--tc-text);">
     <%= render "admin/nav" %>
-    <main class="max-w-5xl mx-auto px-4 py-8">
-      <% [:notice, :alert].each do |k| %>
-        <% if flash[k].present? %>
-          <% classes = k == :notice ? "bg-emerald-50 text-emerald-900 border border-emerald-200" : "bg-red-50 text-red-900 border border-red-200" %>
-          <div class="<%= classes %> rounded px-4 py-2 mb-4 text-sm"><%= flash[k] %></div>
-        <% end %>
-      <% end %>
+    <main class="tc-workspace__body">
+      <%= render "admin/flash" %>
       <%= yield %>
     </main>
   </body>

@@ -1,9 +1,67 @@
 <% content_for :title, "Dashboard — TeamCORE Admin" %>
-<h1 class="text-2xl font-semibold mb-2">Dashboard</h1>
-<% if @agency_count.zero? %>
-  <p class="text-slate-600">Your account is not linked to any agencies. Contact an administrator to grant access.</p>
-<% elsif current_agency.blank? %>
-  <p class="text-slate-600">Use the agency switcher above or <%= link_to "choose an agency", admin_agency_context_path, class: "text-sky-700 underline" %>.</p>
-<% else %>
-  <p class="text-slate-600">Working in <strong><%= current_agency.name %></strong>.</p>
-<% end %>
+<div class="tc-page-stack">
+  <header class="tc-page-header">
+    <div>
+      <p class="tc-page-header__eyebrow">Workspace</p>
+      <h1 class="tc-page-header__title">Dashboard</h1>
+      <p class="tc-page-header__subtitle">
+        Operational home for the current agency context. Use the shortcuts below or the section navigation to open common queues.
+      </p>
+    </div>
+  </header>
+
+  <% if @agency_count.zero? %>
+    <div class="tc-panel">
+      <div class="tc-panel__body">
+        <p class="mb-2">
+          <span class="<%= tc_status_badge_classes('blocked') %>">No agency access</span>
+        </p>
+        <p class="text-sm" style="color: var(--tc-text-muted);">
+          Your account is not linked to any agencies. Contact an administrator to grant access.
+        </p>
+      </div>
+    </div>
+  <% elsif current_agency.blank? %>
+    <div class="tc-panel">
+      <div class="tc-panel__body">
+        <p class="mb-2">
+          <span class="<%= tc_status_badge_classes('pending') %>">Choose an agency</span>
+        </p>
+        <p class="text-sm" style="color: var(--tc-text-muted);">
+          Use the agency switcher in the header or
+          <%= link_to "open agency context", admin_agency_context_path, class: tc_link_classes %>.
+        </p>
+      </div>
+    </div>
+  <% else %>
+    <div class="tc-panel">
+      <div class="tc-panel__header">
+        <div class="tc-panel__title">Current context</div>
+      </div>
+      <div class="tc-panel__body">
+        <p class="mb-3">
+          <span class="<%= tc_status_badge_classes('active') %>">Active agency</span>
+        </p>
+        <p class="text-sm" style="color: var(--tc-text-muted);">
+          Working in <strong style="color: var(--tc-text);"><%= current_agency.name %></strong>.
+        </p>
+      </div>
+    </div>
+
+    <div class="tc-panel">
+      <div class="tc-panel__header">
+        <div class="tc-panel__title">Shortcuts</div>
+        <p class="tc-panel__subtitle">High-traffic admin destinations</p>
+      </div>
+      <div class="tc-panel__body">
+        <ul class="m-0 list-none space-y-2 p-0 text-sm">
+          <li><%= link_to "Team members", admin_team_members_path, class: tc_link_classes %></li>
+          <li><%= link_to "Engagements", admin_engagements_path, class: tc_link_classes %></li>
+          <li><%= link_to "Pending document review", admin_document_reviews_path, class: tc_link_classes %></li>
+          <li><%= link_to "Document records", admin_document_records_path, class: tc_link_classes %></li>
+          <li><%= link_to "Reports", admin_reports_root_path, class: tc_link_classes %></li>
+        </ul>
+      </div>
+    </div>
+  <% end %>
+</div>

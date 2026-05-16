@@ -1,89 +1,110 @@
 <% content_for :title, "Report — Engagements" %>
-<div class="mb-4"><%= link_to "← Reports hub", admin_reports_root_path, class: "text-sky-700 text-sm" %></div>
-<h1 class="text-2xl font-semibold mb-4">Engagement roster</h1>
+<div class="tc-page-stack">
+  <header class="tc-page-header">
+    <div>
+      <p class="tc-page-header__eyebrow">Reports</p>
+      <h1 class="tc-page-header__title">Engagement roster</h1>
+    </div>
+    <div class="tc-page-header__actions">
+      <%= link_to "Reports hub", admin_reports_root_path, class: "#{tc_link_classes} text-sm" %>
+    </div>
+  </header>
 
-<%= form_with url: admin_reports_engagements_path, method: :get, data: { turbo: false }, class: "tc-panel p-4 mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm" do %>
-  <div>
-    <%= label_tag :as_of_date, "As of (ISO)", class: "block text-xs text-slate-600 mb-1" %>
-    <%= date_field_tag :as_of_date, @as_of_date, class: "w-full border rounded px-2 py-1" %>
-  </div>
-  <div>
-    <%= label_tag :relationship_type, "Relationship type", class: "block text-xs text-slate-600 mb-1" %>
-    <%= select_tag :relationship_type, options_for_select([["— any —", ""]] + Engagement::RELATIONSHIP_TYPES.zip(Engagement::RELATIONSHIP_TYPES), params[:relationship_type]), class: "w-full border rounded px-2 py-1" %>
-  </div>
-  <div>
-    <%= label_tag :status, "Status", class: "block text-xs text-slate-600 mb-1" %>
-    <%= select_tag :status, options_for_select([["— any —", ""]] + Engagement::STATUSES.zip(Engagement::STATUSES), params[:status]), class: "w-full border rounded px-2 py-1" %>
-  </div>
-  <div>
-    <%= label_tag :start_on_from, "Start on from", class: "block text-xs text-slate-600 mb-1" %>
-    <%= date_field_tag :start_on_from, params[:start_on_from], class: "w-full border rounded px-2 py-1" %>
-  </div>
-  <div>
-    <%= label_tag :start_on_to, "Start on to", class: "block text-xs text-slate-600 mb-1" %>
-    <%= date_field_tag :start_on_to, params[:start_on_to], class: "w-full border rounded px-2 py-1" %>
-  </div>
-  <div>
-    <%= label_tag :department_id, "Dept id (placement)", class: "block text-xs text-slate-600 mb-1" %>
-    <%= text_field_tag :department_id, params[:department_id], class: "w-full border rounded px-2 py-1" %>
-  </div>
-  <div>
-    <%= label_tag :location_id, "Location id", class: "block text-xs text-slate-600 mb-1" %>
-    <%= text_field_tag :location_id, params[:location_id], class: "w-full border rounded px-2 py-1" %>
-  </div>
-  <div>
-    <%= label_tag :team_id, "Team id", class: "block text-xs text-slate-600 mb-1" %>
-    <%= text_field_tag :team_id, params[:team_id], class: "w-full border rounded px-2 py-1" %>
-  </div>
-  <div>
-    <%= label_tag :supervisor_engagement_id, "Supervisor engagement id", class: "block text-xs text-slate-600 mb-1" %>
-    <%= text_field_tag :supervisor_engagement_id, params[:supervisor_engagement_id], class: "w-full border rounded px-2 py-1" %>
-  </div>
-  <div class="flex items-end">
-    <%= submit_tag "Apply", class: "tc-btn tc-btn--primary" %>
-  </div>
-<% end %>
+  <%= form_with url: admin_reports_engagements_path, method: :get, data: { turbo: false }, class: "tc-form-section tc-form-section--dense mb-6" do %>
+    <div class="tc-form-section__header">
+      <h2 class="tc-form-section__title">Filters</h2>
+    </div>
+    <div class="tc-form-grid tc-form-grid--dense">
+      <div class="tc-field tc-field--compact">
+        <%= label_tag :as_of_date, "As of (ISO)", class: "tc-label" %>
+        <%= date_field_tag :as_of_date, @as_of_date, class: "tc-input" %>
+      </div>
+      <div class="tc-field tc-field--compact">
+        <%= label_tag :relationship_type, "Relationship type", class: "tc-label" %>
+        <%= select_tag :relationship_type, options_for_select([["— any —", ""]] + Engagement::RELATIONSHIP_TYPES.zip(Engagement::RELATIONSHIP_TYPES), params[:relationship_type]), class: "tc-select" %>
+      </div>
+      <div class="tc-field tc-field--compact">
+        <%= label_tag :status, "Status", class: "tc-label" %>
+        <%= select_tag :status, options_for_select([["— any —", ""]] + Engagement::STATUSES.zip(Engagement::STATUSES), params[:status]), class: "tc-select" %>
+      </div>
+      <div class="tc-field tc-field--compact">
+        <%= label_tag :start_on_from, "Start on from", class: "tc-label" %>
+        <%= date_field_tag :start_on_from, params[:start_on_from], class: "tc-input" %>
+      </div>
+      <div class="tc-field tc-field--compact">
+        <%= label_tag :start_on_to, "Start on to", class: "tc-label" %>
+        <%= date_field_tag :start_on_to, params[:start_on_to], class: "tc-input" %>
+      </div>
+      <div class="tc-field tc-field--compact">
+        <%= label_tag :department_id, "Dept id (placement)", class: "tc-label" %>
+        <%= text_field_tag :department_id, params[:department_id], class: "tc-input" %>
+      </div>
+      <div class="tc-field tc-field--compact">
+        <%= label_tag :location_id, "Location id", class: "tc-label" %>
+        <%= text_field_tag :location_id, params[:location_id], class: "tc-input" %>
+      </div>
+      <div class="tc-field tc-field--compact">
+        <%= label_tag :team_id, "Team id", class: "tc-label" %>
+        <%= text_field_tag :team_id, params[:team_id], class: "tc-input" %>
+      </div>
+      <div class="tc-field tc-field--compact">
+        <%= label_tag :supervisor_engagement_id, "Supervisor engagement id", class: "tc-label" %>
+        <%= text_field_tag :supervisor_engagement_id, params[:supervisor_engagement_id], class: "tc-input" %>
+      </div>
+      <div class="tc-field tc-field--compact flex items-end">
+        <%= submit_tag "Apply", class: "tc-btn tc-btn--primary" %>
+      </div>
+    </div>
+  <% end %>
 
-<div class="overflow-x-auto tc-panel">
-  <table class="tc-data-table tc-data-table--compact text-sm min-w-full">
-    <thead>
-      <tr>
-        <th>Eng</th>
-        <th>Team member</th>
-        <th>Type</th>
-        <th>Status</th>
-        <th>Dates</th>
-        <th>Placement (as-of)</th>
-        <th>Supervisor</th>
-        <th>Readiness</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      <% @engagements.each do |eng| %>
-        <% tm = eng.team_member %>
-        <% p = Team360::OrgEffectiveRow.pick(eng.engagement_organization_placements.sort_by(&:effective_start_on), @as_of_date) %>
-        <% s = Team360::OrgEffectiveRow.pick(eng.engagement_supervision_assignments.sort_by(&:effective_start_on), @as_of_date) %>
-        <% sup_name = s&.supervisor_engagement&.team_member&.party&.display_name %>
+  <div class="tc-table-wrap">
+    <table class="tc-data-table tc-data-table--compact text-sm">
+      <thead>
         <tr>
-          <td class="font-mono"><%= eng.id %></td>
-          <td><%= tm.party.display_name %></td>
-          <td class="font-mono text-xs"><%= eng.relationship_type %></td>
-          <td class="font-mono text-xs"><%= eng.status %></td>
-          <td class="font-mono text-xs"><%= eng.start_on %> / <%= eng.end_on || "—" %></td>
-          <td class="text-xs">
-            <% if p %>
-              d<%= p.department_id %> · l<%= p.location_id %> · t<%= p.team_id %>
-            <% else %>—<% end %>
-          </td>
-          <td class="text-xs"><%= sup_name || (s ? "##{s.supervisor_engagement_id}" : "—") %></td>
-          <td class="font-mono text-xs"><%= @readiness_by_engagement_id[eng.id] %></td>
-          <td class="whitespace-nowrap text-xs">
-            <%= link_to "Team360", admin_team_member_team360_path(tm), class: "text-sky-700 underline" %>
-            <%= link_to "Eng", admin_engagement_path(eng), class: "text-sky-700 underline ml-2" %>
-          </td>
+          <th>Eng</th>
+          <th>Team member</th>
+          <th>Type</th>
+          <th>Status</th>
+          <th>Dates</th>
+          <th>Placement (as-of)</th>
+          <th>Supervisor</th>
+          <th>Readiness</th>
+          <th></th>
         </tr>
-      <% end %>
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        <% @engagements.each do |eng| %>
+          <% tm = eng.team_member %>
+          <% p = Team360::OrgEffectiveRow.pick(eng.engagement_organization_placements.sort_by(&:effective_start_on), @as_of_date) %>
+          <% s = Team360::OrgEffectiveRow.pick(eng.engagement_supervision_assignments.sort_by(&:effective_start_on), @as_of_date) %>
+          <% sup_name = s&.supervisor_engagement&.team_member&.party&.display_name %>
+          <% rs = @readiness_by_engagement_id[eng.id] %>
+          <tr>
+            <td class="font-mono"><%= link_to eng.id, admin_engagement_path(eng), class: tc_link_classes %></td>
+            <td class="tc-data-table__primary"><%= tm.party.display_name %></td>
+            <td class="font-mono text-xs tc-data-table__cell-muted"><%= eng.relationship_type %></td>
+            <td><span class="<%= tc_status_badge_classes(eng.status) %>"><%= eng.status %></span></td>
+            <td class="font-mono text-xs"><%= eng.start_on %> / <%= eng.end_on || "—" %></td>
+            <td class="text-xs">
+              <% if p %>
+                d<%= p.department_id %> · l<%= p.location_id %> · t<%= p.team_id %>
+              <% else %>—<% end %>
+            </td>
+            <td class="text-xs"><%= sup_name || (s ? "##{s.supervisor_engagement_id}" : "—") %></td>
+            <td>
+              <% if rs.present? %>
+                <span class="<%= tc_readiness_badge_classes(rs) %>"><%= rs %></span>
+              <% else %>
+                —
+              <% end %>
+            </td>
+            <td class="whitespace-nowrap text-xs">
+              <%= link_to "Team360", admin_team_member_team360_path(tm), class: tc_link_classes %>
+              <%= link_to "Eng", admin_engagement_path(eng), class: "#{tc_link_classes} ml-2" %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
 </div>

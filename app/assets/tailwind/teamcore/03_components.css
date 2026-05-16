@@ -19,6 +19,186 @@
     }
   
     /*
+      App shell (admin chrome)
+    */
+  
+    .tc-app-header {
+      border-bottom: 1px solid color-mix(in srgb, var(--tc-primary) 35%, white);
+      background: var(--tc-primary);
+      box-shadow: var(--tc-shadow-sm);
+    }
+  
+    .tc-app-header__inner {
+      @apply mx-auto flex w-full max-w-[var(--tc-page-max-width)] flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8;
+    }
+  
+    .tc-app-header__brand {
+      @apply inline-flex items-center no-underline;
+      line-height: 0;
+    }
+  
+    .tc-app-header__brand:hover {
+      text-decoration: none;
+      opacity: 0.92;
+    }
+  
+    .tc-app-header__brand:focus-visible {
+      outline: 2px solid var(--tc-secondary);
+      outline-offset: 3px;
+      border-radius: 4px;
+    }
+  
+    .tc-app-header__logo {
+      display: block;
+      height: 2.25rem;
+      width: auto;
+      max-width: min(100%, 200px);
+      object-fit: contain;
+    }
+  
+    .tc-app-header .tc-label {
+      color: color-mix(in srgb, white 86%, transparent);
+    }
+  
+    .tc-app-header__tools {
+      @apply flex flex-wrap items-center gap-3 text-sm;
+      color: color-mix(in srgb, white 88%, var(--tc-secondary-soft));
+    }
+  
+    .tc-app-header .tc-btn--quiet {
+      color: color-mix(in srgb, white 86%, transparent);
+    }
+  
+    .tc-app-header .tc-btn--quiet:hover {
+      color: white;
+      background: color-mix(in srgb, white 14%, transparent);
+    }
+  
+    .tc-section-nav {
+      border-bottom: 1px solid var(--tc-border);
+      background: var(--tc-surface);
+    }
+  
+    .tc-section-nav__inner {
+      @apply mx-auto flex w-full max-w-[var(--tc-page-max-width)] flex-row flex-nowrap items-start gap-4 overflow-x-auto px-4 py-3 sm:flex-wrap sm:overflow-x-visible sm:gap-x-6 sm:gap-y-2 sm:px-6 lg:px-8;
+      -webkit-overflow-scrolling: touch;
+    }
+  
+    .tc-section-nav__group {
+      @apply flex shrink-0 flex-col gap-1 sm:min-w-0 sm:shrink sm:flex-row sm:items-center sm:gap-2;
+    }
+
+    @media (min-width: 40rem) {
+      .tc-section-nav__group:not(:last-child) {
+        border-right: 1px solid var(--tc-border);
+        padding-right: calc(var(--spacing) * 4);
+        margin-right: calc(var(--spacing) * 1);
+      }
+    }
+
+    .tc-section-nav__label {
+      @apply shrink-0 text-xs font-semibold uppercase tracking-wide;
+      color: var(--tc-text-subtle);
+    }
+  
+    .tc-section-nav__links {
+      @apply flex min-w-0 flex-wrap gap-x-3 gap-y-1;
+    }
+  
+    .tc-section-nav__link {
+      @apply whitespace-nowrap rounded-md px-2 py-1 text-sm font-medium no-underline;
+      color: var(--tc-text-muted);
+    }
+  
+    .tc-section-nav__link:hover {
+      color: var(--tc-primary);
+      background: var(--tc-neutral-bg);
+      text-decoration: none;
+    }
+  
+    .tc-section-nav__link:focus-visible {
+      outline: 2px solid var(--tc-secondary);
+      outline-offset: 2px;
+    }
+  
+    .tc-section-nav__link[aria-current="page"],
+    .tc-section-nav__link--active {
+      color: var(--tc-secondary);
+      background: var(--tc-secondary-soft);
+    }
+  
+    /*
+      Index / list page header
+    */
+  
+    .tc-page-header {
+      @apply flex flex-col gap-4 border-b pb-5 sm:flex-row sm:items-start sm:justify-between;
+      border-color: var(--tc-border);
+    }
+  
+    .tc-page-header__eyebrow {
+      @apply text-xs font-semibold uppercase tracking-wide;
+      color: var(--tc-text-subtle);
+    }
+  
+    .tc-page-header__title {
+      @apply mt-1 text-2xl font-semibold tracking-tight;
+      color: var(--tc-text);
+    }
+  
+    .tc-page-header__subtitle {
+      @apply mt-1 max-w-3xl text-sm;
+      color: var(--tc-text-muted);
+    }
+  
+    .tc-page-header__actions {
+      @apply flex shrink-0 flex-wrap items-center gap-2;
+    }
+  
+    /*
+      Inline links (replace ad-hoc sky/underline utilities)
+    */
+  
+    .tc-link {
+      @apply font-medium underline decoration-2 underline-offset-2;
+      color: var(--tc-primary);
+    }
+  
+    .tc-link:hover {
+      color: var(--tc-primary-dark);
+    }
+  
+    .tc-link:focus-visible {
+      outline: 2px solid var(--tc-secondary);
+      outline-offset: 2px;
+      border-radius: 2px;
+    }
+  
+    .tc-link--muted {
+      color: var(--tc-text-muted);
+    }
+  
+    .tc-link--muted:hover {
+      color: var(--tc-primary);
+    }
+  
+    .tc-link--danger {
+      color: var(--tc-danger);
+    }
+  
+    .tc-link--danger:hover {
+      color: color-mix(in srgb, var(--tc-danger) 86%, black);
+    }
+  
+    .tc-report-hub-card {
+      @apply block px-4 py-4 no-underline transition;
+    }
+  
+    .tc-report-hub-card:hover {
+      background: var(--tc-neutral-bg);
+    }
+  
+    /*
       Record header
     */
   

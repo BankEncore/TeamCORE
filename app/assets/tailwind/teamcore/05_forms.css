@@ -26,12 +26,38 @@
       color: var(--tc-text-muted);
     }
   
+    .tc-form-section--dense {
+      @apply p-3;
+    }
+  
+    .tc-form-section--dense .tc-form-section__header {
+      @apply mb-3 pb-2;
+    }
+  
     .tc-form-grid {
       @apply grid grid-cols-1 gap-4 sm:grid-cols-2;
     }
   
+    .tc-form-grid--dense {
+      @apply gap-2 sm:grid-cols-2 lg:grid-cols-4;
+    }
+  
     .tc-field {
       @apply space-y-1;
+    }
+  
+    .tc-field--compact {
+      @apply space-y-0.5;
+    }
+  
+    .tc-field--compact .tc-label {
+      @apply text-xs;
+    }
+  
+    .tc-field--compact .tc-input,
+    .tc-field--compact .tc-select,
+    .tc-field--compact .tc-textarea {
+      @apply px-2 py-1.5 text-xs;
     }
   
     .tc-label {

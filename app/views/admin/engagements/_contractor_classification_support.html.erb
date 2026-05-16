@@ -1,58 +1,65 @@
 <%# locals: presenter — Admin::ContractorClassificationSupportPresenter %>
-<section id="contractor-classification-support" class="border border-slate-200 rounded p-4 bg-white mb-4">
-  <h2 class="font-medium mb-2">Contractor classification support (TC-09)</h2>
-  <p class="text-xs text-slate-600 mb-3">
-    Supporting records and readiness only — not a legal classification determination.
-    Evaluated as of <span class="font-mono"><%= presenter.as_of_date %></span>.
-  </p>
-
-  <h3 class="text-sm font-medium text-slate-800 mb-2">Identity / entity context</h3>
-  <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-sm mb-4">
-    <% presenter.identity_rows.each do |label, value| %>
-      <dt class="text-slate-500"><%= label %></dt>
-      <dd class="text-slate-900"><%= value %></dd>
-    <% end %>
-  </dl>
-
-  <div class="mb-4">
-    <h3 class="text-sm font-medium text-slate-800 mb-1">Classification support status</h3>
-    <p class="text-sm font-mono text-slate-900"><%= presenter.readiness_status %></p>
+<section id="contractor-classification-support" class="tc-panel mb-4">
+  <div class="tc-panel__header">
+    <div>
+      <div class="tc-panel__title">Contractor classification support (TC-09)</div>
+      <p class="tc-panel__subtitle">
+        Supporting records and readiness only — not a legal classification determination.
+        As of <span class="font-mono"><%= presenter.as_of_date %></span>.
+      </p>
+    </div>
   </div>
+  <div class="tc-panel__body">
+    <h3 class="mb-2 text-sm font-semibold" style="color: var(--tc-text);">Identity / entity context</h3>
+    <dl class="tc-kv-grid mb-4">
+      <% presenter.identity_rows.each do |label, value| %>
+        <div class="tc-kv">
+          <dt class="tc-kv__key"><%= label %></dt>
+          <dd class="tc-kv__value"><%= value %></dd>
+        </div>
+      <% end %>
+    </dl>
 
-  <% rollups = presenter.category_rollups %>
-  <% if rollups.any? %>
-    <h3 class="text-sm font-medium text-slate-800 mb-2">By document category (rollup)</h3>
-    <table class="min-w-full text-xs border border-slate-200 bg-white mb-4">
-      <thead class="bg-slate-100">
-        <tr>
-          <th class="text-left p-2">Category</th>
-          <th class="text-left p-2">Rollup outcome</th>
-          <th class="text-left p-2">Requirements</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% rollups.each do |rollup| %>
-          <tr class="border-t border-slate-200 align-top">
-            <td class="p-2 font-mono"><%= rollup.category %></td>
-            <td class="p-2 font-mono"><%= rollup.rollup_outcome %></td>
-            <td class="p-2">
-              <ul class="list-disc pl-4 space-y-1">
-                <% rollup.rows.each do |row| %>
-                  <li>
-                    <%= link_to "Req ##{row.document_requirement_id}", edit_admin_document_requirement_path(row.document_requirement_id), class: "text-sky-700 underline" %>
-                    · <span class="font-mono"><%= row.requirement_outcome %></span>
-                    <% if row.document_record_id.present? %>
-                      · <%= link_to "Record ##{row.document_record_id}", admin_document_record_path(row.document_record_id), class: "text-sky-700 underline" %>
+    <div class="mb-4">
+      <h3 class="mb-1 text-sm font-semibold" style="color: var(--tc-text);">Classification support status</h3>
+      <span class="<%= tc_readiness_badge_classes(presenter.readiness_status) %>"><%= presenter.readiness_status %></span>
+    </div>
+
+    <% rollups = presenter.category_rollups %>
+    <% if rollups.any? %>
+      <h3 class="mb-2 text-sm font-semibold" style="color: var(--tc-text);">By document category (rollup)</h3>
+      <div class="tc-table-wrap mb-4">
+        <table class="tc-data-table tc-data-table--compact text-xs">
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>Rollup outcome</th>
+              <th>Requirements</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% rollups.each do |rollup| %>
+              <tr class="align-top">
+                <td class="font-mono"><%= rollup.category %></td>
+                <td class="font-mono"><%= rollup.rollup_outcome %></td>
+                <td>
+                  <ul class="list-disc space-y-1 pl-4">
+                    <% rollup.rows.each do |row| %>
+                      <li>
+                        <%= link_to "Req ##{row.document_requirement_id}", edit_admin_document_requirement_path(row.document_requirement_id), class: tc_link_classes %>
+                        · <span class="font-mono"><%= row.requirement_outcome %></span>
+                        <% if row.document_record_id.present? %>
+                          · <%= link_to "Record ##{row.document_record_id}", admin_document_record_path(row.document_record_id), class: tc_link_classes %>
+                        <% end %>
+                      </li>
                     <% end %>
-                  </li>
-                <% end %>
-              </ul>
-            </td>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
-  <% end %>
-
-  <p class="text-xs text-slate-600">Blocking alerts and full requirement rows appear in <strong>Document readiness (TC-06)</strong> below.</p>
+                  </ul>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% end %>
+  </div>
 </section>

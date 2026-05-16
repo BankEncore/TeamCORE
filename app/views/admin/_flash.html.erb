@@ -1,0 +1,20 @@
+<% [:notice, :alert].each do |key| %>
+  <% next if flash[key].blank? %>
+  <% variant =
+       case key
+       when :notice
+         "tc-alert--success"
+       when :alert
+         "tc-alert--danger"
+       else
+         "tc-alert--info"
+       end %>
+  <div class="tc-alert <%= variant %> mb-4" role="status" <%= "aria-live=\"polite\"" if key == :notice %> <%= "aria-live=\"assertive\"" if key == :alert %>>
+    <%= flash[key] %>
+  </div>
+<% end %>
+<% if flash[:warning].present? %>
+  <div class="tc-alert tc-alert--warning mb-4" role="status" aria-live="polite">
+    <%= flash[:warning] %>
+  </div>
+<% end %>

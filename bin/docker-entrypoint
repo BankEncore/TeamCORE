@@ -12,4 +12,27 @@ if printf '%s' "$joined" | grep -qE '(^|[[:space:]])(\./)?bin/rails[[:space:]]+s
   ./bin/rails db:prepare
 fi
 
+# tailwind.css is gitignored. Rebuild when missing or when sources are newer than the bundle so
+# component layers (admin header + section nav) are never silently missing after local CSS edits.
+if [ "${RAILS_ENV:-development}" = "development" ]; then
+  tw_out="app/assets/builds/tailwind.css"
+  tw_need=0
+  if [ ! -f "$tw_out" ]; then
+    tw_need=1
+  elif [ "app/assets/tailwind/application.css" -nt "$tw_out" ]; then
+    tw_need=1
+  elif [ -d app/assets/tailwind/teamcore ]; then
+    for f in app/assets/tailwind/teamcore/*.css; do
+      [ -f "$f" ] || continue
+      if [ "$f" -nt "$tw_out" ]; then
+        tw_need=1
+        break
+      fi
+    done
+  fi
+  if [ "$tw_need" -eq 1 ]; then
+    ./bin/rails tailwindcss:build
+  fi
+fi
+
 exec "$@"
