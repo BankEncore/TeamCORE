@@ -18,7 +18,7 @@ module Team360
         active.first
       when 0
         non_cancelled = engagements.reject { |e| e.status == "cancelled" }
-        non_cancelled.max_by { |e| [e.start_on || Date.new(1900, 1, 1), e.id] }
+        non_cancelled.max_by { |e| [ e.start_on || Date.new(1900, 1, 1), e.id ] }
       else
         active.min_by(&:id)
       end

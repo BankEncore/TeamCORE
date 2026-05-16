@@ -138,7 +138,7 @@ module Team360
     end
 
     def build_document_lookups(readiness_result)
-      return [{}, {}] unless readiness_result
+      return [ {}, {} ] unless readiness_result
 
       type_ids =
         (
@@ -155,7 +155,7 @@ module Team360
           DocumentRecord.where(id: rec_ids).includes(:verified_by).index_by(&:id)
         end
 
-      [doc_types_by_id, records_by_id]
+      [ doc_types_by_id, records_by_id ]
     end
 
     def build_subcontractor_rows(party)
@@ -171,7 +171,7 @@ module Team360
 
       rels.map do |rel|
         promoted = sub_engagements.any?
-        latest_sub = sub_engagements.max_by { |e| [e.start_on || Date.new(1900, 1, 1), e.id] }
+        latest_sub = sub_engagements.max_by { |e| [ e.start_on || Date.new(1900, 1, 1), e.id ] }
         {
           id: rel.id,
           source_party: rel.source_party&.display_name,

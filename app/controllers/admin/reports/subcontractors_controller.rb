@@ -42,7 +42,7 @@ module Admin
               tm &&
                 tm.engagements
                   .select { |e| e.relationship_type == "subcontractor" }
-                  .max_by { |e| [e.start_on || Date.new(1900, 1, 1), e.id] }
+                  .max_by { |e| [ e.start_on || Date.new(1900, 1, 1), e.id ] }
             {
               rel: rel,
               promoted: prom,
