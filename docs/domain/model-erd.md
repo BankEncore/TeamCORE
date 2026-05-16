@@ -1,8 +1,10 @@
 # TeamCORE — model ERD (Active Record)
 
-This diagram reflects **persisted models** under `app/models/` as of the current codebase. It is the engineering counterpart to the conceptual [domain map](../product/domain-map.md): product domains like payroll, time, leave, and settlement **do not** have tables yet unless they appear here.
+This diagram reflects **persisted models** under `app/models/` as of the current codebase. It is the engineering counterpart to the conceptual [domain map](../product/domain-map.md). **Phase 4** financial tables (compensation, revenue, commission, contractor charges, contractor settlement) appear in the same diagram (edges from **Engagement** / **Agency**). Domains such as full payroll execution, time, and leave **do not** have dedicated tables yet unless they appear here.
 
 **Tenancy:** Almost every row is scoped to an **Agency**. **Users** attach to agencies via **UserAgency** (admin / ops identity is separate from **Party** identity).
+
+**Modeling notes:** [phase-4-modeling.md](phase-4-modeling.md)
 
 ---
 
@@ -52,6 +54,46 @@ erDiagram
   Engagement ||--o{ EngagementSupervisionAssignment : "supervised side"
   Engagement ||--o{ EngagementSupervisionAssignment : "supervisor side"
   Engagement ||--o{ DocumentRecord : ""
+  Engagement ||--o{ CompensationPlanAssignment : "Phase 4"
+  Engagement ||--o{ RevenueInput : "Phase 4"
+  Engagement ||--o{ CommissionCalculation : "Phase 4"
+  Engagement ||--o| CommissionDrawBalance : "Phase 4 employee draw"
+  Engagement ||--o{ DrawBalanceEvent : "Phase 4"
+  Engagement ||--o{ ContractorCharge : "Phase 4"
+  Engagement ||--o{ ContractorSettlementLine : "Phase 4"
+
+  Agency ||--o{ PayPeriod : "Phase 4"
+  Agency ||--o{ CompensationPlan : "Phase 4"
+  Agency ||--o{ CompensationPlanAssignment : "Phase 4"
+  Agency ||--o{ RevenueInput : "Phase 4"
+  Agency ||--o{ CommissionCalculation : "Phase 4"
+  Agency ||--o{ CommissionDrawBalance : "Phase 4"
+  Agency ||--o{ DrawBalanceEvent : "Phase 4"
+  Agency ||--o{ ContractorCharge : "Phase 4"
+  Agency ||--o{ ContractorChargeWaiver : "Phase 4"
+  Agency ||--o{ ContractorChargeRecovery : "Phase 4"
+  Agency ||--o{ ContractorSettlementRun : "Phase 4"
+  Agency ||--o{ ContractorSettlementLine : "Phase 4"
+
+  CompensationPlan ||--o{ CompensationPlanAssignment : "Phase 4"
+
+  PayPeriod ||--o{ RevenueInput : "Phase 4"
+  PayPeriod ||--o{ CommissionCalculation : "Phase 4"
+
+  RevenueInput ||--o{ CommissionCalculation : "Phase 4"
+  CommissionCalculation ||--o{ DrawBalanceEvent : "Phase 4"
+
+  ContractorSettlementRun ||--o{ ContractorSettlementLine : "Phase 4"
+  ContractorSettlementRun ||--o{ ContractorSettlementRunEvent : "Phase 4"
+
+  ContractorSettlementLine ||--o{ ContractorSettlementLineRevenueInput : "Phase 4 lineage"
+  RevenueInput ||--o{ ContractorSettlementLineRevenueInput : "Phase 4"
+  ContractorSettlementLine ||--o{ ContractorSettlementLineCommissionCalculation : "Phase 4 lineage"
+  CommissionCalculation ||--o{ ContractorSettlementLineCommissionCalculation : "Phase 4"
+
+  ContractorCharge ||--o{ ContractorChargeWaiver : "Phase 4"
+  ContractorCharge ||--o{ ContractorChargeRecovery : "Phase 4"
+  ContractorSettlementLine ||--o{ ContractorChargeRecovery : "Phase 4 optional FK"
 
   EngagementOrganizationPlacement }o--|| Agency : ""
   EngagementOrganizationPlacement }o--|| Engagement : ""
@@ -96,7 +138,12 @@ erDiagram
 | **Engagement** | `Engagement` (relationship type + lifecycle status) |
 | **Placement & supervision** | `EngagementOrganizationPlacement`, `EngagementSupervisionAssignment` |
 | **Documents & compliance** | `DocumentType`, `DocumentRequirement`, `DocumentRecord` |
-| **Team360 / reporting** | No separate tables — read models aggregate the above |
+| **Compensation (Phase 4)** | `CompensationPlan`, `CompensationPlanAssignment` |
+| **Pay periods & revenue (Phase 4)** | `PayPeriod`, `RevenueInput` |
+| **Commission & draw (Phase 4)** | `CommissionCalculation`, `CommissionDrawBalance`, `DrawBalanceEvent` |
+| **Contractor charges (Phase 4)** | `ContractorCharge`, `ContractorChargeWaiver`, `ContractorChargeRecovery` |
+| **Contractor settlement (Phase 4)** | `ContractorSettlementRun`, `ContractorSettlementLine`, join tables, `ContractorSettlementRunEvent` |
+| **Team360 / reporting** | No Team360 table — read models aggregate domain tables |
 | **Admin auth** | `User` (+ `has_secure_password`), `UserAgency` |
 
 ---
@@ -107,6 +154,7 @@ erDiagram
 - **DocumentRecord** requires at least one of **team_member** or **engagement**; **party** is optional; agency must align with those rows.
 - **EngagementSupervisionAssignment** (MVP): supervisor engagement must be **active** **employee**.
 - **Department** hierarchy: optional parent must be top-level (no deep trees in MVP).
+- **Phase 4:** Minimum commission draw recovery is **employee-only**; **contractor settlement** applies to `individual_contractor` and `contractor_organization` engagements only (**subcontractor** excluded in MVP). Net contractor settlement is non-negative in MVP. Hybrid settlement lineage: lines store totals plus join rows to revenue, commission calcs, and charge recoveries.
 
 ---
 

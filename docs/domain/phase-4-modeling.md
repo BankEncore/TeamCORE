@@ -1,7 +1,7 @@
 # Phase 4 — data modeling notes
 
-**Status:** Draft scaffold (decisions agreed; names and migrations filled in during implementation)  
-**Epics:** TC-13 through TC-19  
+**Status:** Locked decisions implemented in `db/migrate/20260516120000_phase4_compensation_settlement.rb` and `app/models/`.  
+**Epics:** TC-13 through TC-19 — **link issue/PR descriptions to this file** and to [phase-4-developer-brief.md](../roadmap/phase-4-developer-brief.md).  
 **Authoritative product/rules:** [phase-4-developer-brief.md](../roadmap/phase-4-developer-brief.md)  
 **ERD (code truth):** [model-erd.md](model-erd.md) — update in the same PR as new `app/models` / migrations.
 
@@ -25,21 +25,18 @@ This document records **locked Phase 4 architecture decisions** for persistence 
 | **Assignment** | Authoritative **engagement-scoped** row with effective dating. |
 | **Snapshots** | Assignment stores terms used for calculations so catalog edits do not rewrite history. |
 
-### Sketch (fill in exact columns in migrations)
+### As implemented
 
-**`CompensationPlan` (TBD final name)**
+**`CompensationPlan`**
 
-- `agency_id` (required)
-- Human-facing identity: name, code (if any), `status`
-- `plan_type` (or equivalent enum in Ruby)
-- Defaults for MVP rails: salary/hourly/flat commission/minimum draw fields as product requires
-- Money in **cents**; commission rates in **basis points** (brief Section 5)
+- `agency_id`, `name`, `plan_type`, `status` (defaults to `active`)
+- Money / rate defaults: `salary_annual_cents`, `hourly_rate_cents`, `default_commission_rate_bps`, `minimum_commission_amount_cents`, `minimum_commission_basis`, `recovery_rule`
 
-**`CompensationPlanAssignment` (TBD final name)**
+**`CompensationPlanAssignment`**
 
 - `agency_id`, `engagement_id`, `compensation_plan_id`
-- `effective_start_on` (required), `effective_end_on` (optional; open-ended if null)
-- **Snapshot fields** (examples): `snapshot_plan_name`, `snapshot_commission_rate_bps`, `snapshot_minimum_basis`, `snapshot_minimum_amount_cents`, recovery rule snapshot as needed
+- `effective_start_on`, `effective_end_on`
+- Snapshots: `snapshot_plan_name`, `snapshot_plan_type`, `snapshot_commission_rate_bps`, `snapshot_minimum_basis`, `snapshot_minimum_amount_cents`, `snapshot_recovery_rule`, `snapshot_salary_annual_cents`, `snapshot_hourly_rate_cents`
 
 ### Explicitly deferred
 
@@ -49,7 +46,7 @@ This document records **locked Phase 4 architecture decisions** for persistence 
 
 | Date | Notes |
 | --- | --- |
-| _TBD_ | Migration(s), model names if different from above |
+| 2026-05-16 | `compensation_plans`, `compensation_plan_assignments` in `Phase4CompensationSettlement` migration. |
 
 ---
 
@@ -63,23 +60,23 @@ This document records **locked Phase 4 architecture decisions** for persistence 
   - **Contractor settlement-centric** work (`ContractorSettlementRun` with explicit period `start_on` / `end_on`, brief Section 11).
 - **No** single unified `FinancialPeriod` table owning **both** payroll and contractor settlement **lifecycle** in MVP.
 
-### Sketch (names TBD)
+### As implemented
 
-**Payroll / pay-period side (examples)**
+**Pay-period side**
 
-- `PayPeriod` and/or `PayrollRun` — _choose names that avoid collision with Phase 5 payroll run product language_
-- FK target for `RevenueInput`, `CommissionCalculation` (employee-context rows)
+- **`PayPeriod`** (`agency_id`, `start_on`, `end_on`, `label`) — optional FK on `RevenueInput` and `CommissionCalculation`.
+- No `PayrollRun` table in Phase 4 (reserved for Phase 5 product language).
 
 **Settlement side**
 
-- `SettlementPeriod` (optional) and/or **`ContractorSettlementRun`**
-- Settlement lines belong to contractor engagements and reference settlement period bounds as in the brief
+- **`ContractorSettlementRun`** (`agency_id`, `period_start_on`, `period_end_on`, `status`) — contractor settlement period bounds on the run.
+- **`ContractorSettlementLine`** belongs to run + `engagement`; snapshot totals and `net_settlement_cents` (MVP ≥ 0).
 
 ### Implementation log
 
 | Date | Notes |
 | --- | --- |
-| _TBD_ | Chosen table names; FK matrix (which model points to which period/run) |
+| 2026-05-16 | `pay_periods`, `contractor_settlement_runs`, `contractor_settlement_lines`; `revenue_inputs.pay_period_id`, `commission_calculations.pay_period_id`. |
 
 ---
 
@@ -90,14 +87,15 @@ This document records **locked Phase 4 architecture decisions** for persistence 
 - **`ContractorSettlementLine`** (or equivalent) stores **snapshot totals** (e.g. gross commission, charge deductions, adjustments, **net ≥ 0** in MVP).
 - **Plus** persisted **links** to selected sources (join or child tables), not only derived-on-read.
 
-### Illustrative join / child concepts (rename as implemented)
+### Join tables (as implemented)
 
-| Concept | Purpose |
+| Table | Purpose |
 | --- | --- |
-| Line ↔ revenue input | Which period revenue rows were selected |
-| Line ↔ commission calculation | Which calculation(s) fed the line |
-| Line ↔ charge recovery / deduction | Applied contractor charge amounts |
-| Manual adjustment rows | Positive/negative adjustments per brief |
+| `contractor_settlement_line_revenue_inputs` | Line ↔ revenue input (unique pair) |
+| `contractor_settlement_line_commission_calculations` | Line ↔ commission calculation (unique pair) |
+| `contractor_charge_recoveries` | Charge recovery rows; optional `contractor_settlement_line_id` when applied in settlement |
+
+Line-level adjustments: `manual_adjustment_positive_cents` / `manual_adjustment_negative_cents` on **`ContractorSettlementLine`**.
 
 ### Anti-patterns
 
@@ -108,7 +106,7 @@ This document records **locked Phase 4 architecture decisions** for persistence 
 
 | Date | Notes |
 | --- | --- |
-| _TBD_ | Actual table names; uniqueness rules; finalize vs draft behavior |
+| 2026-05-16 | Hybrid totals on line + join rows; `Financials::ContractorSettlement::ComposeLine` caps deductions so net ≥ 0. Run `status` + `contractor_settlement_run_events` for lifecycle. |
 
 ---
 
@@ -119,19 +117,19 @@ This document records **locked Phase 4 architecture decisions** for persistence 
 - **Do not** use one catch-all `FinancialAuditEvent` with opaque JSON for Phase 4.
 - Use **targeted**, queryable history where the product requires explainability (brief Section 13).
 
-### Sketch
+### As implemented
 
-| Area | Targeted concept (illustrative) |
+| Area | Table / model |
 | --- | --- |
-| TC-16 | `DrawBalanceEvent` (draw added, recovery, forgiveness, correction) |
-| TC-17 / TC-18 | `ContractorChargeRecovery`, `ContractorChargeWaiver` (or equivalent) |
-| TC-19 | Settlement status / lifecycle events (finalized, voided, payment recorded) |
+| TC-16 | `DrawBalanceEvent` |
+| TC-17 / TC-18 | `ContractorChargeRecovery`, `ContractorChargeWaiver` |
+| TC-19 | `ContractorSettlementRunEvent` |
 
 ### Implementation log
 
 | Date | Notes |
 | --- | --- |
-| _TBD_ | Actor attribution (`user_id`), timestamps, reasons, amount columns |
+| 2026-05-16 | `draw_balance_events` (`event_type`, `amount_cents`, optional `commission_calculation_id`, `actor_id` → users). `contractor_charge_waivers`, `contractor_charge_recoveries` with `actor` where applicable. `contractor_settlement_run_events` on runs. |
 
 ---
 
@@ -147,7 +145,7 @@ This document records **locked Phase 4 architecture decisions** for persistence 
 
 | Date | Notes |
 | --- | --- |
-| _TBD_ | CSV format assumptions, required columns, idempotency / duplicate handling |
+| 2026-05-16 | Admin: `Admin::Engagements::RevenueInputsController#import_csv` — preview/commit flow; expected headers include period dates and commissionable revenue (see controller/view). Vendor APIs and sync out of scope. |
 
 ---
 
@@ -176,7 +174,7 @@ Enforce at model/service boundary; consider a shared policy/helper later.
 
 ## References execution plan
 
-Locked decisions are mirrored in the Cursor plan **Phase 4 execution plan** (repo-local `.cursor/plans/phase_4_execution_plan_*.plan.md` if present). Link GitHub epics to **this file** once implementation starts.
+Locked decisions match the **Phase 4 execution plan** (`.cursor/plans/`). **GitHub epic/issue descriptions** for TC-13–TC-19 should link here and to the developer brief for traceability.
 
 ## Related docs
 
