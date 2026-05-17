@@ -79,7 +79,7 @@ module ApplicationHelper
       # current page is not copied into the next POST (defense in depth).
       rt = request.path
     end
-    fragments = [hidden_field_tag(:return_to, rt, id: nil)]
+    fragments = [ hidden_field_tag(:return_to, rt, id: nil) ]
     if params[:team360_return_to].present?
       safe_tm = controller.send(:safe_admin_return_path, params[:team360_return_to])
       fragments << hidden_field_tag(:team360_return_to, safe_tm, id: nil) if safe_tm.present?
