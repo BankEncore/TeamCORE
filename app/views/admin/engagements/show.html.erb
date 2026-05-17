@@ -16,7 +16,7 @@
         </div>
       </div>
       <div class="tc-record-header__actions">
-        <%= link_to "Team360", admin_team_member_team360_path(@engagement.team_member), class: "tc-btn tc-btn--teal" %>
+        <%= link_to "Team360", tc_team360_url(@engagement.team_member, engagement: @engagement), class: "tc-btn tc-btn--teal" %>
         <%= link_to "Placements", admin_engagement_placements_path(@engagement), class: "tc-btn tc-btn--secondary" %>
         <%= link_to "Supervision", admin_engagement_supervision_assignments_path(@engagement), class: "tc-btn tc-btn--secondary" %>
         <%= link_to "Edit", edit_admin_engagement_path(@engagement), class: "tc-btn tc-btn--primary" %>
@@ -58,6 +58,8 @@
       <% if @contractor_classification_support.present? %>
         <%= render partial: "contractor_classification_support", locals: { presenter: @contractor_classification_support } %>
       <% end %>
+
+      <%= render "admin/engagements/setup_checklist", presenter: @setup_checklist %>
 
       <%= render "admin/engagements/workforce_financial_panel" %>
 

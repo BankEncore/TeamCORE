@@ -11,12 +11,20 @@ Rails.application.routes.draw do
     root "dashboard#show"
     resource :agency_context, only: %i[show update], controller: "agency_context"
 
+    get "guided", to: "guided_onboarding#hub", as: :guided_setup
+    get "guided/employee", to: "guided_onboarding#employee", as: :guided_employee
+    get "guided/individual_contractor", to: "guided_onboarding#individual_contractor", as: :guided_individual_contractor
+    get "guided/contractor_organization", to: "guided_onboarding#contractor_organization", as: :guided_contractor_organization
+    get "guided/subcontractor", to: "guided_onboarding#subcontractor", as: :guided_subcontractor
+
+    get "search", to: "search#index", as: :search
     resources :agencies, only: %i[index show edit update]
     resources :departments, only: %i[index show new create edit update]
     resources :locations, only: %i[index show new create edit update]
     resources :teams, only: %i[index show new create edit update]
 
     resources :parties, only: %i[index show edit update] do
+      resources :party_contact_methods, only: %i[new create edit update]
       resources :party_relationships, only: %i[index new create edit update] do
         member do
           post :promote
@@ -33,6 +41,7 @@ Rails.application.routes.draw do
     end
     resources :pay_periods
     resources :compensation_plans
+    resources :contractor_charges, only: %i[index], controller: "contractor_charge_queue"
     resources :contractor_settlement_runs, only: %i[index show new create] do
       member do
         post :finalize
@@ -72,6 +81,7 @@ Rails.application.routes.draw do
     end
     resources :document_alerts, only: %i[index]
     resources :document_reviews, only: %i[index]
+    resource :document_workbench, only: %i[show], controller: "document_workbench"
 
     namespace :reports do
       root to: "home#show"

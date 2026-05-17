@@ -1,0 +1,15 @@
+<%# locals: of (fields builder for organization profile) %>
+<% org_kind_opts = OrganizationProfile::ORGANIZATION_KINDS.map { |k| [ k.humanize, k ] } %>
+<h2 class="text-lg font-medium mt-6 mb-2">Organization profile</h2>
+<div class="mb-3">
+  <%= of.label :legal_name, class: "block text-sm font-medium text-slate-700 mb-1" %>
+  <%= of.text_field :legal_name, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+</div>
+<div class="mb-3">
+  <%= of.label :trade_name, class: "block text-sm font-medium text-slate-700 mb-1" %>
+  <%= of.text_field :trade_name, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+</div>
+<div class="mb-3">
+  <%= of.label :organization_kind, class: "block text-sm font-medium text-slate-700 mb-1" %>
+  <%= of.select :organization_kind, org_kind_opts, {}, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+</div>

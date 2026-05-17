@@ -1,0 +1,57 @@
+<section class="tc-panel">
+  <div class="tc-panel__header">
+    <div class="flex flex-wrap items-start justify-between gap-2">
+      <div class="tc-panel__title">Engagements</div>
+      <% if @team_member %>
+        <%= link_to "Add engagement", new_admin_engagement_path(team_member_id: @team_member.id), class: tc_link_classes %>
+      <% end %>
+    </div>
+  </div>
+  <div class="tc-panel__body">
+    <% if @team_member.nil? %>
+      <p class="text-sm" style="color: var(--tc-text-muted);">
+        Add a Team Member first. Engagements are created for a team member and define employee, contractor, or subcontractor relationship types.
+      </p>
+      <% if @party_eligible_for_new_team_member %>
+        <p class="text-sm mt-2"><%= link_to "Create team member", new_admin_team_member_path(party_id: @party.id), class: tc_link_classes %></p>
+      <% end %>
+    <% elsif @engagements.empty? %>
+      <p class="text-sm mb-3" style="color: var(--tc-text-muted);">
+        No engagements have been created yet. Engagements define whether this team member is an employee, individual contractor, contractor organization, or subcontractor.
+      </p>
+      <%= link_to "Add engagement", new_admin_engagement_path(team_member_id: @team_member.id), class: "tc-btn tc-btn--secondary tc-btn--sm" %>
+    <% else %>
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-sm border-collapse">
+          <thead>
+            <tr class="border-b border-slate-200 text-left text-xs uppercase tracking-wide" style="color: var(--tc-text-muted);">
+              <th class="py-2 pr-3">Type</th>
+              <th class="py-2 pr-3">Status</th>
+              <th class="py-2 pr-3">Title</th>
+              <th class="py-2 pr-3">Start</th>
+              <th class="py-2 pr-3">End</th>
+              <th class="py-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @engagements.each do |e| %>
+              <tr class="border-b border-slate-100">
+                <td class="py-2 pr-3"><%= e.relationship_type.humanize %></td>
+                <td class="py-2 pr-3"><span class="<%= tc_status_badge_classes(e.status) %>"><%= e.status %></span></td>
+                <td class="py-2 pr-3"><%= e.title.presence || "—" %></td>
+                <td class="py-2 pr-3"><%= e.start_on || "—" %></td>
+                <td class="py-2 pr-3"><%= e.end_on || "—" %></td>
+                <td class="py-2">
+                  <div class="flex flex-wrap gap-x-2 gap-y-1">
+                    <%= link_to "View", admin_engagement_path(e), class: tc_link_classes %>
+                    <%= link_to "Team360", admin_team_member_team360_path(@team_member, engagement_id: e.id), class: tc_link_classes %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% end %>
+  </div>
+</section>

@@ -2,6 +2,8 @@
 
 module Admin
   class BaseController < ApplicationController
+    include Admin::ReturnNavigation
+
     layout "admin"
 
     before_action :authenticate_admin_user!

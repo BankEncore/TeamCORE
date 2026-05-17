@@ -21,7 +21,7 @@ module Admin
       def create
         @charge = @engagement.contractor_charges.build(charge_params.merge(agency_id: current_agency.id))
         if @charge.save
-          redirect_to admin_engagement_contractor_charges_path(@engagement), notice: "Charge created."
+          redirect_after_admin_save admin_engagement_contractor_charges_path(@engagement), notice: "Charge created."
         else
           render :new, status: :unprocessable_entity
         end
@@ -32,7 +32,7 @@ module Admin
 
       def update
         if @charge.update(charge_params)
-          redirect_to admin_engagement_contractor_charge_path(@engagement, @charge), notice: "Updated."
+          redirect_after_admin_save admin_engagement_contractor_charge_path(@engagement, @charge), notice: "Updated."
         else
           render :edit, status: :unprocessable_entity
         end

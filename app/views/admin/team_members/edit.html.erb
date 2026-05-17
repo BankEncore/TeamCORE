@@ -9,7 +9,7 @@
   </div>
   <div class="mb-4">
     <%= f.label :status, class: "block text-sm font-medium text-slate-700 mb-1" %>
-    <%= f.select :status, LifecycleStatusable::STATUSES, {}, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+    <%= f.select :status, LifecycleStatusable::STATUSES.map { |s| [ s.humanize, s ] }, {}, class: "w-full border border-slate-300 rounded px-3 py-2" %>
   </div>
   <%= f.submit "Save", class: "rounded bg-slate-900 text-white px-4 py-2 text-sm cursor-pointer" %>
 <% end %>

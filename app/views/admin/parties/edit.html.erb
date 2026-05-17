@@ -2,52 +2,17 @@
 <h1 class="text-2xl font-semibold mb-4">Edit party</h1>
 <%= render "shared/errors", model: @party %>
 <%= form_with model: [:admin, @party], data: { turbo: false } do |f| %>
-  <div class="mb-3">
-    <%= f.label :display_name, class: "block text-sm font-medium text-slate-700 mb-1" %>
-    <%= f.text_field :display_name, class: "w-full border border-slate-300 rounded px-3 py-2" %>
-  </div>
-  <div class="mb-3">
-    <%= f.label :external_reference, class: "block text-sm font-medium text-slate-700 mb-1" %>
-    <%= f.text_field :external_reference, class: "w-full border border-slate-300 rounded px-3 py-2" %>
-  </div>
-  <div class="mb-3">
-    <%= f.label :notes, class: "block text-sm font-medium text-slate-700 mb-1" %>
-    <%= f.text_area :notes, rows: 2, class: "w-full border border-slate-300 rounded px-3 py-2" %>
-  </div>
-  <div class="mb-4">
-    <%= f.label :status, class: "block text-sm font-medium text-slate-700 mb-1" %>
-    <%= f.select :status, LifecycleStatusable::STATUSES, {}, class: "w-full border border-slate-300 rounded px-3 py-2" %>
-  </div>
+  <%= render "admin/parties/party_basics_fields", f: f, status_mode: :full %>
 
   <% if @party.person? %>
     <%= f.fields_for :person_profile do |pf| %>
       <%= pf.hidden_field :id if pf.object.persisted? %>
-      <h2 class="text-lg font-medium mt-4 mb-2">Person profile</h2>
-      <div class="mb-3">
-        <%= pf.label :first_name, class: "block text-sm font-medium text-slate-700 mb-1" %>
-        <%= pf.text_field :first_name, class: "w-full border border-slate-300 rounded px-3 py-2" %>
-      </div>
-      <div class="mb-3">
-        <%= pf.label :last_name, class: "block text-sm font-medium text-slate-700 mb-1" %>
-        <%= pf.text_field :last_name, class: "w-full border border-slate-300 rounded px-3 py-2" %>
-      </div>
+      <%= render "admin/parties/person_profile_fields", pf: pf %>
     <% end %>
   <% else %>
     <%= f.fields_for :organization_profile do |of| %>
       <%= of.hidden_field :id if of.object.persisted? %>
-      <h2 class="text-lg font-medium mt-4 mb-2">Organization profile</h2>
-      <div class="mb-3">
-        <%= of.label :legal_name, class: "block text-sm font-medium text-slate-700 mb-1" %>
-        <%= of.text_field :legal_name, class: "w-full border border-slate-300 rounded px-3 py-2" %>
-      </div>
-      <div class="mb-3">
-        <%= of.label :trade_name, class: "block text-sm font-medium text-slate-700 mb-1" %>
-        <%= of.text_field :trade_name, class: "w-full border border-slate-300 rounded px-3 py-2" %>
-      </div>
-      <div class="mb-3">
-        <%= of.label :organization_kind, class: "block text-sm font-medium text-slate-700 mb-1" %>
-        <%= of.select :organization_kind, OrganizationProfile::ORGANIZATION_KINDS, {}, class: "w-full border border-slate-300 rounded px-3 py-2" %>
-      </div>
+      <%= render "admin/parties/organization_profile_fields", of: of %>
     <% end %>
   <% end %>
 

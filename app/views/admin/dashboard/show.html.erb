@@ -5,7 +5,7 @@
       <p class="tc-page-header__eyebrow">Workspace</p>
       <h1 class="tc-page-header__title">Dashboard</h1>
       <p class="tc-page-header__subtitle">
-        Operational home for the current agency context. Use the shortcuts below or the section navigation to open common queues.
+        Operational home for the current agency. Cards show counts and deep links — not full reports.
       </p>
     </div>
   </header>
@@ -48,20 +48,98 @@
       </div>
     </div>
 
-    <div class="tc-panel">
-      <div class="tc-panel__header">
-        <div class="tc-panel__title">Shortcuts</div>
-        <p class="tc-panel__subtitle">High-traffic admin destinations</p>
-      </div>
-      <div class="tc-panel__body">
-        <ul class="m-0 list-none space-y-2 p-0 text-sm">
-          <li><%= link_to "Team members", admin_team_members_path, class: tc_link_classes %></li>
-          <li><%= link_to "Engagements", admin_engagements_path, class: tc_link_classes %></li>
-          <li><%= link_to "Pending document review", admin_document_reviews_path, class: tc_link_classes %></li>
-          <li><%= link_to "Document records", admin_document_records_path, class: tc_link_classes %></li>
-          <li><%= link_to "Reports", admin_reports_root_path, class: tc_link_classes %></li>
-        </ul>
-      </div>
+    <div class="grid gap-4 md:grid-cols-2">
+      <section class="tc-panel">
+        <div class="tc-panel__header">
+          <div class="tc-panel__title">Engagements</div>
+          <p class="tc-panel__subtitle">Non-active pipeline</p>
+        </div>
+        <div class="tc-panel__body text-sm space-y-2">
+          <p>
+            <span class="font-semibold"><%= @draft_engagements_count + @pending_engagements_count %></span>
+            in draft or pending
+            <span class="text-slate-500">(<%= @draft_engagements_count %> draft · <%= @pending_engagements_count %> pending)</span>
+          </p>
+          <% if @draft_engagements_count + @pending_engagements_count == 0 %>
+            <p class="text-slate-500">No draft or pending engagements.</p>
+          <% end %>
+          <div class="flex flex-wrap gap-3">
+            <%= link_to "Draft engagements", admin_engagements_path(status: "draft"), class: tc_link_classes %>
+            <%= link_to "Pending engagements", admin_engagements_path(status: "pending"), class: tc_link_classes %>
+            <%= link_to "All engagements", admin_engagements_path, class: tc_link_classes %>
+          </div>
+        </div>
+      </section>
+
+      <section class="tc-panel">
+        <div class="tc-panel__header">
+          <div class="tc-panel__title">Documents</div>
+          <p class="tc-panel__subtitle">Submission and triage</p>
+        </div>
+        <div class="tc-panel__body text-sm space-y-2">
+          <p><span class="font-semibold"><%= @submitted_documents_count %></span> submitted records awaiting review</p>
+          <% if @submitted_documents_count.zero? %>
+            <p class="text-slate-500">No submitted document records.</p>
+          <% end %>
+          <div class="flex flex-wrap gap-3">
+            <%= link_to "Document workbench", admin_document_workbench_path, class: tc_link_classes %>
+            <%= link_to "Pending review", admin_document_reviews_path, class: tc_link_classes %>
+            <%= link_to "Submitted records", admin_document_records_path(status: "submitted"), class: tc_link_classes %>
+          </div>
+        </div>
+      </section>
+
+      <section class="tc-panel">
+        <div class="tc-panel__header">
+          <div class="tc-panel__title">Contractor charges</div>
+          <p class="tc-panel__subtitle">Open or draft balances</p>
+        </div>
+        <div class="tc-panel__body text-sm space-y-2">
+          <p><span class="font-semibold"><%= @open_contractor_charges_count %></span> open or draft charges</p>
+          <p><span class="font-semibold"><%= @past_due_contractor_charges_count %></span> past due (by due date)</p>
+          <% if @open_contractor_charges_count.zero? && @past_due_contractor_charges_count.zero? %>
+            <p class="text-slate-500">No open contractor charges in this agency.</p>
+          <% end %>
+          <div class="flex flex-wrap gap-3">
+            <%= link_to "Open charges", admin_contractor_charges_path(status: "open"), class: tc_link_classes %>
+            <%= link_to "Past due", admin_contractor_charges_path(past_due: "1"), class: tc_link_classes %>
+          </div>
+        </div>
+      </section>
+
+      <section class="tc-panel">
+        <div class="tc-panel__header">
+          <div class="tc-panel__title">Settlement runs</div>
+          <p class="tc-panel__subtitle">Draft runs needing attention</p>
+        </div>
+        <div class="tc-panel__body text-sm space-y-2">
+          <p><span class="font-semibold"><%= @draft_settlement_runs_count %></span> draft runs</p>
+          <% if @draft_settlement_runs_count.zero? %>
+            <p class="text-slate-500">No draft settlement runs.</p>
+          <% end %>
+          <div class="flex flex-wrap gap-3">
+            <%= link_to "Draft runs", admin_contractor_settlement_runs_path(status: "draft"), class: tc_link_classes %>
+            <%= link_to "All runs", admin_contractor_settlement_runs_path, class: tc_link_classes %>
+          </div>
+        </div>
+      </section>
     </div>
+
+    <section class="tc-panel">
+      <div class="tc-panel__header">
+        <div class="tc-panel__title">People &amp; guided setup</div>
+        <p class="tc-panel__subtitle">Shortcuts and thin onboarding flows</p>
+      </div>
+      <div class="tc-panel__body text-sm space-y-2">
+        <div class="flex flex-wrap gap-3">
+          <%= link_to "Parties", admin_parties_path, class: tc_link_classes %>
+          <%= link_to "Team members", admin_team_members_path, class: tc_link_classes %>
+          <%= link_to "Search", admin_search_path, class: tc_link_classes %>
+        </div>
+        <div class="flex flex-wrap gap-3 pt-2 border-t" style="border-color: var(--tc-border);">
+          <%= link_to "Guided setup hub", admin_guided_setup_path, class: "tc-btn tc-btn--secondary" %>
+        </div>
+      </div>
+    </section>
   <% end %>
 </div>

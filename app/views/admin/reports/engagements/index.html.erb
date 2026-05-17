@@ -80,7 +80,7 @@
           <% sup_name = s&.supervisor_engagement&.team_member&.party&.display_name %>
           <% rs = @readiness_by_engagement_id[eng.id] %>
           <tr>
-            <td class="font-mono"><%= link_to eng.id, admin_engagement_path(eng), class: tc_link_classes %></td>
+            <td class="font-mono"><%= link_to eng.id, reports_drill_path(admin_engagement_path(eng)), class: tc_link_classes %></td>
             <td class="tc-data-table__primary"><%= tm.party.display_name %></td>
             <td class="font-mono text-xs tc-data-table__cell-muted"><%= eng.relationship_type %></td>
             <td><span class="<%= tc_status_badge_classes(eng.status) %>"><%= eng.status %></span></td>
@@ -99,8 +99,8 @@
               <% end %>
             </td>
             <td class="whitespace-nowrap text-xs">
-              <%= link_to "Team360", admin_team_member_team360_path(tm), class: tc_link_classes %>
-              <%= link_to "Eng", admin_engagement_path(eng), class: "#{tc_link_classes} ml-2" %>
+              <%= link_to "Team360", reports_team360_path(tm, engagement: eng), class: tc_link_classes %>
+              <%= link_to "Eng", reports_drill_path(admin_engagement_path(eng)), class: "#{tc_link_classes} ml-2" %>
             </td>
           </tr>
         <% end %>

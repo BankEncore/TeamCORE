@@ -1,0 +1,39 @@
+<% content_for :title, "Contractor charges — #{current_agency.name}" %>
+<div class="tc-page-stack">
+  <p class="text-sm"><%= link_to "← Dashboard", admin_root_path, class: tc_link_classes %></p>
+  <h1 class="text-2xl font-semibold">Contractor charges</h1>
+  <p class="text-sm text-slate-600">Agency-wide list. Use filters from the dashboard or narrow by engagement from each engagement&apos;s Charges screen.</p>
+
+  <div class="tc-table-wrap mt-4">
+    <table class="tc-data-table text-sm">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Engagement</th>
+          <th>Status</th>
+          <th>Due</th>
+          <th>Open</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if @charges.blank? %>
+          <tr><td colspan="6" class="text-slate-500">No charges match.</td></tr>
+        <% else %>
+          <% @charges.each do |c| %>
+            <tr>
+              <td class="font-mono"><%= c.id %></td>
+              <td class="font-mono"><%= c.engagement_id %></td>
+              <td><span class="<%= tc_status_badge_classes(c.status) %>"><%= c.status %></span></td>
+              <td class="font-mono"><%= c.due_on || "—" %></td>
+              <td><%= tc_money(c.open_balance_cents) %></td>
+              <td>
+                <%= link_to "Open", admin_engagement_contractor_charge_path(c.engagement, c), class: tc_link_classes %>
+              </td>
+            </tr>
+          <% end %>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

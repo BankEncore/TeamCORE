@@ -1,6 +1,7 @@
 <% content_for :title, (@engagement.new_record? ? "New engagement" : "Edit engagement") %>
 <%= render "shared/errors", model: @engagement %>
 <%= form_with model: [:admin, @engagement], data: { turbo: false } do |f| %>
+  <%= tc_admin_return_navigation_hidden_fields %>
   <% if @engagement.new_record? %>
     <div class="mb-4">
       <%= f.label :team_member_id, class: "block text-sm font-medium text-slate-700 mb-1" %>
@@ -8,7 +9,8 @@
             options_from_collection_for_select(
               @team_members,
               :id,
-              ->(tm) { "#{tm.party.display_name} · TM #{tm.id}" }
+              ->(tm) { "#{tm.party.display_name} · TM #{tm.id}" },
+              @engagement.team_member_id
             ),
             { prompt: "Select team member…" },
             class: "w-full border border-slate-300 rounded px-3 py-2" %>

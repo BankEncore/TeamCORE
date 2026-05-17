@@ -1,0 +1,36 @@
+<section class="tc-panel">
+  <div class="tc-panel__header">
+    <div class="flex flex-wrap items-start justify-between gap-2">
+      <div class="tc-panel__title">Identity details</div>
+      <%= link_to "Edit identity", edit_admin_party_path(@party), class: tc_link_classes %>
+    </div>
+  </div>
+  <div class="tc-panel__body">
+    <p class="text-xs mb-3" style="color: var(--tc-text-muted);">
+      Party records are identity only. Workforce participation is managed through <%= link_to "team members", admin_team_members_path, class: tc_link_classes %>.
+    </p>
+    <dl class="tc-kv-grid">
+      <% if @party.notes.present? %>
+        <div class="tc-kv tc-kv--full">
+          <dt class="tc-kv__key">Notes</dt>
+          <dd class="tc-kv__value whitespace-pre-wrap"><%= @party.notes %></dd>
+        </div>
+      <% end %>
+      <% if @party.person? && @party.person_profile %>
+        <% p = @party.person_profile %>
+        <div class="tc-kv"><dt class="tc-kv__key">First name</dt><dd class="tc-kv__value"><%= p.first_name.presence || "—" %></dd></div>
+        <div class="tc-kv"><dt class="tc-kv__key">Middle name</dt><dd class="tc-kv__value"><%= p.middle_name.presence || "—" %></dd></div>
+        <div class="tc-kv"><dt class="tc-kv__key">Last name</dt><dd class="tc-kv__value"><%= p.last_name.presence || "—" %></dd></div>
+        <div class="tc-kv"><dt class="tc-kv__key">Preferred name</dt><dd class="tc-kv__value"><%= p.preferred_name.presence || "—" %></dd></div>
+        <div class="tc-kv"><dt class="tc-kv__key">Suffix</dt><dd class="tc-kv__value"><%= p.suffix.presence || "—" %></dd></div>
+      <% elsif @party.organization? && @party.organization_profile %>
+        <% o = @party.organization_profile %>
+        <div class="tc-kv"><dt class="tc-kv__key">Legal name</dt><dd class="tc-kv__value"><%= o.legal_name.presence || "—" %></dd></div>
+        <div class="tc-kv"><dt class="tc-kv__key">Trade name</dt><dd class="tc-kv__value"><%= o.trade_name.presence || "—" %></dd></div>
+        <div class="tc-kv"><dt class="tc-kv__key">Organization kind</dt><dd class="tc-kv__value"><%= o.organization_kind&.humanize || "—" %></dd></div>
+      <% else %>
+        <p class="text-sm" style="color: var(--tc-text-muted);">Complete the profile to finish identity setup.</p>
+      <% end %>
+    </dl>
+  </div>
+</section>

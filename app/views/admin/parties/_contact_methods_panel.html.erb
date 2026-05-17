@@ -1,0 +1,43 @@
+<section class="tc-panel">
+  <div class="tc-panel__header">
+    <div class="flex flex-wrap items-start justify-between gap-2">
+      <div class="tc-panel__title">Contact methods</div>
+      <%= link_to "Add contact method", new_admin_party_party_contact_method_path(@party), class: tc_link_classes %>
+    </div>
+  </div>
+  <div class="tc-panel__body">
+    <% if @contact_methods.empty? %>
+      <p class="text-sm mb-2" style="color: var(--tc-text-muted);">
+        No contact methods have been added yet. Add email, phone, address, website, or other contact details for this party.
+      </p>
+      <%= link_to "Add contact method", new_admin_party_party_contact_method_path(@party), class: "tc-btn tc-btn--secondary tc-btn--sm" %>
+    <% else %>
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-sm border-collapse">
+          <thead>
+            <tr class="border-b border-slate-200 text-left text-xs uppercase tracking-wide" style="color: var(--tc-text-muted);">
+              <th class="py-2 pr-3">Type</th>
+              <th class="py-2 pr-3">Value</th>
+              <th class="py-2 pr-3">Label</th>
+              <th class="py-2 pr-3">Primary</th>
+              <th class="py-2 pr-3">Status</th>
+              <th class="py-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @contact_methods.each do |cm| %>
+              <tr class="border-b border-slate-100">
+                <td class="py-2 pr-3"><%= cm.contact_type.humanize %></td>
+                <td class="py-2 pr-3 font-mono text-xs"><%= cm.value %></td>
+                <td class="py-2 pr-3"><%= cm.label.presence || "—" %></td>
+                <td class="py-2 pr-3"><%= cm.is_primary? ? "Yes" : "—" %></td>
+                <td class="py-2 pr-3"><span class="<%= tc_status_badge_classes(cm.status) %>"><%= cm.status %></span></td>
+                <td class="py-2"><%= link_to "Edit", edit_admin_party_party_contact_method_path(@party, cm), class: tc_link_classes %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% end %>
+  </div>
+</section>

@@ -18,7 +18,7 @@ module Admin
       def create
         @assignment = @engagement.compensation_plan_assignments.build(assignment_params.merge(agency_id: current_agency.id))
         if @assignment.save
-          redirect_to admin_engagement_compensation_plan_assignments_path(@engagement), notice: "Assignment created."
+          redirect_after_admin_save admin_engagement_compensation_plan_assignments_path(@engagement), notice: "Assignment created."
         else
           @plans = scoped(CompensationPlan).active_catalog.order(:name)
           render :new, status: :unprocessable_entity
@@ -33,7 +33,7 @@ module Admin
       def update
         @assignment = @engagement.compensation_plan_assignments.find(params[:id])
         if @assignment.update(assignment_params)
-          redirect_to admin_engagement_compensation_plan_assignments_path(@engagement), notice: "Assignment updated."
+          redirect_after_admin_save admin_engagement_compensation_plan_assignments_path(@engagement), notice: "Assignment updated."
         else
           @plans = scoped(CompensationPlan).active_catalog.order(:name)
           render :edit, status: :unprocessable_entity
@@ -43,7 +43,7 @@ module Admin
       def destroy
         @assignment = @engagement.compensation_plan_assignments.find(params[:id])
         @assignment.destroy!
-        redirect_to admin_engagement_compensation_plan_assignments_path(@engagement), notice: "Removed."
+        redirect_after_admin_save admin_engagement_compensation_plan_assignments_path(@engagement), notice: "Removed."
       end
 
       private

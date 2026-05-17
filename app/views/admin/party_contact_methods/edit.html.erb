@@ -1,0 +1,24 @@
+<% content_for :title, "Edit contact method — TeamCORE Admin" %>
+<div class="tc-page-stack">
+  <p class="text-sm">
+    <%= link_to "← Back to party", admin_party_path(@party), class: tc_link_classes %>
+    <% if current_party_team_member_for_nav %>
+      · <%= link_to "Team360", admin_team_member_team360_path(current_party_team_member_for_nav), class: tc_link_classes %>
+    <% end %>
+  </p>
+
+  <header class="tc-record-header">
+    <div class="tc-record-header__top">
+      <div>
+        <div class="tc-record-header__eyebrow">Contact method</div>
+        <h1 class="tc-record-header__title">Edit contact for <%= @party.display_name.presence || "Party ##{@party.id}" %></h1>
+      </div>
+    </div>
+  </header>
+
+  <section class="tc-panel">
+    <div class="tc-panel__body max-w-xl">
+      <%= render "form" %>
+    </div>
+  </section>
+</div>

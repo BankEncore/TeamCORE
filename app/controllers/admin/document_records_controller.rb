@@ -26,6 +26,9 @@ module Admin
           .includes(:document_type, :team_member, :engagement)
           .where(agency_id: current_agency.id)
           .order(id: :desc)
+      if params[:status].present? && DocumentRecord::STATUSES.include?(params[:status])
+        @document_records = @document_records.where(status: params[:status])
+      end
     end
 
     def show
@@ -33,6 +36,7 @@ module Admin
 
     def new
       @document_record = DocumentRecord.new(agency: current_agency, status: "submitted")
+      assign_document_record_from_query_params!
       load_collections
     end
 
@@ -42,7 +46,7 @@ module Admin
       load_collections
 
       if @document_record.save
-        redirect_to admin_document_record_path(@document_record), notice: "Document record created."
+        redirect_after_admin_save admin_document_record_path(@document_record), notice: "Document record created."
       else
         render :new, status: :unprocessable_entity
       end
@@ -57,7 +61,7 @@ module Admin
       load_collections
 
       if @document_record.save
-        redirect_to admin_document_record_path(@document_record), notice: "Document record updated."
+        redirect_after_admin_save admin_document_record_path(@document_record), notice: "Document record updated."
       else
         render :edit, status: :unprocessable_entity
       end
@@ -71,7 +75,7 @@ module Admin
         notes: params[:verification_notes]
       )
       if result.success?
-        redirect_to admin_document_record_path(result.document_record), notice: "Document verified."
+        redirect_after_admin_save admin_document_record_path(result.document_record), notice: "Document verified."
       else
         flash.now[:alert] = result.error_messages.to_sentence
         render :show, status: :unprocessable_entity
@@ -87,7 +91,7 @@ module Admin
         rejection_reason: params[:rejection_reason]
       )
       if result.success?
-        redirect_to admin_document_record_path(result.document_record), notice: "Document rejected."
+        redirect_after_admin_save admin_document_record_path(result.document_record), notice: "Document rejected."
       else
         flash.now[:alert] = result.error_messages.to_sentence
         render :show, status: :unprocessable_entity
@@ -102,7 +106,7 @@ module Admin
         notes: params[:verification_notes]
       )
       if result.success?
-        redirect_to admin_document_record_path(result.document_record), notice: "Document voided."
+        redirect_after_admin_save admin_document_record_path(result.document_record), notice: "Document voided."
       else
         flash.now[:alert] = result.error_messages.to_sentence
         render :show, status: :unprocessable_entity
@@ -110,6 +114,21 @@ module Admin
     end
 
     private
+
+    def assign_document_record_from_query_params!
+      if params[:party_id].present?
+        p = Party.where(agency_id: current_agency.id).find_by(id: params[:party_id])
+        @document_record.party_id = p.id if p
+      end
+      if params[:team_member_id].present?
+        tm = TeamMember.where(agency_id: current_agency.id).find_by(id: params[:team_member_id])
+        @document_record.team_member_id = tm.id if tm
+      end
+      if params[:engagement_id].present?
+        e = Engagement.where(agency_id: current_agency.id).find_by(id: params[:engagement_id])
+        @document_record.engagement_id = e.id if e
+      end
+    end
 
     def set_document_record
       @document_record = DocumentRecord.where(agency_id: current_agency.id).find(params[:id])

@@ -1,0 +1,22 @@
+<%# locals: pf (fields builder for person profile) %>
+<h2 class="text-lg font-medium mt-6 mb-2">Person profile</h2>
+<div class="mb-3">
+  <%= pf.label :first_name, class: "block text-sm font-medium text-slate-700 mb-1" %>
+  <%= pf.text_field :first_name, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+</div>
+<div class="mb-3">
+  <%= pf.label :middle_name, class: "block text-sm font-medium text-slate-700 mb-1" %>
+  <%= pf.text_field :middle_name, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+</div>
+<div class="mb-3">
+  <%= pf.label :last_name, class: "block text-sm font-medium text-slate-700 mb-1" %>
+  <%= pf.text_field :last_name, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+</div>
+<div class="mb-3">
+  <%= pf.label :preferred_name, class: "block text-sm font-medium text-slate-700 mb-1" %>
+  <%= pf.text_field :preferred_name, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+</div>
+<div class="mb-3">
+  <%= pf.label :suffix, class: "block text-sm font-medium text-slate-700 mb-1" %>
+  <%= pf.text_field :suffix, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+</div>

@@ -1,0 +1,52 @@
+<section class="tc-panel">
+  <div class="tc-panel__header">
+    <div>
+      <div class="tc-panel__title"><%= title %></div>
+      <% if local_assigns[:subtitle].present? %>
+        <p class="tc-panel__subtitle"><%= subtitle %></p>
+      <% end %>
+    </div>
+  </div>
+  <div class="tc-panel__body">
+    <% if records.blank? %>
+      <p class="text-sm" style="color: var(--tc-text-muted);"><%= local_assigns[:empty_copy] %></p>
+    <% else %>
+      <div class="tc-table-wrap">
+        <table class="tc-data-table tc-data-table--compact text-xs">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Type</th>
+              <th>TM</th>
+              <th>Eng</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% records.each do |rec| %>
+              <tr>
+                <td class="font-mono"><%= rec.id %></td>
+                <td><%= rec.document_type&.code %></td>
+                <td class="font-mono"><%= rec.team_member_id || "—" %></td>
+                <td class="font-mono"><%= rec.engagement_id || "—" %></td>
+                <td><span class="<%= tc_status_badge_classes(rec.status) %>"><%= rec.status %></span></td>
+                <td class="space-x-2">
+                  <%= link_to "Record", admin_document_record_path(rec), class: tc_link_classes %>
+                  <% if rec.team_member %>
+                    <%= link_to "Team360",
+                          tc_team360_url(rec.team_member, engagement: rec.engagement),
+                          class: tc_link_classes %>
+                  <% end %>
+                  <% if rec.engagement %>
+                    <%= link_to "Engagement", admin_engagement_path(rec.engagement), class: tc_link_classes %>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% end %>
+  </div>
+</section>

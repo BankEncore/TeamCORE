@@ -3,6 +3,7 @@
       url: @assignment.persisted? ? admin_engagement_supervision_assignment_path(@engagement, @assignment) : admin_engagement_supervision_assignments_path(@engagement),
       method: @assignment.persisted? ? :patch : :post,
       data: { turbo: false } do |f| %>
+  <%= tc_admin_return_navigation_hidden_fields %>
   <%= f.hidden_field :relationship_type, value: "primary_reports_to" %>
   <div class="mb-4">
     <%= f.label :supervisor_engagement_id, "Supervisor (active employee engagement)", class: "block text-sm font-medium text-slate-700 mb-1" %>

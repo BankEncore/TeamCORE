@@ -21,7 +21,7 @@ module Admin
     def create
       @placement = EngagementOrganizationPlacement.new(placement_params.merge(engagement: @engagement))
       if @placement.save
-        redirect_to admin_engagement_placement_path(@engagement, @placement), notice: "Placement saved."
+        redirect_after_admin_save admin_engagement_placement_path(@engagement, @placement), notice: "Placement saved."
       else
         load_org_rows
         render :new, status: :unprocessable_entity
@@ -34,7 +34,7 @@ module Admin
 
     def update
       if @placement.update(placement_params)
-        redirect_to admin_engagement_placement_path(@engagement, @placement), notice: "Placement updated."
+        redirect_after_admin_save admin_engagement_placement_path(@engagement, @placement), notice: "Placement updated."
       else
         load_org_rows
         render :edit, status: :unprocessable_entity

@@ -7,6 +7,9 @@ module Admin
 
     def index
       @runs = scoped(ContractorSettlementRun).order(id: :desc)
+      if params[:status].present? && ContractorSettlementRun::STATUSES.include?(params[:status])
+        @runs = @runs.where(status: params[:status])
+      end
     end
 
     def show

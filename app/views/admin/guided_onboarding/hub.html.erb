@@ -1,0 +1,15 @@
+<% content_for :title, "Guided setup" %>
+<div class="tc-page-stack">
+  <p class="text-sm"><%= link_to "← Dashboard", admin_root_path, class: tc_link_classes %></p>
+  <h1 class="text-2xl font-semibold">Guided setup</h1>
+  <p class="text-sm text-slate-600 max-w-2xl">
+    Thin launchers — each flow links to existing admin screens. Search for an existing party first to avoid duplicate identities.
+  </p>
+
+  <ul class="mt-6 space-y-3 list-none p-0 m-0">
+    <li><%= link_to "Add employee", admin_guided_employee_path, class: "tc-btn tc-btn--secondary" %></li>
+    <li><%= link_to "Add individual contractor", admin_guided_individual_contractor_path, class: "tc-btn tc-btn--secondary" %></li>
+    <li><%= link_to "Add contractor organization", admin_guided_contractor_organization_path, class: "tc-btn tc-btn--secondary" %></li>
+    <li><%= link_to "Add subcontractor", admin_guided_subcontractor_path, class: "tc-btn tc-btn--secondary" %></li>
+  </ul>
+</div>
