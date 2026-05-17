@@ -4,6 +4,8 @@
 
 Define the operational contracts TC-23a provides to downstream Phase 5 epics.
 
+**Normative posture:** [ADR-0002 — Payroll period and workweek foundations](../../adr/adr-0002-payroll-period-and-workweek-foundations). MVP employee payroll time is **daily-hours-based** (canonical **daily worked-hour totals**); **weekly timesheets** aggregate those entries within each **workweek**. **Punch/timeclock** capture is **not** MVP and must not become authoritative over daily totals if introduced later.
+
 ---
 
 # TC-23 — Employee Time Tracking MVP
@@ -15,6 +17,11 @@ Define the operational contracts TC-23a provides to downstream Phase 5 epics.
 - Overtime aggregation boundaries
 - Current/open pay-period lookup
 - Payroll-period association logic
+
+## TC-23 must (MVP):
+
+- treat **daily worked-hour totals** per calendar day as the **canonical** payroll-oriented worked-time source
+- **not** implement punch/timeclock/biometric/geo attendance as payroll-authoritative in MVP
 
 ## TC-23 should not redefine:
 
@@ -32,6 +39,10 @@ Define the operational contracts TC-23a provides to downstream Phase 5 epics.
 - Approval completeness checks
 - Overtime visibility windows
 - Current payroll-period resolution
+
+## TC-24 must (MVP):
+
+- standardize on **weekly** timesheets (one **workweek** per timesheet) that **aggregate daily worked-hour entries**
 
 ## TC-24 should not redefine:
 
@@ -62,6 +73,7 @@ Define the operational contracts TC-23a provides to downstream Phase 5 epics.
 - Leave contribution to payroll summaries
 - Open-period behavior
 - Payroll visibility windows
+- Fixed **PayrollEarningCode** mapping for payable leave categories (e.g. `PTO`, `HOL`, `SICK`)
 
 ## TC-26 should not redefine:
 
@@ -77,7 +89,7 @@ Define the operational contracts TC-23a provides to downstream Phase 5 epics.
 - Payroll summary aggregation
 - Worked-hour vs leave-hour distinction
 - Overtime aggregation
-- Closure validation posture
+- Closure validation posture (**override applies to validation checks only** — ADR‑0002)
 - Finalized-period semantics
 
 ## TC-27 should not redefine:
@@ -95,8 +107,9 @@ Define the operational contracts TC-23a provides to downstream Phase 5 epics.
 
 - Exportable payroll periods
 - Finalized export posture
-- Historical export linkage
+- Historical export linkage (including **export_sequence** / draft vs final posture)
 - Payroll summary structures
+- Fixed **PayrollEarningCode** vocabulary for code-oriented exports
 
 ## TC-20 should not redefine:
 
