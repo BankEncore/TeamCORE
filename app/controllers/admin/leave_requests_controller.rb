@@ -6,21 +6,41 @@ module Admin
     before_action :set_leave_request, only: %i[show edit update submit approve reject cancel reopen]
 
     def index
-      scope =
-        LeaveRequest
-          .joins(:engagement)
-          .where(engagements: { agency_id: current_agency.id }, status: "submitted")
-          .includes(:leave_type, engagement: { team_member: :party })
-          .order(submitted_at: :desc, id: :desc)
+      agency_id = current_agency.id
+      @queue_mode = params[:queue].presence || "submitted"
 
-      @queue_rows =
-        scope.map do |req|
-          age_days =
-            if req.submitted_at.present?
-              (Date.current - req.submitted_at.to_date).to_i
-            end
-          { req:, days_pending: age_days }
-        end
+      case @queue_mode
+      when "recent_auto_approved"
+        scope =
+          LeaveRequest
+            .joins(:engagement, :leave_request_approval_events)
+            .where(engagements: { agency_id: agency_id }, status: "approved")
+            .where(leave_request_approval_events: { event_type: "approved", actor_id: nil })
+            .where("leave_requests.reviewed_at >= ?", 30.days.ago.beginning_of_day)
+            .distinct
+            .includes(:leave_type, engagement: { team_member: :party })
+            .order(reviewed_at: :desc, id: :desc)
+        @queue_rows =
+          scope.limit(100).map do |req|
+            { req:, days_pending: nil, reviewed_label: req.reviewed_at&.in_time_zone&.to_fs(:db) }
+          end
+      else
+        scope =
+          LeaveRequest
+            .joins(:engagement)
+            .where(engagements: { agency_id: agency_id }, status: "submitted")
+            .includes(:leave_type, engagement: { team_member: :party })
+            .order(submitted_at: :desc, id: :desc)
+
+        @queue_rows =
+          scope.map do |req|
+            age_days =
+              if req.submitted_at.present?
+                (Date.current - req.submitted_at.to_date).to_i
+              end
+            { req:, days_pending: age_days, reviewed_label: nil }
+          end
+      end
     end
 
     def show
@@ -85,7 +105,13 @@ module Admin
 
     def submit
       Leave::LeaveRequestService.new(leave_request: @leave_request, actor: current_user).submit!
-      redirect_to admin_leave_request_path(@leave_request), notice: "Leave request submitted."
+      msg =
+        if @leave_request.reload.status == "approved"
+          "Leave request submitted and auto-approved."
+        else
+          "Leave request submitted."
+        end
+      redirect_to admin_leave_request_path(@leave_request), notice: msg
     rescue Leave::LeaveRequestService::Error => e
       redirect_to admin_leave_request_path(@leave_request), alert: e.message
     end

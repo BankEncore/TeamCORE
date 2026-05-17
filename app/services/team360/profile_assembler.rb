@@ -375,6 +375,7 @@ module Team360
             transition_from: ev.transition_from,
             transition_to: ev.transition_to,
             actor_email: ev.actor&.email,
+            actor_kind: ev.metadata_hash["actor_kind"],
             reason: ev.metadata_hash["reason"]
           }
         end
@@ -382,6 +383,8 @@ module Team360
       {
         id: req.id,
         leave_type_code: req.leave_type.code,
+        approval_policy: req.leave_type.approval_policy,
+        auto_approved: req.auto_approved?,
         status: req.status,
         start_on: req.start_on,
         end_on: req.end_on,

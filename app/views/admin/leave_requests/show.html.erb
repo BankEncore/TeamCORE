@@ -10,6 +10,10 @@
         <%= @leave_request.engagement.team_member.party.display_name %>
         · <span class="font-mono"><%= @leave_request.status %></span>
         · <%= @visibility.visibility_label %>
+        · Policy: <span class="font-mono"><%= @leave_request.leave_type.approval_policy %></span>
+        <% if @leave_request.auto_approved? %>
+          · <span class="text-emerald-700 font-medium">Auto-approved</span>
+        <% end %>
       </p>
     </div>
     <% if @leave_request.status == "draft" %>
@@ -87,7 +91,9 @@
               <%= ev.occurred_at.in_time_zone.to_fs(:db) %>
               · <%= ev.event_type %>
               · <%= ev.transition_from %> → <%= ev.transition_to %>
-              <% if ev.actor %>(<%= ev.actor.email %>)<% end %>
+              <% if ev.actor %>(<%= ev.actor.email %>)<% elsif ev.metadata_hash["actor_kind"].present? %>
+                (<%= ev.metadata_hash["actor_kind"] == Leave::LeaveRequestService::SYSTEM_ACTOR_KIND ? "system policy" : ev.metadata_hash["actor_kind"] %>)
+              <% end %>
               <% r = ev.metadata_hash["reason"].presence %><%= r ? " — #{r}" : "" %>
             </li>
           <% end %>

@@ -24,6 +24,13 @@ class LeaveRequest < ApplicationRecord
     leave_request_days.reject(&:marked_for_destruction?).sum { |d| BigDecimal(d.hours.to_s) }
   end
 
+  # Latest approve transition was system/policy-driven (ADR-0005); manual approvals always set actor_id.
+  def auto_approved?
+    return false unless status == "approved"
+
+    leave_request_approval_events.where(event_type: "approved").recent_first.limit(1).pick(:actor_id).nil?
+  end
+
   private
 
   def engagement_must_be_leave_eligible

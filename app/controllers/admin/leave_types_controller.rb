@@ -14,7 +14,13 @@ module Admin
     end
 
     def new
-      @leave_type = current_agency.leave_types.build(active: true, paid: false, balance_tracked: false)
+      @leave_type =
+        current_agency.leave_types.build(
+          active: true,
+          paid: false,
+          balance_tracked: false,
+          approval_policy: "manual"
+        )
     end
 
     def create
@@ -54,7 +60,8 @@ module Admin
 
     def leave_type_params
       params.require(:leave_type).permit(
-        :code, :name, :paid, :balance_tracked, :active, :description, :payroll_earning_code_id
+        :code, :name, :paid, :balance_tracked, :active, :description, :payroll_earning_code_id,
+        :approval_policy
       )
     end
   end

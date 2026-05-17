@@ -1,10 +1,21 @@
-<% content_for :title, "Leave requests — submitted queue" %>
+<% content_for :title,
+      (@queue_mode == "recent_auto_approved" ? "Leave requests — auto-approved (recent)" : "Leave requests — submitted queue") %>
 <div class="tc-page-stack">
   <header class="tc-page-header">
     <div>
       <p class="tc-page-header__eyebrow">Payroll · Leave</p>
-      <h1 class="tc-page-header__title">Submitted leave requests</h1>
-      <p class="tc-page-header__subtitle">Awaiting approval for <%= current_agency.name %>.</p>
+      <h1 class="tc-page-header__title">
+        <%= @queue_mode == "recent_auto_approved" ? "Recent auto-approved leave" : "Submitted leave requests" %>
+      </h1>
+      <p class="tc-page-header__subtitle">
+        <%= @queue_mode == "recent_auto_approved" ? "Last 30 days — approved by policy." : "Awaiting manual approval for #{current_agency.name}." %>
+      </p>
+      <div class="flex flex-wrap gap-3 mt-2 text-sm">
+        <%= link_to "Manual queue", admin_leave_requests_path(queue: "submitted"),
+              class: @queue_mode != "recent_auto_approved" ? "font-semibold underline" : tc_link_classes %>
+        <%= link_to "Recent auto-approved", admin_leave_requests_path(queue: "recent_auto_approved"),
+              class: @queue_mode == "recent_auto_approved" ? "font-semibold underline" : tc_link_classes %>
+      </div>
     </div>
     <%= link_to "New request", new_admin_leave_request_path, class: "tc-btn tc-btn--primary" %>
   </header>
@@ -12,16 +23,24 @@
   <div class="tc-panel">
     <div class="tc-panel__body overflow-x-auto">
       <% if @queue_rows.empty? %>
-        <p class="text-sm text-slate-600">No submitted leave requests.</p>
+        <p class="text-sm text-slate-600">No requests in this queue.</p>
       <% else %>
         <table class="min-w-full text-sm">
           <thead>
             <tr class="text-left border-b" style="border-color: var(--tc-border);">
               <th class="py-2 pr-4">Employee</th>
               <th class="py-2 pr-4">Type</th>
+              <% if @queue_mode == "recent_auto_approved" %>
+                <th class="py-2 pr-4">Policy</th>
+                <th class="py-2 pr-4">Approved</th>
+              <% else %>
+                <th class="py-2 pr-4">Policy</th>
+              <% end %>
               <th class="py-2 pr-4">Dates</th>
-              <th class="py-2 pr-4">Submitted</th>
-              <th class="py-2 pr-4">Days pending</th>
+              <% if @queue_mode != "recent_auto_approved" %>
+                <th class="py-2 pr-4">Submitted</th>
+                <th class="py-2 pr-4">Days pending</th>
+              <% end %>
               <th class="py-2"></th>
             </tr>
           </thead>
@@ -32,10 +51,18 @@
               <tr class="border-b" style="border-color: var(--tc-border);">
                 <td class="py-2 pr-4"><%= tm.party.display_name %></td>
                 <td class="py-2 pr-4 font-mono text-xs"><%= req.leave_type.code %></td>
+                <% if @queue_mode == "recent_auto_approved" %>
+                  <td class="py-2 pr-4 font-mono text-xs"><%= req.leave_type.approval_policy %></td>
+                  <td class="py-2 pr-4 font-mono text-xs"><%= row[:reviewed_label] || "—" %></td>
+                <% else %>
+                  <td class="py-2 pr-4 font-mono text-xs"><%= req.leave_type.approval_policy %></td>
+                <% end %>
                 <td class="py-2 pr-4 font-mono text-xs"><%= req.start_on %> – <%= req.end_on %></td>
-                <td class="py-2 pr-4 font-mono text-xs"><%= req.submitted_at&.in_time_zone&.to_fs(:db) || "—" %></td>
-                <td class="py-2 pr-4"><%= row[:days_pending].nil? ? "—" : row[:days_pending] %></td>
-                <td class="py-2"><%= link_to "Review", admin_leave_request_path(req), class: tc_link_classes %></td>
+                <% if @queue_mode != "recent_auto_approved" %>
+                  <td class="py-2 pr-4 font-mono text-xs"><%= req.submitted_at&.in_time_zone&.to_fs(:db) || "—" %></td>
+                  <td class="py-2 pr-4"><%= row[:days_pending].nil? ? "—" : row[:days_pending] %></td>
+                <% end %>
+                <td class="py-2"><%= link_to "Open", admin_leave_request_path(req), class: tc_link_classes %></td>
               </tr>
             <% end %>
           </tbody>

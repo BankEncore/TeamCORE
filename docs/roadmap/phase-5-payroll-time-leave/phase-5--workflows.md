@@ -267,12 +267,14 @@ Canonical leave storage is **hours-based**, allocated per calendar date on **`Le
 
 ## Leave approval flow
 
+**Implementation detail:** Each **`LeaveType`** has an **`approval_policy`** of **`manual`** (queue for human approve/reject) or **`auto`** (approve immediately after successful submit when overlap and balance checks pass). Overlapping **`LeaveRequestDay`** rows are blocked when another request for the same engagement is **`submitted`** or **`approved`**. Auto-approved transitions record **`LeaveRequestApprovalEvent`** rows with a **nullable actor** and **`actor_kind: system_policy`** per [ADR-0005 — System actors in workflow audit events](../../adr/adr-0005-system-actors-in-workflow-audit-events.md).
+
 Typical workflow:
 
 ```text
 Request drafted with daily hour rows → submitted for review
 ↓
-Supervisor/admin approval or rejection
+Supervisor/admin approval or rejection (manual types); or automatic approval (auto types)
 ↓
 Approved leave feeds payroll-preparation visibility (summaries / earning-code buckets — not paycheck generation)
 ```

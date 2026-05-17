@@ -13,6 +13,14 @@
     <%= f.label :name, class: "tc-label" %>
     <%= f.text_field :name, class: "tc-input", required: true %>
   </div>
+  <div class="tc-field">
+    <%= f.label :approval_policy, "Approval policy", class: "tc-label" %>
+    <%= f.select :approval_policy,
+          LeaveType::APPROVAL_POLICIES.map { |p| [ p == "auto" ? "Auto-approve on submit" : "Manual review", p ] },
+          {},
+          class: "tc-select min-w-[16rem]" %>
+    <p class="text-xs mt-1 text-slate-600">Auto types approve immediately after submit when overlap and balance checks pass.</p>
+  </div>
   <div class="flex flex-wrap gap-4">
     <label class="flex items-center gap-2 text-sm"><%= f.check_box :paid %> Paid designation</label>
     <label class="flex items-center gap-2 text-sm"><%= f.check_box :balance_tracked %> Balance tracked</label>

@@ -16,7 +16,7 @@ module Leave
     end
 
     def call
-      unless Payroll::Access.can_adjust_leave_balance?(user: actor, leave_balance: leave_balance)
+      unless Leave::Access.can_adjust_leave_balance?(user: actor, leave_balance: leave_balance)
         raise Error, "Not permitted to adjust leave balances for this agency."
       end
 

@@ -40,6 +40,8 @@ class Team360ProfileAssemblerLeavePanelTest < ActiveSupport::TestCase
     assert_equal "16.0", vac_bal[:balance_hours]
 
     row = panel[:requests].find { |r| r[:id] == req.id }
+    assert_equal "manual", row[:approval_policy]
+    assert_equal false, row[:auto_approved]
     assert_equal "Projected leave", row[:visibility_label]
     assert_equal "submitted", row[:status]
   end

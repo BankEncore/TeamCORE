@@ -5,6 +5,8 @@ module Leave
   class LeaveRequestService
     class Error < StandardError; end
 
+    SYSTEM_ACTOR_KIND = "system_policy"
+
     def initialize(leave_request:, actor:)
       @leave_request = leave_request
       @actor = actor
@@ -16,17 +18,29 @@ module Leave
 
       validate_days_present!
 
+      policy = Leave::ApprovalPolicy.new(leave_request)
+      submit_errs =
+        if policy.auto_approve?
+          policy.submit_errors_for_auto_type
+        else
+          policy.submit_errors_for_manual_type
+        end
+      raise Error, submit_errs.first if submit_errs.any?
+
       LeaveRequest.transaction do
         record_event!(
           transition_from: "draft",
           transition_to: "submitted",
           event_type: "submitted",
-          metadata: {}
+          metadata: {},
+          audit_actor: actor
         )
         leave_request.update!(
           status: "submitted",
           submitted_at: Time.current
         )
+
+        approve_after_submit_if_auto! if policy.auto_approve?
       end
       leave_request.reload
     end
@@ -40,7 +54,8 @@ module Leave
             transition_from: "draft",
             transition_to: "cancelled",
             event_type: "cancelled",
-            metadata: meta_reason(reason)
+            metadata: meta_reason(reason),
+            audit_actor: actor
           )
           leave_request.update!(status: "cancelled", cancellation_reason: reason&.to_s&.strip)
         end
@@ -50,7 +65,8 @@ module Leave
             transition_from: "submitted",
             transition_to: "cancelled",
             event_type: "cancelled",
-            metadata: meta_reason(reason)
+            metadata: meta_reason(reason),
+            audit_actor: actor
           )
           leave_request.update!(status: "cancelled", cancellation_reason: reason&.to_s&.strip, submitted_at: nil)
         end
@@ -61,7 +77,8 @@ module Leave
             transition_from: "approved",
             transition_to: "cancelled",
             event_type: "cancelled",
-            metadata: meta_reason(reason)
+            metadata: meta_reason(reason),
+            audit_actor: actor
           )
           leave_request.update!(
             status: "cancelled",
@@ -85,12 +102,17 @@ module Leave
       validate_days_present!
 
       LeaveRequest.transaction do
+        policy = Leave::ApprovalPolicy.new(leave_request.reload)
+        appr_errs = policy.approval_errors
+        raise Error, appr_errs.first if appr_errs.any?
+
         consume_balance_if_needed!
         record_event!(
           transition_from: "submitted",
           transition_to: "approved",
           event_type: "approved",
-          metadata: {}
+          metadata: {},
+          audit_actor: actor
         )
         leave_request.update!(
           status: "approved",
@@ -111,7 +133,8 @@ module Leave
           transition_from: "submitted",
           transition_to: "rejected",
           event_type: "rejected",
-          metadata: {}
+          metadata: {},
+          audit_actor: actor
         )
         leave_request.update!(
           status: "rejected",
@@ -134,7 +157,8 @@ module Leave
           transition_from: "approved",
           transition_to: "draft",
           event_type: "reopened",
-          metadata: meta_reason(reason)
+          metadata: meta_reason(reason),
+          audit_actor: actor
         )
         leave_request.update!(
           status: "draft",
@@ -151,8 +175,29 @@ module Leave
 
     attr_reader :leave_request, :actor
 
+    def approve_after_submit_if_auto!
+      policy = Leave::ApprovalPolicy.new(leave_request.reload)
+      appr_errs = policy.approval_errors
+      raise Error, appr_errs.first if appr_errs.any?
+
+      consume_balance_if_needed!
+      record_event!(
+        transition_from: "submitted",
+        transition_to: "approved",
+        event_type: "approved",
+        metadata: {},
+        audit_actor: nil
+      )
+      leave_request.update!(
+        status: "approved",
+        reviewed_by: nil,
+        reviewed_at: Time.current,
+        review_notes: nil
+      )
+    end
+
     def authorize_manage!
-      unless Payroll::Access.can_manage_leave_request?(user: actor, leave_request: leave_request)
+      unless Leave::Access.can_manage_leave_request?(user: actor, leave_request: leave_request)
         raise Error, "Not permitted to manage leave requests for this agency."
       end
     end
@@ -206,7 +251,7 @@ module Leave
       reason.present? ? { reason: reason.to_s } : {}
     end
 
-    def record_event!(transition_from:, transition_to:, event_type:, metadata:)
+    def record_event!(transition_from:, transition_to:, event_type:, metadata:, audit_actor:)
       meta =
         if metadata.is_a?(Hash) && metadata.present?
           metadata.deep_stringify_keys
@@ -214,9 +259,11 @@ module Leave
           {}
         end
 
+      meta["actor_kind"] = SYSTEM_ACTOR_KIND if audit_actor.nil?
+
       LeaveRequestApprovalEvent.create!(
         leave_request: leave_request,
-        actor: actor,
+        actor: audit_actor,
         occurred_at: Time.current,
         transition_from: transition_from,
         transition_to: transition_to,

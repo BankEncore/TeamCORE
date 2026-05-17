@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_17_140002) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_17_140003) do
   create_table "agencies", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
     t.string "code", null: false
     t.datetime "created_at", null: false
@@ -405,7 +405,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_17_140002) do
   end
 
   create_table "leave_request_approval_events", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
-    t.bigint "actor_id", null: false
+    t.bigint "actor_id"
     t.datetime "created_at", null: false
     t.string "event_type", null: false
     t.bigint "leave_request_id", null: false
@@ -453,6 +453,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_17_140002) do
   create_table "leave_types", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
     t.boolean "active", default: true, null: false
     t.bigint "agency_id", null: false
+    t.string "approval_policy", default: "manual", null: false
     t.boolean "balance_tracked", default: false, null: false
     t.string "code", null: false
     t.datetime "created_at", null: false

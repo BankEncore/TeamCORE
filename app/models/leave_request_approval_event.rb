@@ -6,7 +6,7 @@ class LeaveRequestApprovalEvent < ApplicationRecord
   attribute :metadata, :json, default: -> { {} }
 
   belongs_to :leave_request, inverse_of: :leave_request_approval_events
-  belongs_to :actor, class_name: "User", inverse_of: :leave_request_approval_events_as_actor
+  belongs_to :actor, class_name: "User", inverse_of: :leave_request_approval_events_as_actor, optional: true
 
   validates :occurred_at, :transition_from, :transition_to, :event_type, presence: true
   validates :event_type, inclusion: { in: EVENT_TYPES }

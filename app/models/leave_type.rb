@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class LeaveType < ApplicationRecord
+  APPROVAL_POLICIES = %w[manual auto].freeze
+
   belongs_to :agency, inverse_of: :leave_types
   belongs_to :payroll_earning_code, optional: true
   has_many :leave_requests, dependent: :restrict_with_exception
@@ -8,6 +10,7 @@ class LeaveType < ApplicationRecord
 
   validates :code, :name, presence: true
   validates :code, uniqueness: { scope: :agency_id }
+  validates :approval_policy, inclusion: { in: APPROVAL_POLICIES }
   validate :paid_leave_must_map_earning_code
 
   scope :active, -> { where(active: true) }
@@ -37,6 +40,7 @@ class LeaveType < ApplicationRecord
         paid: row[:paid],
         balance_tracked: row[:balance_tracked],
         active: true,
+        approval_policy: "manual",
         payroll_earning_code_id: pec_id
       )
     end
