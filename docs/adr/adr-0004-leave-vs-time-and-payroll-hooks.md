@@ -17,6 +17,8 @@ Without explicit boundaries:
 - Balance tables acquire liability-accounting semantics prematurely.
 - Pay-period closure or overtime logic absorbs leave incorrectly.
 
+TC-26 does not replace the TC-25 leave-request service façade. TC-26 defines the approval-policy contract consumed by TC-25 leave workflows: who may approve, which leave types auto-approve, how approval authority is interpreted, and which rules must be enforced before leave becomes approved operational leave.
+
 ---
 
 ## Decision
@@ -111,5 +113,6 @@ Use a small presenter or helper so Team360 and admin queues share labels without
 
 - [ADR-0002 — Payroll period and workweek foundations](./adr-0002-payroll-period-and-workweek-foundations)
 - [ADR-0003 — Employee time capture and timesheet approval boundaries](./adr-0003-employee-time-and-timesheet-approval-boundaries.md)
+- [ADR-0005 — System actors in workflow audit events](./adr-0005-system-actors-in-workflow-audit-events.md)
 - [Phase 5 workflows — leave](../roadmap/phase-5-payroll-time-leave/phase-5--workflows.md)
 - [Phase 5 downstream dependency contracts](../roadmap/phase-5-payroll-time-leave/phase-5-tc-23-a-downstream-dependency-contracts.md)
