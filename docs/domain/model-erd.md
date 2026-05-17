@@ -1,10 +1,12 @@
 # TeamCORE — model ERD (Active Record)
 
-This diagram reflects **persisted models** under `app/models/` as of the current codebase. It is the engineering counterpart to the conceptual [domain map](../product/domain-map.md). **Workforce financial** tables (compensation / revenue / commission / draw, contractor charges, contractor settlement) appear in the same diagram (edges from **Engagement** / **Agency**). Domains such as full payroll execution, time, and leave **do not** have dedicated tables yet unless they appear here.
+This diagram reflects **persisted models** under `app/models/` as of the current codebase. It is the engineering counterpart to the conceptual [domain map](../product/domain-map.md). **Workforce financial** tables (compensation / revenue / commission / draw, contractor charges, contractor settlement) appear in the same diagram (edges from **Engagement** / **Agency**). **Phase 5 payroll calendar foundations (TC‑23a)** add **AgencyPayrollConfiguration**, **PayrollExport**, and a global **PayrollEarningCode** catalog; employee time and leave persistence remains future work unless listed below.
 
 **Tenancy:** Almost every row is scoped to an **Agency**. **Users** attach to agencies via **UserAgency** (admin / ops identity is separate from **Party** identity).
 
 **Modeling notes (TC-13–TC-19):** [workforce-financial-modeling.md](workforce-financial-modeling.md) (hub) · [compensation-financials.md](compensation-financials.md) · [contractor-charges.md](contractor-charges.md) · [contractor-settlement.md](contractor-settlement.md)
+
+**Payroll calendar / periods (TC‑23a):** [ADR‑0002](../adr/adr-0002-payroll-period-and-workweek-foundations); roadmap notes under `docs/roadmap/phase-5-payroll-time-leave/`.
 
 ---
 
@@ -25,6 +27,7 @@ erDiagram
   Agency ||--o{ DocumentRequirement : "rules"
   Agency ||--o{ DocumentRecord : "artifacts"
   Agency ||--o{ UserAgency : "admin users"
+  Agency ||--|| AgencyPayrollConfiguration : "payroll calendar TC-23a"
 
   User ||--o{ UserAgency : ""
   UserAgency }o--|| Agency : ""
@@ -79,6 +82,10 @@ erDiagram
 
   PayPeriod ||--o{ RevenueInput : "compensation"
   PayPeriod ||--o{ CommissionCalculation : "compensation"
+  PayPeriod ||--o{ PayrollExport : "export tracking TC-23a"
+  PayPeriod }o--o| User : "closed_by"
+
+  PayrollExport }o--o| User : "exported_by"
 
   RevenueInput ||--o{ CommissionCalculation : "compensation"
   CommissionCalculation ||--o{ DrawBalanceEvent : "compensation"
@@ -122,6 +129,13 @@ erDiagram
   PartyRelationship }o--|| Agency : ""
   PartyRelationship }o--|| Party : "source_party"
   PartyRelationship }o--|| Party : "target_party"
+
+  PayrollEarningCode {
+    string code
+    string category
+    string name
+    int position
+  }
 ```
 
 ---
@@ -130,7 +144,7 @@ erDiagram
 
 | Conceptual domain | Primary models |
 | --- | --- |
-| **Agency** | `Agency`, `UserAgency` |
+| **Agency** | `Agency`, `UserAgency`, `AgencyPayrollConfiguration` |
 | **Organization (structure)** | `Department`, `Location`, `Team` |
 | **Party / identity** | `Party`, `PersonProfile`, `OrganizationProfile`, `PartyContactMethod` |
 | **Party graph** | `PartyRelationship` (same agency; source/target parties) |
@@ -139,12 +153,13 @@ erDiagram
 | **Placement & supervision** | `EngagementOrganizationPlacement`, `EngagementSupervisionAssignment` |
 | **Documents & compliance** | `DocumentType`, `DocumentRequirement`, `DocumentRecord` |
 | **Compensation (catalog & assignment)** | `CompensationPlan`, `CompensationPlanAssignment` |
-| **Pay periods & revenue** | `PayPeriod`, `RevenueInput` |
+| **Pay periods & revenue** | `PayPeriod`, `RevenueInput`, `PayrollExport` |
+| **Payroll earning vocabulary** | `PayrollEarningCode` (global seeded catalog; no agency FK) |
 | **Commission & draw** | `CommissionCalculation`, `CommissionDrawBalance`, `DrawBalanceEvent` |
 | **Contractor charges** | `ContractorCharge`, `ContractorChargeWaiver`, `ContractorChargeRecovery` |
 | **Contractor settlement** | `ContractorSettlementRun`, `ContractorSettlementLine`, join tables, `ContractorSettlementRunEvent` |
 | **Team360 / reporting** | No Team360 table — read models aggregate domain tables |
-| **Admin auth** | `User` (+ `has_secure_password`), `UserAgency` |
+| **Admin auth** | `User` (+ `has_secure_password`), `UserAgency`; **Pay period lifecycle** may reference `User` via `PayPeriod#closed_by` and `PayrollExport#exported_by` |
 
 ---
 
@@ -154,6 +169,8 @@ erDiagram
 - **DocumentRecord** requires at least one of **team_member** or **engagement**; **party** is optional; agency must align with those rows.
 - **EngagementSupervisionAssignment** (MVP): supervisor engagement must be **active** **employee**.
 - **Department** hierarchy: optional parent must be top-level (no deep trees in MVP).
+- **PayPeriod (TC‑23a):** at most one non‑overlapping date range per agency; persisted `start_on`/`end_on` cannot change after save; **closed** periods reject updates (`status_was == closed`). Closure validation overrides apply only to pending stub validators — permissions and immutability still enforced.
+- **AgencyPayrollConfiguration:** one row per agency (single payroll frequency MVP); weekly/biweekly/monthly require `pay_schedule_anchor_on`; semimonthly halves ignore anchor.
 - **Workforce financials:** Minimum commission draw recovery is **employee-only**; **contractor settlement** applies to `individual_contractor` and `contractor_organization` engagements only (**subcontractor** excluded in MVP). Net contractor settlement is non-negative in MVP. Hybrid settlement lineage: lines store totals plus join rows to revenue, commission calcs, and charge recoveries.
 
 ---

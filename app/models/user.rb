@@ -10,6 +10,10 @@ class User < ApplicationRecord
   has_many :draw_balance_events, foreign_key: :actor_id, inverse_of: :actor, dependent: :nullify
   has_many :contractor_charge_waivers, foreign_key: :actor_id, inverse_of: :actor, dependent: :restrict_with_exception
   has_many :contractor_charge_recoveries, foreign_key: :actor_id, inverse_of: :actor, dependent: :nullify
+  has_many :closed_pay_periods, class_name: "PayPeriod", foreign_key: :closed_by_id, inverse_of: :closed_by,
+    dependent: :restrict_with_exception
+  has_many :exported_payroll_exports, class_name: "PayrollExport", foreign_key: :exported_by_id,
+    inverse_of: :exported_by, dependent: :nullify
 
   normalizes :email, with: ->(e) { e.strip.downcase }
 

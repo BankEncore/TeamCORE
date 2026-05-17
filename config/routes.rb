@@ -39,7 +39,14 @@ Rails.application.routes.draw do
     resources :team_members, only: %i[index show new create edit update] do
       resource :team360, only: %i[show], controller: "team360"
     end
-    resources :pay_periods
+    resources :pay_periods, only: %i[index show edit update] do
+      collection do
+        post :generate
+      end
+      member do
+        post :close
+      end
+    end
     resources :compensation_plans
     resources :contractor_charges, only: %i[index], controller: "contractor_charge_queue"
     resources :contractor_settlement_runs, only: %i[index show new create] do

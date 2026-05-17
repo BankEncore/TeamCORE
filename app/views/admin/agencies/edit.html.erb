@@ -14,5 +14,41 @@
     <%= f.label :status, class: "block text-sm font-medium text-slate-700 mb-1" %>
     <%= f.select :status, LifecycleStatusable::STATUSES, {}, class: "w-full border border-slate-300 rounded px-3 py-2" %>
   </div>
+
+  <% cfg = f.object.agency_payroll_configuration %>
+  <%= f.fields_for :agency_payroll_configuration, cfg do |pf| %>
+    <fieldset class="border border-slate-200 rounded p-4 mb-4">
+      <legend class="text-sm font-semibold px-1">Payroll calendar (agency-wide)</legend>
+      <p class="text-xs text-slate-500 mb-3">
+        One payroll frequency per agency in MVP. Operational dates use the payroll timezone (ADR‑0002).
+      </p>
+      <%= pf.hidden_field :id if cfg&.persisted? %>
+      <div class="mb-3">
+        <%= pf.label :payroll_frequency, class: "block text-sm font-medium text-slate-700 mb-1" %>
+        <%= pf.select :payroll_frequency,
+            AgencyPayrollConfiguration::FREQUENCIES.map { |fr| [ fr.humanize, fr ] },
+            {},
+            class: "w-full border border-slate-300 rounded px-3 py-2" %>
+      </div>
+      <div class="mb-3">
+        <%= pf.label :workweek_starts_on, "Workweek starts on (0=Sunday … 6=Saturday)", class: "block text-sm font-medium text-slate-700 mb-1" %>
+        <%= pf.number_field :workweek_starts_on, min: 0, max: 6, step: 1, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+      </div>
+      <div class="mb-3">
+        <%= pf.label :payroll_timezone, "Payroll IANA timezone", class: "block text-sm font-medium text-slate-700 mb-1" %>
+        <%= pf.text_field :payroll_timezone, class: "w-full border border-slate-300 rounded px-3 py-2", placeholder: "America/New_York" %>
+      </div>
+      <div class="mb-3">
+        <%= pf.label :weekly_overtime_threshold_hours, class: "block text-sm font-medium text-slate-700 mb-1" %>
+        <%= pf.text_field :weekly_overtime_threshold_hours, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+      </div>
+      <div class="mb-1">
+        <%= pf.label :pay_schedule_anchor_on, "Pay schedule anchor date (required except semimonthly)", class: "block text-sm font-medium text-slate-700 mb-1" %>
+        <%= pf.date_field :pay_schedule_anchor_on, class: "w-full border border-slate-300 rounded px-3 py-2" %>
+      </div>
+      <p class="text-xs text-slate-500">Weekly/biweekly/monthly periods derive from this anchor; semimonthly halves ignore it.</p>
+    </fieldset>
+  <% end %>
+
   <%= f.submit "Save", class: "rounded bg-slate-900 text-white px-4 py-2 text-sm cursor-pointer" %>
 <% end %>

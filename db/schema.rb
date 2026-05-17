@@ -20,6 +20,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_16_120000) do
     t.index ["code"], name: "index_agencies_on_code", unique: true
   end
 
+  create_table "agency_payroll_configurations", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.bigint "agency_id", null: false
+    t.datetime "created_at", null: false
+    t.date "pay_schedule_anchor_on"
+    t.string "payroll_frequency", null: false
+    t.string "payroll_timezone", default: "Etc/UTC", null: false
+    t.datetime "updated_at", null: false
+    t.decimal "weekly_overtime_threshold_hours", precision: 8, scale: 2, default: "40.0", null: false
+    t.integer "workweek_starts_on", default: 1, null: false
+    t.index ["agency_id"], name: "index_agency_payroll_configurations_on_agency_id", unique: true
+  end
+
   create_table "commission_calculations", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
     t.bigint "agency_id", null: false
     t.bigint "calculated_commission_cents", default: 0, null: false
@@ -431,13 +443,44 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_16_120000) do
 
   create_table "pay_periods", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
     t.bigint "agency_id", null: false
+    t.datetime "closed_at"
+    t.bigint "closed_by_id"
     t.datetime "created_at", null: false
     t.date "end_on", null: false
     t.string "label"
+    t.string "payroll_frequency", default: "legacy", null: false
     t.date "start_on", null: false
+    t.string "status", default: "open", null: false
     t.datetime "updated_at", null: false
     t.index ["agency_id", "start_on", "end_on"], name: "index_pay_periods_on_agency_and_bounds"
     t.index ["agency_id"], name: "index_pay_periods_on_agency_id"
+    t.index ["closed_by_id"], name: "index_pay_periods_on_closed_by_id"
+  end
+
+  create_table "payroll_earning_codes", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.string "category", null: false
+    t.string "code", null: false
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.integer "position", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.index ["code"], name: "index_payroll_earning_codes_on_code", unique: true
+  end
+
+  create_table "payroll_exports", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "export_sequence", null: false
+    t.datetime "exported_at", null: false
+    t.bigint "exported_by_id"
+    t.string "file_format", null: false
+    t.boolean "is_final", default: false, null: false
+    t.text "notes"
+    t.bigint "pay_period_id", null: false
+    t.string "storage_reference"
+    t.datetime "updated_at", null: false
+    t.index ["exported_by_id"], name: "index_payroll_exports_on_exported_by_id"
+    t.index ["pay_period_id", "export_sequence"], name: "index_payroll_exports_on_pay_period_and_sequence", unique: true
+    t.index ["pay_period_id"], name: "index_payroll_exports_on_pay_period_id"
   end
 
   create_table "person_profiles", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
@@ -520,6 +563,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_16_120000) do
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
+  add_foreign_key "agency_payroll_configurations", "agencies"
   add_foreign_key "commission_calculations", "agencies"
   add_foreign_key "commission_calculations", "engagements"
   add_foreign_key "commission_calculations", "pay_periods"
@@ -582,6 +626,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_16_120000) do
   add_foreign_key "party_relationships", "parties", column: "source_party_id"
   add_foreign_key "party_relationships", "parties", column: "target_party_id"
   add_foreign_key "pay_periods", "agencies"
+  add_foreign_key "pay_periods", "users", column: "closed_by_id"
+  add_foreign_key "payroll_exports", "pay_periods"
+  add_foreign_key "payroll_exports", "users", column: "exported_by_id"
   add_foreign_key "person_profiles", "parties"
   add_foreign_key "revenue_inputs", "agencies"
   add_foreign_key "revenue_inputs", "engagements"

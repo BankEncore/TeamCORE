@@ -67,20 +67,14 @@ class AdminPhase4FinancialsTest < ActionDispatch::IntegrationTest
     assert ContractorSettlementRunEvent.exists?(contractor_settlement_run_id: run2.id, event_type: "voided")
   end
 
-  test "pay periods index and create" do
+  test "pay periods index and generate" do
     get admin_pay_periods_path
     assert_response :success
 
-    assert_difference -> { PayPeriod.where(agency_id: @agency.id).count }, +1 do
-      post admin_pay_periods_path, params: {
-        pay_period: {
-          label: "Adm P4 PP",
-          start_on: "2024-06-01",
-          end_on: "2024-06-15"
-        }
-      }
+    assert_changes -> { PayPeriod.where(agency_id: @agency.id).count }, :positive do
+      post generate_admin_pay_periods_path, params: { horizon_months_ahead: 6, horizon_months_back: 6 }
     end
-    assert_redirected_to %r{/admin/pay_periods/\d+}
+    assert_redirected_to admin_pay_periods_path
   end
 
   test "compensation plans index and create" do
@@ -144,7 +138,7 @@ class AdminPhase4FinancialsTest < ActionDispatch::IntegrationTest
   end
 
   test "admin cannot re-finalize commission calculation" do
-    pp = PayPeriod.create!(agency: @agency, start_on: Date.new(2024, 7, 20), end_on: Date.new(2024, 7, 31), label: "Jul-2b")
+    pp = PayPeriod.create!(agency: @agency, start_on: Date.new(2024, 8, 1), end_on: Date.new(2024, 8, 15), label: "Aug-1")
     rev = RevenueInput.create!(
       agency: @agency,
       engagement: @ee[:engagement],
@@ -165,7 +159,7 @@ class AdminPhase4FinancialsTest < ActionDispatch::IntegrationTest
   end
 
   test "calculate commission blocked after admin finalizes" do
-    pp = PayPeriod.create!(agency: @agency, start_on: Date.new(2024, 7, 22), end_on: Date.new(2024, 7, 31), label: "Jul-2c")
+    pp = PayPeriod.create!(agency: @agency, start_on: Date.new(2024, 8, 16), end_on: Date.new(2024, 8, 31), label: "Aug-2")
     rev = RevenueInput.create!(
       agency: @agency,
       engagement: @ee[:engagement],
