@@ -29,8 +29,9 @@ Companion references:
 - `overview.md`
 - `employee-contractor-applicability-matrix.md`
 - `ADR-0002: Payroll period and workweek foundations` ([adr-0002-payroll-period-and-workweek-foundations](../../adr/adr-0002-payroll-period-and-workweek-foundations))
+- `ADR-0003: Employee time capture and timesheet approval boundaries (TC-23 / TC-24)` ([adr-0003-employee-time-and-timesheet-approval-boundaries.md](../../adr/adr-0003-employee-time-and-timesheet-approval-boundaries.md))
 
-**Alignment:** MVP employee time is **daily-hours-based** only (canonical daily worked-hours entries). **Timeclock/punch capture** and related attendance enforcement are **out of MVP** and listed under deferrals; see ADR‑0002 revision note.
+**Alignment:** MVP employee time is **daily-hours-based** only (canonical daily worked-hours entries). **Timeclock/punch capture** and related attendance enforcement are **out of MVP** and listed under deferrals; see ADR‑0002 revision note. **Submission vs timesheet approval ownership**, **locking norms**, and **projected vs approved overtime** are normative in **ADR‑0003**.
 
 ---
 

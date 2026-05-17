@@ -352,6 +352,7 @@ The following are intentionally deferred:
 - TC-23 — Employee Time Tracking MVP
 - TC-24 — Employee Timesheet Approval
 - TC-27 — Payroll Input Workflow
+- [ADR-0003 — Employee time capture and timesheet approval boundaries (TC-23 / TC-24)](./adr-0003-employee-time-and-timesheet-approval-boundaries.md) — submission vs approval ownership, projected vs approved overtime
 - `mvp-scope.md`
 - `overview.md`
 - `employee-contractor-applicability-matrix.md`
