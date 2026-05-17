@@ -11,6 +11,8 @@
 #
 # Run: bin/rails db:seed   (inside Docker per project README if applicable)
 
+load Rails.root.join("db/seeds/payroll_catalog.rb")
+
 agency = Agency.find_or_initialize_by(code: "example")
 agency.assign_attributes(name: "Example Agency", status: "active")
 agency.save!
