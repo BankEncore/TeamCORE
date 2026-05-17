@@ -47,6 +47,13 @@ Rails.application.routes.draw do
         post :close
       end
     end
+    resources :weekly_timesheets, only: %i[index show] do
+      member do
+        post :approve
+        post :send_back
+        post :reopen
+      end
+    end
     resources :compensation_plans
     resources :contractor_charges, only: %i[index], controller: "contractor_charge_queue"
     resources :contractor_settlement_runs, only: %i[index show new create] do

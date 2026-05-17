@@ -1,6 +1,6 @@
 # TeamCORE — model ERD (Active Record)
 
-This diagram reflects **persisted models** under `app/models/` as of the current codebase. It is the engineering counterpart to the conceptual [domain map](../product/domain-map.md). **Workforce financial** tables (compensation / revenue / commission / draw, contractor charges, contractor settlement) appear in the same diagram (edges from **Engagement** / **Agency**). **Phase 5 payroll calendar foundations (TC‑23a)** add **AgencyPayrollConfiguration**, **PayrollExport**, and a global **PayrollEarningCode** catalog. **TC‑23** adds **DailyWorkedHour** (canonical one row per engagement per work date) and **WeeklyTimesheet** (weekly workflow container; approval actor FKs on **User**).
+This diagram reflects **persisted models** under `app/models/` as of the current codebase. It is the engineering counterpart to the conceptual [domain map](../product/domain-map.md). **Workforce financial** tables (compensation / revenue / commission / draw, contractor charges, contractor settlement) appear in the same diagram (edges from **Engagement** / **Agency**). **Phase 5 payroll calendar foundations (TC‑23a)** add **AgencyPayrollConfiguration**, **PayrollExport**, and a global **PayrollEarningCode** catalog. **TC‑23** adds **DailyWorkedHour** (canonical one row per engagement per work date) and **WeeklyTimesheet** (weekly workflow container; **`approved_by`** snapshot on **User**). **Weekly timesheet approval audit** is **`WeeklyTimesheetApprovalEvent`** (append-only transitions).
 
 **Tenancy:** Almost every row is scoped to an **Agency**. **Users** attach to agencies via **UserAgency** (admin / ops identity is separate from **Party** identity).
 
@@ -65,10 +65,12 @@ erDiagram
   Engagement ||--o{ ContractorCharge : "charges"
   Engagement ||--o{ ContractorSettlementLine : "settlement"
   Engagement ||--o{ DailyWorkedHour : "TC-23 daily worked hours"
-  Engagement ||--o{ WeeklyTimesheet : "TC-23 weekly workflow"
+  Engagement ||--o{ WeeklyTimesheet : "weekly workflow"
 
   WeeklyTimesheet }o--o| User : "approved_by"
-  WeeklyTimesheet }o--o| User : "rejected_by"
+  WeeklyTimesheet ||--o{ WeeklyTimesheetApprovalEvent : "approval audit"
+
+  WeeklyTimesheetApprovalEvent }o--|| User : "actor"
 
   Agency ||--o{ PayPeriod : "compensation"
   Agency ||--o{ CompensationPlan : "compensation"

@@ -21,6 +21,11 @@ module Admin
           .where("contractor_charges.due_on < ?", today)
           .count
       @draft_settlement_runs_count = ContractorSettlementRun.where(agency_id: aid, status: "draft").count
+      @pending_weekly_timesheets_count =
+        WeeklyTimesheet
+          .joins(:engagement)
+          .where(engagements: { agency_id: aid }, status: "submitted")
+          .count
     end
   end
 end

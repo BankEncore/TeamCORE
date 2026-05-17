@@ -221,7 +221,7 @@ Employee submits timesheet
 ↓
 Supervisor reviews
 ↓
-Supervisor approves or rejects
+Supervisor approves or sends back for correction (returns sheet to draft)
 ```
 
 ---
@@ -462,12 +462,14 @@ MVP intentionally avoids:
 
 Periods should not close when:
 
-* missing employee timesheets exist
-* pending approvals exist
+* an **approved** weekly timesheet is missing for any **workweek intersecting** the pay period (per active employee engagement)
+* **pending approvals** exist (**submitted** timesheets overlapping the period — operational backlog signal)
 
 Administrative override is allowed.
 
-**Override semantics:** override bypasses **closure validation checks only** (e.g. missing timesheets / pending approvals). It does **not** bypass authorization to close, audit expectations, or immutability rules for closed periods (ADR‑0002).
+**Override semantics:** override bypasses **closure validation checks only** (e.g. unapproved / missing approved timesheets / pending approvals). It does **not** bypass authorization to close, audit expectations, or immutability rules for closed periods (ADR‑0002).
+
+**Note:** Early Phase 5 drafts gated closure on **row existence** only; the normative rule is **approved** weekly timesheets for each intersecting workweek so payroll preparation reflects payroll-eligible worked time only.
 
 ---
 

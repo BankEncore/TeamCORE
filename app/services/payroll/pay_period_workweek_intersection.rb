@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 module Payroll
-  # Enumerates civil workweek ranges (Mon–Sun style bounds per ADR-0002) that intersect a pay period.
-  module PayPeriodWorkweeks
+  # Single place for pay-period ∩ agency workweek iteration (ADR-0002 civil dates).
+  module PayPeriodWorkweekIntersection
     module_function
 
     # @yieldparam week_start [Date]

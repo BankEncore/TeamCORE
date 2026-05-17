@@ -59,7 +59,8 @@ module Team360
         document_types_by_id: doc_types_by_id,
         records_by_id: records_by_id,
         subcontractor_rows: build_subcontractor_rows(party),
-        workforce_financial: build_workforce_financial(focused)
+        workforce_financial: build_workforce_financial(focused),
+        weekly_timesheets_panel: build_weekly_timesheets_panel(focused)
       )
     end
 
@@ -291,6 +292,46 @@ module Team360
       end
 
       out
+    end
+
+    def build_weekly_timesheets_panel(focused_engagement)
+      return nil unless focused_engagement&.employee_path?
+
+      focused_engagement
+        .weekly_timesheets
+        .includes(:weekly_timesheet_approval_events)
+        .order(week_start_on: :desc)
+        .limit(16)
+        .map { |sheet| serialize_weekly_timesheet_panel_row(sheet) }
+    end
+
+    def serialize_weekly_timesheet_panel_row(sheet)
+      ot = Payroll::TimesheetOvertimePresenter.for_timesheet(sheet)
+      events =
+        sheet.weekly_timesheet_approval_events.recent_first.limit(8).map do |ev|
+          {
+            id: ev.id,
+            event_type: ev.event_type,
+            transition_from: ev.transition_from,
+            transition_to: ev.transition_to,
+            occurred_at: ev.occurred_at,
+            actor_email: ev.actor&.email,
+            reason: ev.metadata_hash["reason"]
+          }
+        end
+
+      {
+        id: sheet.id,
+        week_start_on: sheet.week_start_on,
+        week_end_on: sheet.week_end_on,
+        status: sheet.status,
+        submitted_at: sheet.submitted_at,
+        approved_at: sheet.approved_at,
+        regular_hours: ot.regular_hours.to_s("F"),
+        overtime_hours: ot.overtime_hours.to_s("F"),
+        overtime_visibility: ot.visibility_mode.to_s,
+        approval_events: events
+      }
     end
 
     def build_subcontractor_rows(party)

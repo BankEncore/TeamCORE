@@ -18,7 +18,7 @@ module Payroll
       end
     end
 
-    # MVP (ADR-0003): missing means no WeeklyTimesheet row for each workweek intersecting the period.
+    # Each intersecting workweek must have an approved weekly timesheet for payroll eligibility.
     class MissingTimesheets
       def self.call(agency:, pay_period:)
         violations = []
@@ -27,12 +27,16 @@ module Payroll
         Engagement.where(agency_id: agency.id, relationship_type: "employee", status: "active")
           .where("start_on <= ?", pay_period.end_on)
           .find_each do |eng|
-          Payroll::PayPeriodWorkweeks.each_intersecting(pay_period, workweek_starts_on: config.workweek_starts_on) do |week_start, _week_end|
-            exists = WeeklyTimesheet.exists?(engagement_id: eng.id, week_start_on: week_start)
-            next if exists
+          Payroll::PayPeriodWorkweekIntersection.each_intersecting(pay_period, workweek_starts_on: config.workweek_starts_on) do |week_start, _week_end|
+            approved = WeeklyTimesheet.exists?(
+              engagement_id: eng.id,
+              week_start_on: week_start,
+              status: "approved"
+            )
+            next if approved
 
             violations <<
-              "Missing weekly timesheet for engagement #{eng.id} (#{week_start.iso8601})"
+              "Weekly timesheet not approved for engagement #{eng.id} (workweek starting #{week_start.iso8601})"
           end
         end
 

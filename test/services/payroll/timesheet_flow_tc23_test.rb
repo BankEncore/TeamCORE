@@ -101,7 +101,7 @@ class Payroll::TimesheetFlowTc23Test < ActiveSupport::TestCase
     assert_equal :projected, view.visibility_mode
     assert_operator view.overtime_hours, :>, 0
 
-    Payroll::WeeklyTimesheetApprovalTransitions.new(timesheet: sheet, actor: @admin).approve!
+    Payroll::TimesheetApprovalService.new(weekly_timesheet: sheet.reload, actor: @admin).approve!
     sheet.reload
     view2 = Payroll::TimesheetOvertimePresenter.for_timesheet(sheet)
     assert_equal :approved, view2.visibility_mode

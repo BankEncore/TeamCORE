@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
 class WeeklyTimesheet < ApplicationRecord
-  STATUSES = %w[draft submitted approved rejected].freeze
+  STATUSES = %w[draft submitted approved].freeze
 
   belongs_to :engagement, inverse_of: :weekly_timesheets
   belongs_to :approved_by, class_name: "User", optional: true, inverse_of: :weekly_timesheets_approved
-  belongs_to :rejected_by, class_name: "User", optional: true, inverse_of: :weekly_timesheets_rejected
+  has_many :weekly_timesheet_approval_events, dependent: :restrict_with_exception
 
   validates :week_start_on, :week_end_on, presence: true
   validates :status, inclusion: { in: STATUSES }

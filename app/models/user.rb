@@ -16,8 +16,11 @@ class User < ApplicationRecord
     inverse_of: :exported_by, dependent: :nullify
   has_many :weekly_timesheets_approved, class_name: "WeeklyTimesheet", foreign_key: :approved_by_id,
     inverse_of: :approved_by, dependent: :nullify
-  has_many :weekly_timesheets_rejected, class_name: "WeeklyTimesheet", foreign_key: :rejected_by_id,
-    inverse_of: :rejected_by, dependent: :nullify
+  has_many :weekly_timesheet_approval_events_as_actor,
+    class_name: "WeeklyTimesheetApprovalEvent",
+    foreign_key: :actor_id,
+    inverse_of: :actor,
+    dependent: :restrict_with_exception
 
   normalizes :email, with: ->(e) { e.strip.downcase }
 

@@ -85,11 +85,10 @@ TC-23 does not own:
 
 TC-24 owns:
 
-- approve/reject decisions on timesheets
-- supervisor review workflows (MVP: **direct reports only**; hierarchy engines deferred)
-- approval auditability
-- payroll-eligibility posture
-- approved-worked-time semantics
+- approve / return-for-correction / reopen decisions on weekly timesheets (via a single façade service and append-only approval events)
+- supervisor / payroll review workflows (**MVP posture:** agency-scoped operational users may act; **direct-report-only routing is not enforced** until supervisor identity mapping hardens — **TC-29**)
+- approval auditability (persisted transition lineage on events)
+- payroll-eligibility posture (approved worked time only)
 - approved overtime semantics (what counts as payroll-eligible OT **after** approval)
 - notifications/escalation workflows (incrementally)
 
@@ -196,47 +195,23 @@ Daily rows are operationally editable according to parent timesheet locking rule
 
 Timesheets own workflow state.
 
-##### TC-23 timesheet states
+##### Persisted statuses (MVP)
+
+Only three values are persisted on **`WeeklyTimesheet.status`**:
 
 | Status | Meaning |
 | --- | --- |
-| `draft` | Employee/supervisor may enter or adjust hours per policy. |
-| `submitted` | Employee submitted timesheet for supervisor review. |
+| `draft` | Hours may be edited subject to locking rules; sheet is **not** payroll-eligible. |
+| `submitted` | Submitted for review; employee editing locked per matrix below. |
+| `approved` | Worked hours are payroll-eligible; **approved** overtime visibility applies. |
 
-##### TC-24 timesheet states
-
-| Status | Meaning |
-| --- | --- |
-| `approved` | Worked hours become payroll-eligible approved worked time. |
-| `rejected` | Supervisor rejected timesheet for correction and resubmission. |
-
-##### Rejection posture
-
-Rejected timesheets return to:
-
-```text
-draft
-```
-
-for correction and later resubmission.
-
-This intentionally avoids ambiguous “submitted but rejected” posture.
+**Return for correction** (historically “reject” / **send-back**): **not** a steady persisted status. The sheet moves **`submitted` → `draft`** so the employee can correct and resubmit. Intent is captured only on append-only **`WeeklyTimesheetApprovalEvent`** rows (`sent_back`, `returned_for_correction`, …) including optional `metadata` (e.g. reason).
 
 ##### Reopen posture
 
-`reopened` is not required as a persisted steady-state status.
+**Reopen** is **`approved` → `draft`**, audited (`event_type`: **`reopened`**). Snapshot columns **`approved_at`** / **`approved_by_id`** are cleared. Until the sheet is **submitted and approved again**, downstream payroll preparation **must not** treat prior approval timestamps as authoritative — reopened sheets are excluded from approved aggregates.
 
-**Reopen** is a controlled workflow transition **from** `approved` **or** `rejected` **back to**:
-
-```text
-draft
-```
-
-Reopen authorization and auditability belong to TC-24.
-
-Exact implementation mechanics remain implementation-specific but must remain deterministic and documented.
-
-**Send-back from `submitted`:** Moving from `submitted` to `draft` so the employee can correct hours uses TC-24 **reject** or an explicit **send-back** action (audit-logged). In this ADR, the term **reopen** refers to transitions **from** `approved` or `rejected` **to** `draft`, not to send-back from `submitted`.
+**Send-back from `submitted`:** **`submitted` → `draft`** (same persisted outcome as return-for-correction); distinct from reopen, which originates from **`approved`**.
 
 ---
 
@@ -247,9 +222,8 @@ Rules apply to daily hour rows associated with the timesheet workweek.
 | Timesheet status | Employee | Direct supervisor | Payroll / admin |
 | --- | --- | --- | --- |
 | `draft` | Edit hours | Edit hours | Edit hours |
-| `submitted` | Locked | Edit hours; may **reject**, **send-back to draft**, or approve per TC-24 policy | Edit / override per capability |
+| `submitted` | Locked | Edit hours; may **send back to draft**, or approve per policy | Edit / override per capability |
 | `approved` | Locked | No silent edits; changes require **reopen** workflow (→ `draft`) | Override / reopen per capability |
-| `rejected` | Edit hours and resubmit | Edit hours | Edit hours |
 
 ---
 
@@ -269,7 +243,7 @@ draft
 
 unless:
 
-- explicitly **rejected** / **sent back**, **or**
+- explicitly **returned for correction** / **sent back** to `draft`, **or**
 - explicitly transitioned via another TC-24-documented action
 
 This preserves operational review continuity during supervisor correction workflows.

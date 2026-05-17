@@ -464,13 +464,64 @@
         <% end %>
       <% end %>
 
+      <% unless @snapshot.weekly_timesheets_panel.nil? %>
+        <section class="tc-panel">
+          <div class="tc-panel__header">
+            <div class="tc-panel__title">Weekly timesheets</div>
+            <p class="tc-panel__subtitle">
+              Read-only summary for the focused employee engagement.
+              <%= link_to "Pending approvals queue", admin_weekly_timesheets_path, class: "#{tc_link_classes} text-xs ml-1" %>
+            </p>
+          </div>
+          <div class="tc-panel__body text-sm space-y-3">
+            <% if @snapshot.weekly_timesheets_panel.empty? %>
+              <p class="text-slate-600">No weekly timesheets recorded yet.</p>
+            <% end %>
+            <% @snapshot.weekly_timesheets_panel.each do |row| %>
+              <div class="border rounded-md p-3" style="border-color: var(--tc-border);">
+                <div class="flex flex-wrap justify-between gap-2">
+                  <span class="font-medium">
+                    <%= row[:week_start_on] %> – <%= row[:week_end_on] %>
+                  </span>
+                  <span class="font-mono text-xs"><%= row[:status] %></span>
+                </div>
+                <p class="text-xs mt-1 text-slate-600">
+                  REG <%= row[:regular_hours] %> h · OT <%= row[:overtime_hours] %> h
+                  · <strong><%= row[:overtime_visibility] %></strong> overtime visibility
+                </p>
+                <% if row[:submitted_at].present? %>
+                  <p class="text-xs text-slate-600">Submitted <%= row[:submitted_at].in_time_zone.to_date %></p>
+                <% end %>
+                <% if row[:approved_at].present? %>
+                  <p class="text-xs text-slate-600">Approved <%= row[:approved_at].in_time_zone.to_date %></p>
+                <% end %>
+                <% if row[:approval_events].present? %>
+                  <p class="text-xs font-medium mt-2">Recent approval activity</p>
+                  <ul class="list-none text-xs space-y-0.5 p-0 m-0 font-mono text-slate-600">
+                    <% row[:approval_events].each do |ev| %>
+                      <li>
+                        <%= ev[:occurred_at].in_time_zone.to_fs(:db) %>
+                        · <%= ev[:event_type] %>
+                        · <%= ev[:transition_from] %> → <%= ev[:transition_to] %>
+                        <% if ev[:reason].present? %> — <%= ev[:reason] %><% end %>
+                      </li>
+                    <% end %>
+                  </ul>
+                <% end %>
+                <%= link_to "Open in admin", admin_weekly_timesheet_path(row[:id]), class: "#{tc_link_classes} text-xs mt-2 inline-block" %>
+              </div>
+            <% end %>
+          </div>
+        </section>
+      <% end %>
+
       <% %w[
-        time_leave payroll audit_timeline
+        payroll audit_timeline
       ].each do |key| %>
         <section class="tc-panel tc-panel--muted">
           <div class="tc-panel__header">
             <div class="tc-panel__title"><%= key.humanize %></div>
-            <p class="tc-panel__subtitle">TODO(TC-29) · Deferred domain — placeholder only (TC-3-D07).</p>
+            <p class="tc-panel__subtitle">Deferred domain — placeholder only.</p>
           </div>
           <div class="tc-panel__body text-sm text-slate-600">
             This panel is not implemented in Phase 3.

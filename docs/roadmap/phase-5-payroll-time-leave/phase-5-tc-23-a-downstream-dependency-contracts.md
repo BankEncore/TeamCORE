@@ -43,11 +43,14 @@ Define the operational contracts TC-23a provides to downstream Phase 5 epics.
 ## TC-24 must (MVP):
 
 - standardize on **weekly** timesheets (one **workweek** per timesheet) that **aggregate daily worked-hour entries**
+- persist **three** workflow statuses only on **`WeeklyTimesheet`**: **`draft`**, **`submitted`**, **`approved`**; **return-for-correction** is **`submitted` → `draft`** plus append-only **`WeeklyTimesheetApprovalEvent`** rows (not a long-lived rejected status)
+- enforce pay-period closure completeness: each **intersecting workweek** needs an **`approved`** timesheet for active employee engagements (see **`Payroll::ClosureValidators::MissingTimesheets`**), while **`PendingApprovals`** continues to surface **`submitted`** backlog counts
+- expose supervisor / payroll review queues with operational aging where implemented
 
 ## TC-24 should not redefine:
 
-- payroll closure semantics
-- workweek boundaries
+- pay-period / workweek calendar definitions (**ADR‑0002**)
+- daily worked-hour persistence (**TC‑23**)
 
 ---
 

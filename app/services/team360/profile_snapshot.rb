@@ -15,6 +15,7 @@ module Team360
     :records_by_id,
     :subcontractor_rows,
     :workforce_financial,
+    :weekly_timesheets_panel,
     keyword_init: true
   )
 end

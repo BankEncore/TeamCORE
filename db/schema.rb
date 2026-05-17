@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_17_140000) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_17_140001) do
   create_table "agencies", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
     t.string "code", null: false
     t.datetime "created_at", null: false
@@ -575,14 +575,26 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_17_140000) do
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
+  create_table "weekly_timesheet_approval_events", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.bigint "actor_id", null: false
+    t.datetime "created_at", null: false
+    t.string "event_type", null: false
+    t.text "metadata", size: :long, collation: "utf8mb4_bin"
+    t.datetime "occurred_at", null: false
+    t.string "transition_from", null: false
+    t.string "transition_to", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "weekly_timesheet_id", null: false
+    t.index ["actor_id"], name: "index_weekly_timesheet_approval_events_on_actor_id"
+    t.index ["weekly_timesheet_id", "occurred_at"], name: "index_weekly_timesheet_approval_events_on_sheet_and_time", order: { occurred_at: :desc }
+    t.index ["weekly_timesheet_id"], name: "index_weekly_timesheet_approval_events_on_weekly_timesheet_id"
+  end
+
   create_table "weekly_timesheets", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
     t.datetime "approved_at"
     t.bigint "approved_by_id"
     t.datetime "created_at", null: false
     t.bigint "engagement_id", null: false
-    t.datetime "rejected_at"
-    t.bigint "rejected_by_id"
-    t.text "rejection_reason"
     t.string "status", default: "draft", null: false
     t.datetime "submitted_at"
     t.datetime "updated_at", null: false
@@ -591,7 +603,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_17_140000) do
     t.index ["approved_by_id"], name: "index_weekly_timesheets_on_approved_by_id"
     t.index ["engagement_id", "week_start_on"], name: "index_weekly_timesheets_on_engagement_and_week_start", unique: true
     t.index ["engagement_id"], name: "index_weekly_timesheets_on_engagement_id"
-    t.index ["rejected_by_id"], name: "index_weekly_timesheets_on_rejected_by_id"
   end
 
   add_foreign_key "agency_payroll_configurations", "agencies"
@@ -672,7 +683,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_17_140000) do
   add_foreign_key "teams", "locations"
   add_foreign_key "user_agencies", "agencies"
   add_foreign_key "user_agencies", "users"
+  add_foreign_key "weekly_timesheet_approval_events", "users", column: "actor_id"
+  add_foreign_key "weekly_timesheet_approval_events", "weekly_timesheets"
   add_foreign_key "weekly_timesheets", "engagements"
   add_foreign_key "weekly_timesheets", "users", column: "approved_by_id"
-  add_foreign_key "weekly_timesheets", "users", column: "rejected_by_id"
 end

@@ -12,5 +12,16 @@ module Payroll
     def can_generate_pay_periods?(user:, agency:)
       user.present? && user.agencies.exists?(agency.id)
     end
+
+    # MVP: agency-scoped user may act on weekly timesheet approvals.
+    # Direct supervisor enforcement is deferred until role/identity mapping exists.
+    def can_manage_weekly_timesheet_approval?(user:, weekly_timesheet:)
+      return false if user.blank? || weekly_timesheet.blank?
+
+      agency_id = weekly_timesheet.engagement&.agency_id
+      return false if agency_id.blank?
+
+      user.agencies.exists?(agency_id)
+    end
   end
 end
