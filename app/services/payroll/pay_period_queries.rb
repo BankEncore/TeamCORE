@@ -20,14 +20,12 @@ module Payroll
       pay_period.payroll_exports.includes(:exported_by).ordered
     end
 
-    # Placeholders until timesheets ship (TC‑23 / TC‑24).
-    def missing_timesheets_count(_agency, _pay_period)
-      0
+    def missing_timesheets_count(agency, pay_period)
+      Payroll::ClosureValidators::MissingTimesheets.call(agency:, pay_period:).violations.size
     end
 
-    # Placeholders until approvals ship (TC‑24).
-    def pending_approvals_count(_agency, _pay_period)
-      0
+    def pending_approvals_count(agency, pay_period)
+      Payroll::ClosureValidators::PendingApprovals.call(agency:, pay_period:).violations.size
     end
   end
 end

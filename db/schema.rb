@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_16_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_17_140000) do
   create_table "agencies", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
     t.string "code", null: false
     t.datetime "created_at", null: false
@@ -207,6 +207,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_16_120000) do
     t.datetime "updated_at", null: false
     t.index ["agency_id", "period_start_on", "period_end_on"], name: "index_settlement_runs_on_agency_and_period"
     t.index ["agency_id"], name: "index_contractor_settlement_runs_on_agency_id"
+  end
+
+  create_table "daily_worked_hours", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "engagement_id", null: false
+    t.decimal "hours", precision: 8, scale: 2, null: false
+    t.text "notes"
+    t.integer "source", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.date "work_date", null: false
+    t.index ["engagement_id", "work_date"], name: "index_daily_worked_hours_on_engagement_and_work_date", unique: true
+    t.index ["engagement_id"], name: "index_daily_worked_hours_on_engagement_id"
   end
 
   create_table "departments", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
@@ -563,6 +575,25 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_16_120000) do
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
+  create_table "weekly_timesheets", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.datetime "approved_at"
+    t.bigint "approved_by_id"
+    t.datetime "created_at", null: false
+    t.bigint "engagement_id", null: false
+    t.datetime "rejected_at"
+    t.bigint "rejected_by_id"
+    t.text "rejection_reason"
+    t.string "status", default: "draft", null: false
+    t.datetime "submitted_at"
+    t.datetime "updated_at", null: false
+    t.date "week_end_on", null: false
+    t.date "week_start_on", null: false
+    t.index ["approved_by_id"], name: "index_weekly_timesheets_on_approved_by_id"
+    t.index ["engagement_id", "week_start_on"], name: "index_weekly_timesheets_on_engagement_and_week_start", unique: true
+    t.index ["engagement_id"], name: "index_weekly_timesheets_on_engagement_id"
+    t.index ["rejected_by_id"], name: "index_weekly_timesheets_on_rejected_by_id"
+  end
+
   add_foreign_key "agency_payroll_configurations", "agencies"
   add_foreign_key "commission_calculations", "agencies"
   add_foreign_key "commission_calculations", "engagements"
@@ -593,6 +624,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_16_120000) do
   add_foreign_key "contractor_settlement_run_events", "contractor_settlement_runs"
   add_foreign_key "contractor_settlement_run_events", "users", column: "actor_id"
   add_foreign_key "contractor_settlement_runs", "agencies"
+  add_foreign_key "daily_worked_hours", "engagements"
   add_foreign_key "departments", "agencies"
   add_foreign_key "departments", "departments", column: "parent_department_id"
   add_foreign_key "document_records", "agencies"
@@ -640,4 +672,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_16_120000) do
   add_foreign_key "teams", "locations"
   add_foreign_key "user_agencies", "agencies"
   add_foreign_key "user_agencies", "users"
+  add_foreign_key "weekly_timesheets", "engagements"
+  add_foreign_key "weekly_timesheets", "users", column: "approved_by_id"
+  add_foreign_key "weekly_timesheets", "users", column: "rejected_by_id"
 end

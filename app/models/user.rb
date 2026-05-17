@@ -14,6 +14,10 @@ class User < ApplicationRecord
     dependent: :restrict_with_exception
   has_many :exported_payroll_exports, class_name: "PayrollExport", foreign_key: :exported_by_id,
     inverse_of: :exported_by, dependent: :nullify
+  has_many :weekly_timesheets_approved, class_name: "WeeklyTimesheet", foreign_key: :approved_by_id,
+    inverse_of: :approved_by, dependent: :nullify
+  has_many :weekly_timesheets_rejected, class_name: "WeeklyTimesheet", foreign_key: :rejected_by_id,
+    inverse_of: :rejected_by, dependent: :nullify
 
   normalizes :email, with: ->(e) { e.strip.downcase }
 

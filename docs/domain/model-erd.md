@@ -1,12 +1,12 @@
 # TeamCORE — model ERD (Active Record)
 
-This diagram reflects **persisted models** under `app/models/` as of the current codebase. It is the engineering counterpart to the conceptual [domain map](../product/domain-map.md). **Workforce financial** tables (compensation / revenue / commission / draw, contractor charges, contractor settlement) appear in the same diagram (edges from **Engagement** / **Agency**). **Phase 5 payroll calendar foundations (TC‑23a)** add **AgencyPayrollConfiguration**, **PayrollExport**, and a global **PayrollEarningCode** catalog; employee time and leave persistence remains future work unless listed below.
+This diagram reflects **persisted models** under `app/models/` as of the current codebase. It is the engineering counterpart to the conceptual [domain map](../product/domain-map.md). **Workforce financial** tables (compensation / revenue / commission / draw, contractor charges, contractor settlement) appear in the same diagram (edges from **Engagement** / **Agency**). **Phase 5 payroll calendar foundations (TC‑23a)** add **AgencyPayrollConfiguration**, **PayrollExport**, and a global **PayrollEarningCode** catalog. **TC‑23** adds **DailyWorkedHour** (canonical one row per engagement per work date) and **WeeklyTimesheet** (weekly workflow container; approval actor FKs on **User**).
 
 **Tenancy:** Almost every row is scoped to an **Agency**. **Users** attach to agencies via **UserAgency** (admin / ops identity is separate from **Party** identity).
 
 **Modeling notes (TC-13–TC-19):** [workforce-financial-modeling.md](workforce-financial-modeling.md) (hub) · [compensation-financials.md](compensation-financials.md) · [contractor-charges.md](contractor-charges.md) · [contractor-settlement.md](contractor-settlement.md)
 
-**Payroll calendar / periods (TC‑23a):** [ADR‑0002](../adr/adr-0002-payroll-period-and-workweek-foundations); roadmap notes under `docs/roadmap/phase-5-payroll-time-leave/`.
+**Payroll calendar / periods (TC‑23a):** [ADR‑0002](../adr/adr-0002-payroll-period-and-workweek-foundations); **employee time tracking (TC‑23):** [ADR‑0003](../adr/adr-0003-employee-time-and-timesheet-approval-boundaries.md); roadmap notes under `docs/roadmap/phase-5-payroll-time-leave/`.
 
 ---
 
@@ -64,6 +64,11 @@ erDiagram
   Engagement ||--o{ DrawBalanceEvent : "compensation"
   Engagement ||--o{ ContractorCharge : "charges"
   Engagement ||--o{ ContractorSettlementLine : "settlement"
+  Engagement ||--o{ DailyWorkedHour : "TC-23 daily worked hours"
+  Engagement ||--o{ WeeklyTimesheet : "TC-23 weekly workflow"
+
+  WeeklyTimesheet }o--o| User : "approved_by"
+  WeeklyTimesheet }o--o| User : "rejected_by"
 
   Agency ||--o{ PayPeriod : "compensation"
   Agency ||--o{ CompensationPlan : "compensation"
@@ -154,6 +159,7 @@ erDiagram
 | **Documents & compliance** | `DocumentType`, `DocumentRequirement`, `DocumentRecord` |
 | **Compensation (catalog & assignment)** | `CompensationPlan`, `CompensationPlanAssignment` |
 | **Pay periods & revenue** | `PayPeriod`, `RevenueInput`, `PayrollExport` |
+| **Employee time (TC‑23)** | `DailyWorkedHour`, `WeeklyTimesheet` |
 | **Payroll earning vocabulary** | `PayrollEarningCode` (global seeded catalog; no agency FK) |
 | **Commission & draw** | `CommissionCalculation`, `CommissionDrawBalance`, `DrawBalanceEvent` |
 | **Contractor charges** | `ContractorCharge`, `ContractorChargeWaiver`, `ContractorChargeRecovery` |
@@ -169,6 +175,7 @@ erDiagram
 - **DocumentRecord** requires at least one of **team_member** or **engagement**; **party** is optional; agency must align with those rows.
 - **EngagementSupervisionAssignment** (MVP): supervisor engagement must be **active** **employee**.
 - **Department** hierarchy: optional parent must be top-level (no deep trees in MVP).
+- **DailyWorkedHour / WeeklyTimesheet (TC‑23):** canonical **one** daily worked-hour row per `engagement_id` + `work_date`; weekly timesheet unique per `engagement_id` + `week_start_on` with `week_end_on == week_start_on + 6 days`; workflow statuses `draft` / `submitted` / `approved` / `rejected` (approval transitions TC‑24‑owned); optional `approved_by` / `rejected_by` users.
 - **PayPeriod (TC‑23a):** at most one non‑overlapping date range per agency; persisted `start_on`/`end_on` cannot change after save; **closed** periods reject updates (`status_was == closed`). Closure validation overrides apply only to pending stub validators — permissions and immutability still enforced.
 - **AgencyPayrollConfiguration:** one row per agency (single payroll frequency MVP); weekly/biweekly/monthly require `pay_schedule_anchor_on`; semimonthly halves ignore anchor.
 - **Workforce financials:** Minimum commission draw recovery is **employee-only**; **contractor settlement** applies to `individual_contractor` and `contractor_organization` engagements only (**subcontractor** excluded in MVP). Net contractor settlement is non-negative in MVP. Hybrid settlement lineage: lines store totals plus join rows to revenue, commission calcs, and charge recoveries.
