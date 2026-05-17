@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_17_140001) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_17_140002) do
   create_table "agencies", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
     t.string "code", null: false
     t.datetime "created_at", null: false
@@ -381,6 +381,91 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_17_140001) do
     t.index ["team_member_id"], name: "index_engagements_on_team_member_id"
   end
 
+  create_table "leave_balance_adjustments", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.datetime "adjusted_at", null: false
+    t.bigint "adjusted_by_id", null: false
+    t.decimal "adjustment_hours", precision: 10, scale: 2, null: false
+    t.datetime "created_at", null: false
+    t.bigint "leave_balance_id", null: false
+    t.text "reason", null: false
+    t.datetime "updated_at", null: false
+    t.index ["adjusted_by_id"], name: "index_leave_balance_adjustments_on_adjusted_by_id"
+    t.index ["leave_balance_id"], name: "index_leave_balance_adjustments_on_leave_balance_id"
+  end
+
+  create_table "leave_balances", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.decimal "balance_hours", precision: 10, scale: 2, default: "0.0", null: false
+    t.datetime "created_at", null: false
+    t.bigint "engagement_id", null: false
+    t.bigint "leave_type_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["engagement_id", "leave_type_id"], name: "index_leave_balances_on_engagement_id_and_leave_type_id", unique: true
+    t.index ["engagement_id"], name: "index_leave_balances_on_engagement_id"
+    t.index ["leave_type_id"], name: "index_leave_balances_on_leave_type_id"
+  end
+
+  create_table "leave_request_approval_events", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.bigint "actor_id", null: false
+    t.datetime "created_at", null: false
+    t.string "event_type", null: false
+    t.bigint "leave_request_id", null: false
+    t.text "metadata", size: :long, collation: "utf8mb4_bin"
+    t.datetime "occurred_at", null: false
+    t.string "transition_from", null: false
+    t.string "transition_to", null: false
+    t.datetime "updated_at", null: false
+    t.index ["actor_id"], name: "index_leave_request_approval_events_on_actor_id"
+    t.index ["leave_request_id", "occurred_at"], name: "index_leave_request_approval_events_on_req_and_time", order: { occurred_at: :desc }
+    t.index ["leave_request_id"], name: "index_leave_request_approval_events_on_leave_request_id"
+    t.check_constraint "json_valid(`metadata`)", name: "metadata"
+  end
+
+  create_table "leave_request_days", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.decimal "hours", precision: 8, scale: 2, null: false
+    t.date "leave_date", null: false
+    t.bigint "leave_request_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["leave_request_id", "leave_date"], name: "index_leave_request_days_on_request_and_date", unique: true
+    t.index ["leave_request_id"], name: "index_leave_request_days_on_leave_request_id"
+  end
+
+  create_table "leave_requests", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.text "cancellation_reason"
+    t.datetime "created_at", null: false
+    t.date "end_on"
+    t.bigint "engagement_id", null: false
+    t.bigint "leave_type_id", null: false
+    t.text "notes"
+    t.text "review_notes"
+    t.datetime "reviewed_at"
+    t.bigint "reviewed_by_id"
+    t.date "start_on"
+    t.string "status", default: "draft", null: false
+    t.datetime "submitted_at"
+    t.datetime "updated_at", null: false
+    t.index ["engagement_id", "status"], name: "index_leave_requests_on_engagement_id_and_status"
+    t.index ["engagement_id"], name: "index_leave_requests_on_engagement_id"
+    t.index ["leave_type_id"], name: "index_leave_requests_on_leave_type_id"
+    t.index ["reviewed_by_id"], name: "index_leave_requests_on_reviewed_by_id"
+  end
+
+  create_table "leave_types", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.boolean "active", default: true, null: false
+    t.bigint "agency_id", null: false
+    t.boolean "balance_tracked", default: false, null: false
+    t.string "code", null: false
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.string "name", null: false
+    t.boolean "paid", default: false, null: false
+    t.bigint "payroll_earning_code_id"
+    t.datetime "updated_at", null: false
+    t.index ["agency_id", "code"], name: "index_leave_types_on_agency_id_and_code", unique: true
+    t.index ["agency_id"], name: "index_leave_types_on_agency_id"
+    t.index ["payroll_earning_code_id"], name: "index_leave_types_on_payroll_earning_code_id"
+  end
+
   create_table "locations", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
     t.bigint "agency_id", null: false
     t.string "code", null: false
@@ -588,6 +673,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_17_140001) do
     t.index ["actor_id"], name: "index_weekly_timesheet_approval_events_on_actor_id"
     t.index ["weekly_timesheet_id", "occurred_at"], name: "index_weekly_timesheet_approval_events_on_sheet_and_time", order: { occurred_at: :desc }
     t.index ["weekly_timesheet_id"], name: "index_weekly_timesheet_approval_events_on_weekly_timesheet_id"
+    t.check_constraint "json_valid(`metadata`)", name: "metadata"
   end
 
   create_table "weekly_timesheets", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
@@ -661,6 +747,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_17_140001) do
   add_foreign_key "engagement_supervision_assignments", "engagements", column: "supervisor_engagement_id"
   add_foreign_key "engagements", "agencies"
   add_foreign_key "engagements", "team_members"
+  add_foreign_key "leave_balance_adjustments", "leave_balances"
+  add_foreign_key "leave_balance_adjustments", "users", column: "adjusted_by_id"
+  add_foreign_key "leave_balances", "engagements"
+  add_foreign_key "leave_balances", "leave_types"
+  add_foreign_key "leave_request_approval_events", "leave_requests"
+  add_foreign_key "leave_request_approval_events", "users", column: "actor_id"
+  add_foreign_key "leave_request_days", "leave_requests"
+  add_foreign_key "leave_requests", "engagements"
+  add_foreign_key "leave_requests", "leave_types"
+  add_foreign_key "leave_requests", "users", column: "reviewed_by_id"
+  add_foreign_key "leave_types", "agencies"
+  add_foreign_key "leave_types", "payroll_earning_codes"
   add_foreign_key "locations", "agencies"
   add_foreign_key "organization_profiles", "parties"
   add_foreign_key "parties", "agencies"

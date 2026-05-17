@@ -1,6 +1,6 @@
 # TeamCORE — model ERD (Active Record)
 
-This diagram reflects **persisted models** under `app/models/` as of the current codebase. It is the engineering counterpart to the conceptual [domain map](../product/domain-map.md). **Workforce financial** tables (compensation / revenue / commission / draw, contractor charges, contractor settlement) appear in the same diagram (edges from **Engagement** / **Agency**). **Phase 5 payroll calendar foundations (TC‑23a)** add **AgencyPayrollConfiguration**, **PayrollExport**, and a global **PayrollEarningCode** catalog. **TC‑23** adds **DailyWorkedHour** (canonical one row per engagement per work date) and **WeeklyTimesheet** (weekly workflow container; **`approved_by`** snapshot on **User**). **Weekly timesheet approval audit** is **`WeeklyTimesheetApprovalEvent`** (append-only transitions).
+This diagram reflects **persisted models** under `app/models/` as of the current codebase. It is the engineering counterpart to the conceptual [domain map](../product/domain-map.md). **Workforce financial** tables (compensation / revenue / commission / draw, contractor charges, contractor settlement) appear in the same diagram (edges from **Engagement** / **Agency**). **Phase 5 payroll calendar foundations (TC‑23a)** add **AgencyPayrollConfiguration**, **PayrollExport**, and a global **PayrollEarningCode** catalog. **TC‑23** adds **DailyWorkedHour** (canonical one row per engagement per work date) and **WeeklyTimesheet** (weekly workflow container; **`approved_by`** snapshot on **User**). **Weekly timesheet approval audit** is **`WeeklyTimesheetApprovalEvent`** (append-only transitions). **TC‑25** adds agency‑scoped **`LeaveType`**, **`LeaveRequest`** / **`LeaveRequestDay`**, append‑only **`LeaveRequestApprovalEvent`**, optional **`LeaveBalance`** / **`LeaveBalanceAdjustment`** for balance‑tracked paid types; paid types map to **`PayrollEarningCode`** (**ADR‑0004**).
 
 **Tenancy:** Almost every row is scoped to an **Agency**. **Users** attach to agencies via **UserAgency** (admin / ops identity is separate from **Party** identity).
 
@@ -66,11 +66,24 @@ erDiagram
   Engagement ||--o{ ContractorSettlementLine : "settlement"
   Engagement ||--o{ DailyWorkedHour : "TC-23 daily worked hours"
   Engagement ||--o{ WeeklyTimesheet : "weekly workflow"
+  Engagement ||--o{ LeaveRequest : "TC-25 leave"
+  Engagement ||--o{ LeaveBalance : "TC-25 balance-tracked"
 
   WeeklyTimesheet }o--o| User : "approved_by"
   WeeklyTimesheet ||--o{ WeeklyTimesheetApprovalEvent : "approval audit"
 
   WeeklyTimesheetApprovalEvent }o--|| User : "actor"
+
+  Agency ||--o{ LeaveType : "TC-25 catalog"
+  LeaveType }o--o| PayrollEarningCode : "paid leave earning map"
+  LeaveRequest }o--|| LeaveType : ""
+  LeaveRequest }o--o| User : "reviewed_by"
+  LeaveRequest ||--o{ LeaveRequestDay : ""
+  LeaveRequest ||--o{ LeaveRequestApprovalEvent : ""
+  LeaveRequestApprovalEvent }o--|| User : "actor"
+  LeaveBalance }o--|| LeaveType : ""
+  LeaveBalance ||--o{ LeaveBalanceAdjustment : ""
+  LeaveBalanceAdjustment }o--|| User : "adjusted_by"
 
   Agency ||--o{ PayPeriod : "compensation"
   Agency ||--o{ CompensationPlan : "compensation"
@@ -162,6 +175,7 @@ erDiagram
 | **Compensation (catalog & assignment)** | `CompensationPlan`, `CompensationPlanAssignment` |
 | **Pay periods & revenue** | `PayPeriod`, `RevenueInput`, `PayrollExport` |
 | **Employee time (TC‑23)** | `DailyWorkedHour`, `WeeklyTimesheet` |
+| **Employee leave (TC‑25)** | `LeaveType`, `LeaveRequest`, `LeaveRequestDay`, `LeaveRequestApprovalEvent`, `LeaveBalance`, `LeaveBalanceAdjustment` |
 | **Payroll earning vocabulary** | `PayrollEarningCode` (global seeded catalog; no agency FK) |
 | **Commission & draw** | `CommissionCalculation`, `CommissionDrawBalance`, `DrawBalanceEvent` |
 | **Contractor charges** | `ContractorCharge`, `ContractorChargeWaiver`, `ContractorChargeRecovery` |
@@ -178,6 +192,7 @@ erDiagram
 - **EngagementSupervisionAssignment** (MVP): supervisor engagement must be **active** **employee**.
 - **Department** hierarchy: optional parent must be top-level (no deep trees in MVP).
 - **DailyWorkedHour / WeeklyTimesheet (TC‑23):** canonical **one** daily worked-hour row per `engagement_id` + `work_date`; weekly timesheet unique per `engagement_id` + `week_start_on` with `week_end_on == week_start_on + 6 days`; workflow statuses `draft` / `submitted` / `approved` / `rejected` (approval transitions TC‑24‑owned); optional `approved_by` / `rejected_by` users.
+- **Leave (TC‑25):** `LeaveRequest` statuses `draft` / `submitted` / `approved` / `rejected` / `cancelled`; daily allocation on `LeaveRequestDay`; paid `LeaveType` requires `payroll_earning_code_id`; balance rows only for balance‑tracked types; consume/restore on approve/cancel‑approved/reopen per **ADR‑0004** (reject does **not** restore balance that was never consumed).
 - **PayPeriod (TC‑23a):** at most one non‑overlapping date range per agency; persisted `start_on`/`end_on` cannot change after save; **closed** periods reject updates (`status_was == closed`). Closure validation overrides apply only to pending stub validators — permissions and immutability still enforced.
 - **AgencyPayrollConfiguration:** one row per agency (single payroll frequency MVP); weekly/biweekly/monthly require `pay_schedule_anchor_on`; semimonthly halves ignore anchor.
 - **Workforce financials:** Minimum commission draw recovery is **employee-only**; **contractor settlement** applies to `individual_contractor` and `contractor_organization` engagements only (**subcontractor** excluded in MVP). Net contractor settlement is non-negative in MVP. Hybrid settlement lineage: lines store totals plus join rows to revenue, commission calcs, and charge recoveries.

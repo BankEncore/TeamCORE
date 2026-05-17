@@ -16,6 +16,7 @@ module Team360
     :subcontractor_rows,
     :workforce_financial,
     :weekly_timesheets_panel,
+    :leave_panel,
     keyword_init: true
   )
 end

@@ -23,6 +23,7 @@ class Agency < ApplicationRecord
   has_many :commission_calculations, dependent: :restrict_with_exception
   has_many :contractor_charges, dependent: :restrict_with_exception
   has_many :contractor_settlement_runs, dependent: :restrict_with_exception
+  has_many :leave_types, inverse_of: :agency, dependent: :restrict_with_exception
 
   validates :name, presence: true
   validates :code, presence: true, uniqueness: true
@@ -30,8 +31,13 @@ class Agency < ApplicationRecord
   accepts_nested_attributes_for :agency_payroll_configuration
 
   after_create :ensure_agency_payroll_configuration
+  after_create :ensure_default_leave_types
 
   private
+
+  def ensure_default_leave_types
+    LeaveType.seed_defaults_for_agency!(self)
+  end
 
   def ensure_agency_payroll_configuration
     return if agency_payroll_configuration.present?

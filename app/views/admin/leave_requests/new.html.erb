@@ -1,0 +1,6 @@
+<% content_for :title, "New leave request" %>
+<div class="tc-page-stack">
+  <p class="text-sm"><%= link_to "← Queue", admin_leave_requests_path, class: tc_link_classes %></p>
+  <h1 class="text-xl font-semibold">New leave request</h1>
+  <%= render "form" %>
+</div>

@@ -136,6 +136,20 @@
           </div>
         </div>
       </section>
+
+      <section class="tc-panel">
+        <div class="tc-panel__header">
+          <div class="tc-panel__title">Leave requests</div>
+          <p class="tc-panel__subtitle">Submitted, awaiting approval</p>
+        </div>
+        <div class="tc-panel__body text-sm space-y-2">
+          <p><span class="font-semibold"><%= @submitted_leave_requests_count %></span> in queue</p>
+          <div class="flex flex-wrap gap-3">
+            <%= link_to "Leave queue", admin_leave_requests_path, class: tc_link_classes %>
+            <%= link_to "Leave types", admin_leave_types_path, class: tc_link_classes %>
+          </div>
+        </div>
+      </section>
     </div>
 
     <section class="tc-panel">

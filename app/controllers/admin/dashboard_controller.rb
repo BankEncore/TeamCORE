@@ -26,6 +26,11 @@ module Admin
           .joins(:engagement)
           .where(engagements: { agency_id: aid }, status: "submitted")
           .count
+      @submitted_leave_requests_count =
+        LeaveRequest
+          .joins(:engagement)
+          .where(engagements: { agency_id: aid }, status: "submitted")
+          .count
     end
   end
 end

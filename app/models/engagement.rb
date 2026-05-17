@@ -53,6 +53,8 @@ class Engagement < ApplicationRecord
   has_many :contractor_settlement_lines, dependent: :restrict_with_exception
   has_many :daily_worked_hours, inverse_of: :engagement, dependent: :restrict_with_exception
   has_many :weekly_timesheets, inverse_of: :engagement, dependent: :restrict_with_exception
+  has_many :leave_requests, inverse_of: :engagement, dependent: :restrict_with_exception
+  has_many :leave_balances, inverse_of: :engagement, dependent: :restrict_with_exception
 
   validates :relationship_type, presence: true, inclusion: { in: RELATIONSHIP_TYPES }
   validates :status, presence: true, inclusion: { in: STATUSES }

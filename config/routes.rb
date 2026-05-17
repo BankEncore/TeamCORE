@@ -54,6 +54,16 @@ Rails.application.routes.draw do
         post :reopen
       end
     end
+    resources :leave_types
+    resources :leave_requests do
+      member do
+        post :submit
+        post :approve
+        post :reject
+        post :cancel
+        post :reopen
+      end
+    end
     resources :compensation_plans
     resources :contractor_charges, only: %i[index], controller: "contractor_charge_queue"
     resources :contractor_settlement_runs, only: %i[index show new create] do
@@ -65,6 +75,7 @@ Rails.application.routes.draw do
       end
     end
     resources :engagements, only: %i[index show new create edit update] do
+      resources :leave_balances, only: %i[index create], controller: "engagement_leave_balances"
       resources :placements, controller: "engagement_placements", only: %i[index show new create edit update]
       resources :supervision_assignments, controller: "engagement_supervisions", only: %i[index show new create edit update]
       scope module: :engagements do

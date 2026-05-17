@@ -21,6 +21,18 @@ class User < ApplicationRecord
     foreign_key: :actor_id,
     inverse_of: :actor,
     dependent: :restrict_with_exception
+  has_many :reviewed_leave_requests, class_name: "LeaveRequest", foreign_key: :reviewed_by_id,
+    inverse_of: :reviewed_by, dependent: :nullify
+  has_many :leave_request_approval_events_as_actor,
+    class_name: "LeaveRequestApprovalEvent",
+    foreign_key: :actor_id,
+    inverse_of: :actor,
+    dependent: :restrict_with_exception
+  has_many :leave_balance_adjustments_as_actor,
+    class_name: "LeaveBalanceAdjustment",
+    foreign_key: :adjusted_by_id,
+    inverse_of: :adjusted_by,
+    dependent: :restrict_with_exception
 
   normalizes :email, with: ->(e) { e.strip.downcase }
 

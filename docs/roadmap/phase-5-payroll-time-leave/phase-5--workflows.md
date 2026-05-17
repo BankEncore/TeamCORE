@@ -253,13 +253,15 @@ Supervisors/payroll administrators may reopen or adjust approved time if necessa
 
 Leave applies to employees only in MVP.
 
+**Normative boundaries:** [ADR-0004 — Leave vs time and payroll hooks](../../adr/adr-0004-leave-vs-time-and-payroll-hooks.md).
+
 MVP supports:
 
 * full-day leave
 * partial-day leave
 * hourly leave tracking
 
-Canonical leave storage is hours-based.
+Canonical leave storage is **hours-based**, allocated per calendar date on **`LeaveRequestDay`** rows (workflow container: **`LeaveRequest`**).
 
 ---
 
@@ -268,11 +270,11 @@ Canonical leave storage is hours-based.
 Typical workflow:
 
 ```text
-Employee submits leave request
+Request drafted with daily hour rows → submitted for review
 ↓
-Supervisor/admin approval
+Supervisor/admin approval or rejection
 ↓
-Approved leave contributes payable payroll entries
+Approved leave feeds payroll-preparation visibility (summaries / earning-code buckets — not paycheck generation)
 ```
 
 ---
@@ -281,17 +283,17 @@ Approved leave contributes payable payroll entries
 
 Approved leave:
 
-* contributes to payable payroll totals
-* does NOT contribute toward overtime thresholds
+* surfaces in **payroll-preparation visibility** aggregates for paid vs unpaid designation (**ADR‑0004**)
+* does NOT contribute toward **weekly overtime thresholds** (worked hours only)
 
 Examples:
 
-| Type          | Counts toward OT? | Counts toward payroll totals? |
-| ------------- | ----------------- | ----------------------------- |
-| Worked hours  | Yes               | Yes                           |
-| PTO           | No                | Yes                           |
-| Holiday leave | No                | Yes                           |
-| Sick leave    | No                | Yes                           |
+| Type          | Counts toward OT? | Payroll-prep visibility (approved)? |
+| ------------- | ----------------- | ----------------------------------- |
+| Worked hours  | Yes               | Yes (approved worked time)          |
+| PTO           | No                | Yes (paid leave designation)        |
+| Holiday leave | No              | Yes (paid leave designation)      |
+| Sick leave    | No                | Yes (paid leave designation)      |
 
 ---
 

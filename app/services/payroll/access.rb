@@ -23,5 +23,24 @@ module Payroll
 
       user.agencies.exists?(agency_id)
     end
+
+    # MVP: agency-scoped user may manage employee leave requests and balances.
+    def can_manage_leave_request?(user:, leave_request:)
+      return false if user.blank? || leave_request.blank?
+
+      agency_id = leave_request.engagement&.agency_id
+      return false if agency_id.blank?
+
+      user.agencies.exists?(agency_id)
+    end
+
+    def can_adjust_leave_balance?(user:, leave_balance:)
+      return false if user.blank? || leave_balance.blank?
+
+      agency_id = leave_balance.engagement&.agency_id
+      return false if agency_id.blank?
+
+      user.agencies.exists?(agency_id)
+    end
   end
 end

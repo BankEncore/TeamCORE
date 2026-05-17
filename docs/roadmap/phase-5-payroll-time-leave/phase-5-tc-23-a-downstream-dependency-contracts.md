@@ -56,16 +56,24 @@ Define the operational contracts TC-23a provides to downstream Phase 5 epics.
 
 # TC-25 — Employee Leave Request MVP
 
+**Normative posture:** [ADR-0004 — Leave vs time and payroll hooks](../../adr/adr-0004-leave-vs-time-and-payroll-hooks.md).
+
 ## TC-25 depends on TC-23a for:
 
-- Payroll-period association
-- Leave-hour aggregation windows
-- Agency timezone posture
+- Civil-date overlap windows against **`PayPeriod#start_on` / `end_on`** for summary inclusion (**no `LeaveRequest` → `PayPeriod` FK**)
+
+## TC-25 must (MVP):
+
+- persist **`LeaveType`**, **`LeaveRequest`**, **`LeaveRequestDay`**, **`LeaveBalance`** (+ **`LeaveBalanceAdjustment`**) for employee engagements only
+- keep leave **separate** from **`DailyWorkedHour`** / **`WeeklyTimesheet`**
+- use statuses **`draft`**, **`submitted`**, **`approved`**, **`rejected`**, **`cancelled`**, with **`submitted`** as the review-queue label (aligned with timesheets)
+- apply balance consume on **`submitted` → `approved`** and restore on **`approved` → `draft`** / **`approved` → `cancelled`** for **balance-tracked paid** types (**ADR‑0004**)
+- expose aggregator hooks summing **approved** **`LeaveRequestDay`** rows overlapping the pay period into paid vs unpaid and **`hours_by_earning_code`** where **`LeaveType`** maps to **`PayrollEarningCode`**
 
 ## TC-25 should not redefine:
 
-- overtime semantics
-- payroll-period structure
+- overtime semantics (**worked hours only**)
+- pay-period / workweek calendar definitions (**ADR‑0002**)
 
 ---
 

@@ -1,0 +1,52 @@
+<%= form_with model: [:admin, @leave_request], class: "space-y-4 max-w-3xl" do |f| %>
+  <% if @leave_request.errors.any? %>
+    <div class="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+      <ul class="m-0 list-disc pl-4"><% @leave_request.errors.full_messages.each do |m| %><li><%= m %></li><% end %></ul>
+    </div>
+  <% end %>
+
+  <div class="tc-field">
+    <%= f.label :engagement_id, "Employee engagement", class: "tc-label" %>
+    <%= f.collection_select :engagement_id,
+          Engagement.where(agency_id: current_agency.id, relationship_type: "employee", status: "active").includes(team_member: :party).order(:id),
+          :id,
+          ->(e) { "##{e.id} — #{e.team_member.party.display_name}" },
+          { prompt: "Select engagement" },
+          class: "tc-select min-w-[20rem]", required: true %>
+  </div>
+  <div class="tc-field">
+    <%= f.label :leave_type_id, class: "tc-label" %>
+    <%= f.collection_select :leave_type_id,
+          current_agency.leave_types.active.order(:code),
+          :id,
+          ->(lt) { "#{lt.code} — #{lt.name}" },
+          { prompt: "Leave type" },
+          class: "tc-select min-w-[16rem]", required: true %>
+  </div>
+  <div class="tc-field">
+    <%= f.label :notes, "Employee / request notes", class: "tc-label" %>
+    <%= f.text_area :notes, rows: 2, class: "tc-textarea" %>
+  </div>
+
+  <div class="tc-panel">
+    <div class="tc-panel__header"><div class="tc-panel__title">Daily hours</div></div>
+    <div class="tc-panel__body space-y-2">
+      <%= f.fields_for :leave_request_days do |df| %>
+        <div class="flex flex-wrap gap-2 items-end">
+          <%= df.hidden_field :id %>
+          <%= df.hidden_field :_destroy %>
+          <div class="tc-field tc-field--compact">
+            <%= df.label :leave_date, class: "tc-label" %>
+            <%= df.date_field :leave_date, class: "tc-input" %>
+          </div>
+          <div class="tc-field tc-field--compact">
+            <%= df.label :hours, class: "tc-label" %>
+            <%= df.number_field :hours, step: 0.25, min: 0, class: "tc-input w-28" %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div><%= f.submit(@leave_request.new_record? ? "Save draft" : "Update draft", class: "tc-btn tc-btn--primary") %></div>
+<% end %>

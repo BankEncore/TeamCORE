@@ -21,7 +21,8 @@ Team360 **organizes and presents** authoritative data only. **No `team360s` tabl
 | **Computed** | Document readiness, alerts, requirement **outcomes** | Consume **`Documents::ReadinessEvaluator`** → **`Documents::ReadinessResult`** only for outcomes and alert severities ([`documents-compliance.md`](documents-compliance.md), [`document-alerts.md`](document-alerts.md)). |
 | **Computed (workforce financials)** | Compensation summary, contractor charges & settlement (read model: `ProfileSnapshot#workforce_financial`) | No Team360-side writes. Payload from **`Team360::ProfileAssembler#build_workforce_financial`**; coarse **draw** visibility via **`User#team360_show_employee_draw_balance?`** until TC-29/30. Product rules: [developer brief §12](../roadmap/phase-4-developer-brief.md); modeling: [`compensation-financials.md`](compensation-financials.md), [`contractor-charges.md`](contractor-charges.md), [`contractor-settlement.md`](contractor-settlement.md); hub: [`workforce-financial-modeling.md`](workforce-financial-modeling.md). |
 | **Computed (payroll time)** | Weekly timesheet row(s): status, projected vs approved overtime via **`Payroll::TimesheetOvertimePresenter`**, recent **`WeeklyTimesheetApprovalEvent`** rows | Read-only assembly in **`Team360::ProfileAssembler`**; no duplicated OT math (**ADR‑0003**). |
-| **Placeholder** | Employee pay-period payroll totals rollups, leave balances, durable audit timeline | Static copy only; no dummy rows (**TC-3-D07**). |
+| **Computed (leave)** | Balance‑tracked **`LeaveBalance`** rows and recent **`LeaveRequest`** / **`LeaveRequestDay`** / **`LeaveRequestApprovalEvent`** summaries; projected vs payroll‑visible label via **`Payroll::LeavePayrollVisibilityPresenter`** | Read-only assembly in **`Team360::ProfileAssembler#build_leave_panel`**; workflow mutations stay in admin leave screens (**ADR‑0004**). |
+| **Placeholder** | Employee pay-period payroll totals rollups, durable audit timeline | Static copy only; no dummy rows (**TC-3-D07**). |
 
 ## `focused_engagement` (display selection)
 
@@ -58,3 +59,4 @@ Phase 3 uses existing **`Admin::BaseController`** agency scoping and coarse admi
 - [`subcontractor-relationships.md`](subcontractor-relationships.md)
 - Workforce financial **read** surfaces (not workflow owner): [`compensation-financials.md`](compensation-financials.md), [`contractor-charges.md`](contractor-charges.md), [`contractor-settlement.md`](contractor-settlement.md), [`workforce-financial-modeling.md`](workforce-financial-modeling.md), [developer brief §12](../roadmap/phase-4-developer-brief.md)
 - Operational lists and drill-through: [`operational-reporting.md`](operational-reporting.md)
+- Phase 5 payroll / leave boundaries: [`../adr/adr-0003-employee-time-and-timesheet-approval-boundaries.md`](../adr/adr-0003-employee-time-and-timesheet-approval-boundaries.md), [`../adr/adr-0004-leave-vs-time-and-payroll-hooks.md`](../adr/adr-0004-leave-vs-time-and-payroll-hooks.md)

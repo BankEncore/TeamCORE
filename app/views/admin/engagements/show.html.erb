@@ -19,6 +19,9 @@
         <%= link_to "Team360", tc_team360_url(@engagement.team_member, engagement: @engagement), class: "tc-btn tc-btn--teal" %>
         <%= link_to "Placements", admin_engagement_placements_path(@engagement), class: "tc-btn tc-btn--secondary" %>
         <%= link_to "Supervision", admin_engagement_supervision_assignments_path(@engagement), class: "tc-btn tc-btn--secondary" %>
+        <% if @engagement.employee_path? %>
+          <%= link_to "Leave balances", admin_engagement_leave_balances_path(@engagement), class: "tc-btn tc-btn--secondary" %>
+        <% end %>
         <%= link_to "Edit", edit_admin_engagement_path(@engagement), class: "tc-btn tc-btn--primary" %>
       </div>
     </div>

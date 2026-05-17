@@ -60,7 +60,8 @@ module Team360
         records_by_id: records_by_id,
         subcontractor_rows: build_subcontractor_rows(party),
         workforce_financial: build_workforce_financial(focused),
-        weekly_timesheets_panel: build_weekly_timesheets_panel(focused)
+        weekly_timesheets_panel: build_weekly_timesheets_panel(focused),
+        leave_panel: build_leave_panel(focused)
       )
     end
 
@@ -331,6 +332,62 @@ module Team360
         overtime_hours: ot.overtime_hours.to_s("F"),
         overtime_visibility: ot.visibility_mode.to_s,
         approval_events: events
+      }
+    end
+
+    def build_leave_panel(focused_engagement)
+      return nil unless focused_engagement&.employee_path?
+
+      balances =
+        focused_engagement
+          .leave_balances
+          .includes(:leave_type)
+          .order(:id)
+          .map do |b|
+            {
+              leave_type_code: b.leave_type.code,
+              balance_hours: BigDecimal(b.balance_hours.to_s).to_s("F")
+            }
+          end
+
+      requests =
+        focused_engagement
+          .leave_requests
+          .includes(:leave_type, :leave_request_days, leave_request_approval_events: :actor)
+          .order(id: :desc)
+          .limit(12)
+          .map { |req| serialize_leave_request_panel_row(req) }
+
+      { balances:, requests: }
+    end
+
+    def serialize_leave_request_panel_row(req)
+      vis = Payroll::LeavePayrollVisibilityPresenter.for_leave_request(req)
+      days =
+        req.leave_request_days.sort_by(&:leave_date).map do |d|
+          { leave_date: d.leave_date, hours: BigDecimal(d.hours.to_s).to_s("F") }
+        end
+      events =
+        req.leave_request_approval_events.recent_first.limit(6).map do |ev|
+          {
+            occurred_at: ev.occurred_at,
+            event_type: ev.event_type,
+            transition_from: ev.transition_from,
+            transition_to: ev.transition_to,
+            actor_email: ev.actor&.email,
+            reason: ev.metadata_hash["reason"]
+          }
+        end
+
+      {
+        id: req.id,
+        leave_type_code: req.leave_type.code,
+        status: req.status,
+        start_on: req.start_on,
+        end_on: req.end_on,
+        visibility_label: vis.visibility_label,
+        days:,
+        events:
       }
     end
 
