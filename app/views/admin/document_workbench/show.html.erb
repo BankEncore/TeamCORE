@@ -1,0 +1,48 @@
+<% content_for :title, "Document workbench" %>
+<div class="tc-page-stack">
+  <p class="text-sm"><%= link_to "← Dashboard", admin_root_path, class: tc_link_classes %></p>
+  <header class="tc-record-header">
+    <div class="tc-record-header__top">
+      <div>
+        <div class="tc-record-header__eyebrow">Compliance</div>
+        <h1 class="tc-record-header__title">Document workbench</h1>
+        <p class="tc-record-header__subtitle">Capped queues for daily triage. Full queues stay on Pending review and Document alerts.</p>
+      </div>
+      <div class="tc-record-header__actions">
+        <%= link_to "Pending review", admin_document_reviews_path, class: "tc-btn tc-btn--secondary" %>
+        <%= link_to "Document alerts", admin_document_alerts_path, class: "tc-btn tc-btn--secondary" %>
+      </div>
+    </div>
+  </header>
+
+  <%= render "admin/document_workbench/section",
+        title: "Pending review",
+        subtitle: "Submitted documents (#{Admin::DocumentWorkbenchController::SECTION_LIMIT} max).",
+        records: @pending_review,
+        empty_copy: "Nothing waiting in the submitted queue." %>
+
+  <%= render "admin/document_workbench/section",
+        title: "Recently rejected",
+        subtitle: "Latest rejections (#{Admin::DocumentWorkbenchController::SECTION_LIMIT} max).",
+        records: @recently_rejected,
+        empty_copy: "No rejected records recently." %>
+
+  <%= render "admin/document_workbench/section",
+        title: "Expiring within 30 days (or expired)",
+        subtitle: "Submitted or verified records with an expiry date in range (#{Admin::DocumentWorkbenchController::SECTION_LIMIT} max).",
+        records: @expiring_soon,
+        empty_copy: "No documents in this window." %>
+
+  <section class="tc-panel">
+    <div class="tc-panel__header">
+      <div>
+        <div class="tc-panel__title">Missing requirements / readiness</div>
+        <p class="tc-panel__subtitle">Evaluator-backed alerts are not re-run here (performance). Open the full alert report.</p>
+      </div>
+    </div>
+    <div class="tc-panel__body text-sm space-y-2">
+      <p style="color: var(--tc-text-muted);">Use Document alerts for blocking and warning rows across engagements.</p>
+      <%= link_to "Open document alerts", admin_document_alerts_path, class: "tc-btn tc-btn--primary" %>
+    </div>
+  </section>
+</div>

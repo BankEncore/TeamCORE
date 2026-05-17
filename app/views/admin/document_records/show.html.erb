@@ -22,6 +22,11 @@
         </div>
       </div>
       <div class="tc-record-header__actions">
+        <% if @document_record.team_member %>
+          <%= link_to "Team360",
+                tc_team360_url(@document_record.team_member, engagement: @document_record.engagement),
+                class: "tc-btn tc-btn--teal" %>
+        <% end %>
         <%= link_to "Edit metadata", edit_admin_document_record_path(@document_record), class: "tc-btn tc-btn--secondary" %>
       </div>
     </div>
@@ -41,6 +46,7 @@
              when "submitted" %>
             <div class="space-y-4">
               <%= form_with url: verify_admin_document_record_path(@document_record), method: :post, data: { turbo: false }, class: "rounded-lg border p-3" do %>
+                <%= tc_admin_return_navigation_hidden_fields %>
                 <div class="tc-field">
                   <%= label_tag :verification_notes, "Notes (optional)", class: "tc-label" %>
                   <%= text_area_tag :verification_notes, nil, rows: 2, class: "tc-textarea" %>
@@ -49,6 +55,7 @@
               <% end %>
 
               <%= form_with url: reject_admin_document_record_path(@document_record), method: :post, data: { turbo: false }, class: "rounded-lg border p-3" do %>
+                <%= tc_admin_return_navigation_hidden_fields %>
                 <div class="tc-field">
                   <%= label_tag :rejection_reason, "Rejection reason (required)", class: "tc-label" %>
                   <%= text_area_tag :rejection_reason, nil, rows: 3, required: true, class: "tc-textarea" %>
@@ -61,6 +68,7 @@
               <% end %>
 
               <%= form_with url: void_admin_document_record_path(@document_record), method: :post, data: { turbo: false }, class: "rounded-lg border p-3" do %>
+                <%= tc_admin_return_navigation_hidden_fields %>
                 <div class="tc-field">
                   <%= label_tag :verification_notes, "Notes (optional, void context)", class: "tc-label" %>
                   <%= text_area_tag :verification_notes, nil, rows: 2, class: "tc-textarea" %>
@@ -70,6 +78,7 @@
             </div>
           <% when "verified", "rejected" %>
             <%= form_with url: void_admin_document_record_path(@document_record), method: :post, data: { turbo: false }, class: "max-w-xl rounded-lg border p-3" do %>
+              <%= tc_admin_return_navigation_hidden_fields %>
               <div class="tc-field">
                 <%= label_tag :verification_notes, "Notes (optional, void context)", class: "tc-label" %>
                 <%= text_area_tag :verification_notes, nil, rows: 2, class: "tc-textarea" %>

@@ -4,7 +4,7 @@ module Admin
   class AgencyContextController < Admin::BaseController
     def show
       @agencies = current_user.agencies.order(:name)
-      @return_to = safe_return_path(params[:return_to])
+      @return_to = safe_admin_return_path(params[:return_to]) || admin_root_path
     end
 
     def update
@@ -15,27 +15,7 @@ module Admin
       end
 
       session[:current_agency_id] = aid
-      redirect_to safe_return_path(params[:return_to])
-    end
-
-    private
-
-    def safe_return_path(raw)
-      path = raw.to_s
-      return admin_root_path if path.blank?
-
-      begin
-        uri = URI.parse(path)
-        return admin_root_path if uri.host
-
-        path = uri.path.to_s
-        path = "/#{path}" unless path.start_with?("/")
-        return admin_root_path unless path.start_with?("/admin")
-
-        path
-      rescue URI::InvalidURIError
-        admin_root_path
-      end
+      redirect_to safe_admin_return_path(params[:return_to]) || admin_root_path
     end
   end
 end

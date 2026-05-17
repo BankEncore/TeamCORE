@@ -17,6 +17,31 @@ module Admin
           as_of_date: @as_of_date,
           focused_engagement_id: engagement_focus_param
         ).call
+
+      if @snapshot.focused_engagement_id.present?
+        eng =
+          Engagement
+            .where(agency_id: current_agency.id)
+            .includes(
+              :team_member,
+              :engagement_organization_placements,
+              :engagement_supervision_assignments,
+              :contractor_charges,
+              :contractor_settlement_lines
+            )
+            .find_by(id: @snapshot.focused_engagement_id)
+        if eng && @snapshot.readiness_result
+          @engagement_setup_checklist =
+            Admin::EngagementSetupChecklistPresenter.new(
+              engagement: eng,
+              document_readiness: @snapshot.readiness_result,
+              as_of_date: @as_of_date,
+              placement_rows: eng.engagement_organization_placements.order(:effective_start_on),
+              supervision_rows: eng.engagement_supervision_assignments.order(:effective_start_on),
+              workforce_financial_assignment: CompensationPlanAssignment.current_for_engagement(eng)
+            )
+        end
+      end
     end
 
     private

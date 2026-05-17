@@ -24,7 +24,7 @@ module Admin
     def create
       @assignment = EngagementSupervisionAssignment.new(assignment_params.merge(engagement: @engagement))
       if @assignment.save
-        redirect_to admin_engagement_supervision_assignment_path(@engagement, @assignment), notice: "Supervision saved."
+        redirect_after_admin_save admin_engagement_supervision_assignment_path(@engagement, @assignment), notice: "Supervision saved."
       else
         @supervisor_engagements = supervisor_candidate_engagements
         render :new, status: :unprocessable_entity
@@ -37,7 +37,7 @@ module Admin
 
     def update
       if @assignment.update(assignment_params)
-        redirect_to admin_engagement_supervision_assignment_path(@engagement, @assignment), notice: "Supervision updated."
+        redirect_after_admin_save admin_engagement_supervision_assignment_path(@engagement, @assignment), notice: "Supervision updated."
       else
         @supervisor_engagements = supervisor_candidate_engagements
         render :edit, status: :unprocessable_entity

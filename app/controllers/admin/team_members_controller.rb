@@ -34,7 +34,7 @@ module Admin
     def create
       @team_member = TeamMember.new(team_member_params.merge(agency: current_agency))
       if @team_member.save
-        redirect_to admin_team_member_path(@team_member), notice: "Team member created."
+        redirect_after_admin_save admin_team_member_path(@team_member), notice: "Team member created."
       else
         load_eligible_parties
         render :new, status: :unprocessable_entity

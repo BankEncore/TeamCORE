@@ -1,0 +1,99 @@
+<% content_for :title, flow_title %>
+<div class="tc-page-stack">
+  <p class="text-sm"><%= link_to "← Guided setup", admin_guided_setup_path, class: tc_link_classes %></p>
+  <h1 class="text-2xl font-semibold"><%= flow_title %></h1>
+
+  <div class="tc-panel mt-4">
+    <div class="tc-panel__header">
+      <div class="tc-panel__title">1 · Party identity</div>
+      <p class="tc-panel__subtitle">Search existing parties first, then create a workforce record.</p>
+    </div>
+    <div class="tc-panel__body text-sm space-y-3">
+      <p class="text-amber-900" style="background: color-mix(in srgb, var(--tc-warning-bg, #fef3c7) 80%, white); border: 1px solid color-mix(in srgb, var(--tc-warning-bg, #f59e0b) 40%, transparent); border-radius: 0.25rem; padding: 0.5rem;">
+        Before creating a new person or organization, search to avoid duplicate identity records.
+      </p>
+      <%= form_with url: request.path, method: :get, data: { turbo: false }, class: "flex flex-wrap gap-2 items-end" do %>
+        <%= label_tag :q, "Search parties", class: "sr-only" %>
+        <%= text_field_tag :q, @search_q, class: "tc-input min-w-[14rem]", placeholder: "Party display name…" %>
+        <%= submit_tag "Search", class: "tc-btn tc-btn--primary" %>
+      <% end %>
+      <%= link_to "Full search (parties, team members, engagements)", admin_search_path(q: @search_q.presence || ""), class: tc_link_classes %>
+      <% if @search_q.present? && @search_q.length < 2 %>
+        <p class="text-slate-500">Enter at least two characters to search.</p>
+      <% end %>
+      <% if @search_q.present? && @search_q.length >= 2 %>
+        <% if @party_hits.blank? %>
+          <p class="text-slate-500">No matching parties.</p>
+        <% else %>
+          <ul class="m-0 list-none space-y-2 p-0">
+            <% @party_hits.each do |p| %>
+              <li class="flex flex-wrap gap-2 items-baseline">
+                <%= link_to p.display_name, send(@guided_route, q: @search_q, party_id: p.id), class: tc_link_classes %>
+                <%= link_to "Party hub", admin_party_path(p), class: tc_link_classes(:muted) %>
+              </li>
+            <% end %>
+          </ul>
+        <% end %>
+      <% end %>
+      <div class="pt-2 space-y-2" style="border-top: 1px solid var(--tc-border);">
+        <% unless local_assigns[:org_flow] %>
+          <%= link_to "Create new person party",
+                new_person_party_path(return_to: request.fullpath, team360_return_to: request.fullpath),
+                class: tc_link_classes %>
+        <% end %>
+        <%= link_to "Create new organization party",
+              new_organization_party_path(return_to: request.fullpath, team360_return_to: request.fullpath),
+              class: tc_link_classes %>
+        <%= link_to "Browse parties index", admin_parties_path, class: tc_link_classes(:muted) %>
+      </div>
+    </div>
+  </div>
+
+  <div class="tc-panel mt-4">
+    <div class="tc-panel__header">
+      <div class="tc-panel__title">2 · Team member</div>
+    </div>
+    <div class="tc-panel__body text-sm space-y-2">
+      <% if @selected_party %>
+        <p>Selected party: <strong><%= @selected_party.display_name %></strong></p>
+        <%= link_to "New team member for this party",
+              new_admin_team_member_path(
+                party_id: @selected_party.id,
+                return_to: request.fullpath,
+                team360_return_to: request.fullpath
+              ),
+              class: "tc-btn tc-btn--primary" %>
+      <% else %>
+        <p class="text-slate-500">Select or create a party in step 1 first.</p>
+      <% end %>
+      <%= link_to "New team member (pick party on form)", new_admin_team_member_path(return_to: request.fullpath), class: tc_link_classes %>
+    </div>
+  </div>
+
+  <div class="tc-panel mt-4">
+    <div class="tc-panel__header">
+      <div class="tc-panel__title">3 · Engagement</div>
+    </div>
+    <div class="tc-panel__body text-sm space-y-2">
+      <% eng_opts = { relationship_type: relationship_type, return_to: request.fullpath } %>
+      <% eng_opts[:team_member_id] = params[:team_member_id] if params[:team_member_id].present? %>
+      <%= link_to "New engagement",
+            new_admin_engagement_path(eng_opts),
+            class: tc_link_classes %>
+      <p class="text-xs text-slate-500">Default relationship for this flow: <code class="font-mono"><%= relationship_type %></code>.</p>
+      <% if local_assigns[:subcontractor_note] %>
+        <p class="text-xs text-slate-600"><%= local_assigns[:subcontractor_note] %></p>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="tc-panel mt-4">
+    <div class="tc-panel__header">
+      <div class="tc-panel__title">Finish</div>
+      <p class="tc-panel__subtitle">Open Team360 when the team member and engagement exist; otherwise Party Hub covers related-only subcontractors.</p>
+    </div>
+    <div class="tc-panel__body text-sm">
+      <%= link_to "Workspace search", admin_search_path, class: tc_link_classes %>
+    </div>
+  </div>
+</div>

@@ -1,4 +1,5 @@
 <%= form_with model: [:admin, engagement, charge], class: "space-y-4 max-w-xl" do |f| %>
+  <%= tc_admin_return_navigation_hidden_fields %>
   <% if charge.errors.any? %>
     <div class="text-red-600 text-sm"><%= charge.errors.full_messages.join(", ") %></div>
   <% end %>

@@ -68,6 +68,32 @@ module ApplicationHelper
     request.path.start_with?("/admin/reports")
   end
 
+  # Hidden fields for post-save redirects (Admin return navigation contract).
+  def tc_admin_return_navigation_hidden_fields
+    rt =
+      if params[:return_to].present?
+        controller.send(:safe_admin_return_path, params[:return_to])
+      end
+    if rt.blank?
+      # Use path only (no query) as default so a poisoned query string on the
+      # current page is not copied into the next POST (defense in depth).
+      rt = request.path
+    end
+    fragments = [hidden_field_tag(:return_to, rt, id: nil)]
+    if params[:team360_return_to].present?
+      safe_tm = controller.send(:safe_admin_return_path, params[:team360_return_to])
+      fragments << hidden_field_tag(:team360_return_to, safe_tm, id: nil) if safe_tm.present?
+    end
+    safe_join(fragments, "\n".html_safe)
+  end
+
+  def tc_team360_url(team_member, engagement: nil, as_of_date: nil)
+    admin_team_member_team360_path(
+      team_member,
+      **{ engagement_id: engagement&.id, as_of_date: as_of_date }.compact
+    )
+  end
+
   # Maps domain status / readiness strings to existing tc-badge modifiers in 03_components.css
   def tc_status_badge_classes(status)
     s = status.to_s.strip.downcase.tr(" ", "_")

@@ -94,7 +94,7 @@
               <% end %>
             </td>
             <td><%= row[:alert_count] %></td>
-            <td><%= link_to "Open", admin_team_member_team360_path(tm), class: tc_link_classes %></td>
+            <td><%= link_to "Open", reports_team360_path(tm, engagement: row[:focused_engagement]), class: tc_link_classes %></td>
           </tr>
         <% end %>
       </tbody>

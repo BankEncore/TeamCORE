@@ -9,6 +9,7 @@
   <p class="text-slate-600 mb-4">No eligible parties (complete identity, not yet a team member). <%= link_to "Create a person party", admin_new_person_party_path, class: "text-sky-700 underline" %> or <%= link_to "organization party", admin_new_organization_party_path, class: "text-sky-700 underline" %>.</p>
 <% end %>
 <%= form_with model: [:admin, @team_member], data: { turbo: false } do |f| %>
+  <%= tc_admin_return_navigation_hidden_fields %>
   <div class="mb-4">
     <%= f.label :party_id, "Party", class: "block text-sm font-medium text-slate-700 mb-1" %>
     <%= f.collection_select :party_id, @eligible_parties, :id, :display_name,

@@ -1,0 +1,6 @@
+<% @guided_route = :admin_guided_subcontractor_path %>
+<%= render "flow_steps",
+      flow_title: "Add subcontractor",
+      relationship_type: "subcontractor",
+      org_flow: false,
+      subcontractor_note: "Use Party hub → Party relationships for PartyRelationship rows; promote to workforce when ready." %>

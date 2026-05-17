@@ -79,15 +79,15 @@
           <% dtype = @document_types_by_id[a.document_type_id] %>
           <tr>
             <td class="tc-data-table__primary"><%= tm.party.display_name %></td>
-            <td class="font-mono"><%= link_to e.id, admin_engagement_path(e), class: tc_link_classes %></td>
+            <td class="font-mono"><%= link_to e.id, reports_drill_path(admin_engagement_path(e)), class: tc_link_classes %></td>
             <td class="font-mono"><%= a.alert_type %></td>
             <td><span class="<%= tc_status_badge_classes(a.severity) %>"><%= a.severity %></span></td>
             <td><%= dtype ? "#{dtype.name} (#{dtype.code})" : "##{a.document_type_id}" %></td>
             <td class="font-mono"><%= a.expires_on || "—" %></td>
-            <td><%= link_to "Team360", admin_team_member_team360_path(tm), class: tc_link_classes %></td>
+            <td><%= link_to "Team360", reports_team360_path(tm, engagement: e), class: tc_link_classes %></td>
             <td>
               <% if a.document_record_id %>
-                <%= link_to "Record", admin_document_record_path(a.document_record_id), class: tc_link_classes %>
+                <%= link_to "Record", reports_drill_path(admin_document_record_path(a.document_record_id)), class: tc_link_classes %>
               <% else %>—<% end %>
             </td>
           </tr>
