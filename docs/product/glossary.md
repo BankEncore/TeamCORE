@@ -945,3 +945,97 @@ Team360 should display authoritative information from underlying domain records.
 - Update this glossary when a later ADR changes terminology.
 - Link major terminology changes to the roadmap decision log or an ADR.
 - Keep Phase 1 identity, organization, and engagement terms stable before implementation begins.
+
+---
+
+### Workweek
+
+A **Workweek** is an agency-defined seven-day operational period used for:
+
+- overtime calculation
+- weekly timesheet grouping
+- operational reporting
+- employee time aggregation
+
+The workweek is distinct from the payroll pay period because overtime calculations may occur weekly while payroll periods may span multiple weeks.
+
+MVP workweeks are configured at the agency level.
+
+---
+
+### Pay Period
+
+A **Pay Period** is the operational payroll preparation period used for:
+
+- employee payroll summaries
+- payroll exports
+- payroll approvals
+- payroll reporting
+- Team360 payroll visibility
+
+Pay periods are automatically generated from agency payroll settings.
+
+In MVP, employee payroll pay periods remain distinct from contractor settlement cycles.
+
+---
+
+### Payroll Summary
+
+A **Payroll Summary** is the aggregated operational payroll view for an employee within a pay period.
+
+Payroll summaries may include:
+
+- regular hours
+- overtime hours
+- leave hours
+- total paid hours
+
+Payroll summaries support payroll preparation and export workflows but are not themselves statutory payroll calculations.
+
+---
+
+### Worked Hours
+
+**Worked Hours** are employee hours derived from approved worked time entries.
+
+Worked hours contribute toward overtime calculations and payroll totals.
+
+Worked hours are distinct from leave hours.
+
+---
+
+### Leave Hours
+
+**Leave Hours** are approved employee leave hours included in payroll summaries.
+
+Leave hours may contribute toward payable payroll totals but do not count toward overtime eligibility in MVP.
+
+---
+
+### Overtime Hours
+
+**Overtime Hours** are approved worked hours that exceed the agency-configured overtime threshold within a workweek.
+
+MVP overtime is based on weekly worked-hour aggregation.
+
+Approved leave hours do not contribute toward overtime thresholds.
+
+---
+
+### Closed Pay Period
+
+A **Closed Pay Period** is a finalized payroll preparation period that has completed payroll-processing preparation workflows.
+
+Closed periods are immutable by default and represent finalized payroll preparation/export posture for MVP operational workflows.
+
+Administrative override or reopening workflows may be introduced later.
+
+---
+
+### Payroll Export
+
+A **Payroll Export** is a generated payroll preparation artifact, typically CSV or XLSX, intended for external payroll processing systems.
+
+Multiple draft payroll exports may exist while a pay period remains open.
+
+The final export associated with pay period closure becomes the authoritative finalized payroll export for that period.

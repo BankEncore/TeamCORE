@@ -1,0 +1,268 @@
+# TC-23a — Work Calendar / Pay Period Foundation
+
+## Purpose
+
+Establish the foundational operational calendar and pay-period framework used by:
+
+- employee time tracking
+- weekly timesheets
+- overtime calculation
+- leave workflows
+- payroll preparation
+- payroll exports/imports
+- Team360 payroll visibility
+- operational payroll reporting
+
+TC-23a defines shared operational workforce-period semantics for employee payroll workflows before downstream Phase 5 implementation begins.
+
+TC-23a intentionally remains lightweight and operational in scope. TeamCORE is not a payroll tax engine or accounting platform.
+
+---
+
+# Scope
+
+## Included
+
+### Agency payroll/work-calendar configuration
+
+- Payroll frequency
+- Workweek start day
+- Agency payroll timezone
+- Weekly overtime threshold
+
+### Payroll period management
+
+- Automatic pay-period generation
+- Pay-period lifecycle (`open`, `closed`)
+- Payroll-period summaries
+- Payroll-period completeness validation
+- Payroll export linkage/history
+
+### Overtime foundations
+
+- Weekly overtime aggregation
+- Workweek boundary semantics
+- Worked-hours vs leave-hours distinction
+- Continuous overtime visibility
+
+### Payroll summary foundations
+
+- Regular hours
+- Overtime hours
+- Leave hours
+- Total paid hours
+
+### Payroll closure workflows
+
+- Closure validation
+- Administrative override posture
+- Capability-based closure authority
+
+---
+
+## Excluded
+
+### Not implemented by TC-23a
+
+- Employee time entry UX
+- Timesheet approval workflows
+- Leave approval workflows
+- Payroll tax calculations
+- Direct deposit
+- Contractor settlement periods
+- Scheduling/attendance systems
+- Shift planning
+- Payroll reconciliation engines
+- Multi-timezone workforce handling
+- Advanced overtime engines
+- Retro payroll engines
+
+---
+
+# Operational Model
+
+## Workweek
+
+A workweek:
+
+- is agency-configured
+- defaults to Monday
+- may start on any weekday
+- exists primarily for:
+  - overtime
+  - weekly timesheets
+  - reporting
+
+Workweeks are distinct from pay periods.
+
+---
+
+## Pay Period
+
+A pay period:
+
+- is a persisted operational payroll record
+- is automatically generated
+- supports payroll summaries
+- supports payroll exports
+- supports payroll reporting
+- supports Team360 visibility
+
+MVP frequencies:
+
+- weekly
+- biweekly
+- semimonthly
+- monthly
+
+Semimonthly periods use fixed halves:
+
+| Period | Dates |
+| --- | --- |
+| First | 1st–15th |
+| Second | 16th–end of month |
+
+---
+
+# Lifecycle
+
+## States
+
+| Status | Meaning |
+| --- | --- |
+| `open` | Editable operational payroll period |
+| `closed` | Finalized payroll-processing-complete period |
+
+---
+
+## Open periods
+
+Open periods:
+
+- allow time corrections
+- allow approvals
+- allow leave integration
+- allow payroll exports
+- allow multiple draft exports
+
+---
+
+## Closed periods
+
+Closed periods:
+
+- represent finalized payroll-processing posture
+- become immutable by default
+- should block standard editing
+- may support future administrative reopening
+
+---
+
+# Overtime Rules
+
+## MVP overtime
+
+MVP supports weekly overtime only.
+
+### Rules
+
+- Overtime is based on worked hours only.
+- Leave/PTO does not contribute toward overtime thresholds.
+- Overtime is derived from approved worked time.
+- Overtime visibility is continuous during the period.
+
+### Agency configuration
+
+| Setting | Default |
+| --- | --- |
+| `weekly_overtime_threshold_hours` | `40` |
+
+Future advanced overtime rules are deferred.
+
+---
+
+# Payroll Summary Structure
+
+| Field | Meaning |
+| --- | --- |
+| `regular_hours` | Approved worked non-overtime hours |
+| `overtime_hours` | Approved overtime worked hours |
+| `leave_hours` | Approved payable leave hours |
+| `total_paid_hours` | Regular + overtime + payable leave |
+
+---
+
+# Payroll Export Posture
+
+## Draft exports
+
+Open periods may generate multiple draft exports.
+
+## Final export
+
+The export associated with pay-period closure becomes the authoritative finalized export artifact.
+
+Exports should remain historically visible.
+
+---
+
+# Closure Rules
+
+## Closure validation
+
+Periods should not close when:
+
+- missing timesheets exist
+- pending approvals exist
+
+## Override
+
+Administrative override is allowed.
+
+## Authority
+
+Closure authority is capability/permission-based.
+
+---
+
+# Contractor Separation
+
+Employee payroll periods remain distinct from contractor settlement cycles.
+
+TC-23a intentionally avoids unifying:
+
+- payroll periods
+- contractor settlement periods
+- contractor settlement exports
+
+---
+
+# Reporting Expectations
+
+TC-23a supports future reporting for:
+
+- current pay-period status
+- missing timesheets
+- pending approvals
+- overtime visibility
+- payroll export history
+- employee hour summaries
+- employee timesheets
+
+---
+
+# Future-Compatible Areas
+
+TC-23a must leave room for:
+
+- payroll groups
+- multiple payroll schedules
+- advanced overtime rules
+- retro payroll adjustments
+- multi-state employees
+- scheduling integration
+- contractor time workflows
+- accrual engines
+- payroll APIs
+
+without requiring foundational redesign.
