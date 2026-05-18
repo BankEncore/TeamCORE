@@ -77,6 +77,22 @@ class FinancialsContractorSettlementComposeLineTest < ActiveSupport::TestCase
     assert_match(/not eligible|Engagement not eligible/i, err.message)
   end
 
+  test "rejects subcontractor engagement for settlement compose" do
+    sub = p4_active_subcontractor!(@agency)
+
+    err = assert_raises(ArgumentError) do
+      Financials::ContractorSettlement::ComposeLine.call(
+        run: @run,
+        engagement: sub[:engagement],
+        actor: @actor,
+        revenue_input_ids: [],
+        commission_calculation_ids: [],
+        contractor_charge_ids: []
+      )
+    end
+    assert_match(/not eligible|Engagement not eligible/i, err.message)
+  end
+
   test "rejects finalized run" do
     @run.update!(status: "finalized")
 

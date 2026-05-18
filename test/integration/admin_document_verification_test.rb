@@ -117,6 +117,48 @@ class AdminDocumentVerificationTest < ActionDispatch::IntegrationTest
     assert_equal "Alias", @record.display_name
   end
 
+  test "verified record updates expires_on via post-review patch" do
+    post verify_admin_document_record_path(@record)
+    exp = Date.new(2027, 12, 31)
+    patch admin_document_record_path(@record.reload), params: {
+      document_record: { expires_on: exp.iso8601 }
+    }
+    assert_redirected_to admin_document_record_path(@record)
+    @record.reload
+    assert_equal exp, @record.expires_on
+    assert_equal "verified", @record.status
+  end
+
+  test "post-review update ignores stripped engagement_id in params" do
+    party2 = Party.create!(agency: @agency, party_type: "person", display_name: "Other")
+    PersonProfile.create!(party: party2, first_name: "O", last_name: "Ther")
+    party2.reload
+    tm2 = TeamMember.create!(agency: @agency, party: party2)
+    other_engagement =
+      Engagement.create!(
+        agency: @agency,
+        team_member: tm2,
+        relationship_type: "employee",
+        status: "active",
+        start_on: Date.new(2026, 3, 1)
+      )
+
+    post verify_admin_document_record_path(@record)
+    patch admin_document_record_path(@record.reload), params: {
+      document_record: {
+        engagement_id: other_engagement.id,
+        expires_on: Date.new(2029, 1, 15).iso8601,
+        display_name: "Still Taylor"
+      }
+    }
+    assert_response :redirect
+    @record.reload
+    assert_equal @engagement.id, @record.engagement_id
+    assert_equal Date.new(2029, 1, 15), @record.expires_on
+    assert_equal "Still Taylor", @record.display_name
+    assert_equal "verified", @record.status
+  end
+
   test "agency isolation on review endpoints" do
     other_agency = Agency.create!(name: "Other VA", code: "ova#{SecureRandom.hex(4)}")
     outsider = Party.create!(agency: other_agency, party_type: "person", display_name: "Out")
