@@ -15,10 +15,7 @@ module Admin
       submitted_on issued_on expires_on
     ].freeze
 
-    POST_REVIEW_METADATA_FIELDS = %i[
-      display_name filename storage_key content_type byte_size
-      issued_on expires_on
-    ].freeze
+    POST_REVIEW_METADATA_FIELDS = Documents::PostReviewDocumentRecordPatch::ALLOWED_ATTRIBUTE_KEYS
 
     def index
       @document_records =
@@ -57,13 +54,28 @@ module Admin
     end
 
     def update
-      @document_record.assign_attributes(document_record_update_params)
       load_collections
 
-      if @document_record.save
-        redirect_after_admin_save admin_document_record_path(@document_record), notice: "Document record updated."
+      if @document_record.status == "submitted"
+        @document_record.assign_attributes(document_record_update_params)
+        if @document_record.save
+          redirect_after_admin_save admin_document_record_path(@document_record), notice: "Document record updated."
+        else
+          render :edit, status: :unprocessable_entity
+        end
       else
-        render :edit, status: :unprocessable_entity
+        result =
+          Documents::PostReviewDocumentRecordPatch.call(
+            document_record: @document_record,
+            attributes: document_record_update_params,
+            actor: current_user
+          )
+        if result.success?
+          redirect_after_admin_save admin_document_record_path(@document_record), notice: "Document record updated."
+        else
+          flash.now[:alert] = result.error_messages.to_sentence
+          render :edit, status: :unprocessable_entity
+        end
       end
     end
 
