@@ -237,6 +237,7 @@ class AdminPhase4FinancialsTest < ActionDispatch::IntegrationTest
       source_type: "manual"
     )
     Financials::ApplyCommissionAndDraw.call(revenue_input: rev, actor: @user)
+    CommissionCalculation.find_by!(revenue_input_id: rev.id).update!(status: "finalized")
 
     charge = ContractorCharge.create!(
       agency: @agency,
