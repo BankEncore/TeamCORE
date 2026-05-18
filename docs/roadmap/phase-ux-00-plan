@@ -1,0 +1,8 @@
+# Workspace-centric UX roadmap — UX-0 pointer
+
+UX-0 deliverables (locked IA, persona journeys, route baseline) now live in product docs:
+
+- [`docs/product/ux-design-guide.md`](../product/ux-design-guide.md) — workspace taxonomy, hub rules, TC-29 IA-only posture, Team360 + return conventions, hub→route mapping.
+- [`docs/product/journeys/README.md`](../product/journeys/README.md) — journey index, status vocabulary, `BankEncore/TeamCORE main @ …` route baseline, helper appendix.
+
+Phases **UX-1+** (hubs, search, Team360 next actions, guided checklist presenter, workbenches, deferred self-service spike) remain summarized inside the historical narrative that previously lived in this file; recover it from git history if needed. Prefer treating the UX guide + journeys as the authoritative UX-0 checkpoint going forward.
