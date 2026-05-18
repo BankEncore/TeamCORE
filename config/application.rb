@@ -23,5 +23,11 @@ module App
     #
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
+
+    # Local form_with embeds authenticity_token; remote defaults + data-turbo="false" POSTs fail CSRF.
+    config.action_view.form_with_generates_remote_forms = false
+
+    # Per-form tokens break submit buttons with formaction to a different path (settlement line composer).
+    config.action_controller.per_form_csrf_tokens = false
   end
 end

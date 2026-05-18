@@ -18,6 +18,7 @@ class FinancialsContractorSettlementExportServicesTest < ActiveSupport::TestCase
       source_type: "manual"
     )
     Financials::ApplyCommissionAndDraw.call(revenue_input: @rev, actor: @actor)
+    CommissionCalculation.find_by!(revenue_input_id: @rev.id).update!(status: "finalized")
 
     @run = ContractorSettlementRun.create!(
       agency: @agency,

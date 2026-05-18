@@ -59,6 +59,38 @@ Line-level adjustments: `manual_adjustment_positive_cents` / `manual_adjustment_
 | Date | Notes |
 | --- | --- |
 | 2026-05-16 | Hybrid totals + joins; `ComposeLine` caps deductions so net ≥ 0. |
+| 2026-05-17 | `LineComputation`, `PreviewLine`, `SettlementComposerCandidates`; admin line composer UI; void blocked when lines exist; compose allowed on `draft` or `calculated` runs for additional engagements. |
+
+---
+
+## 3. Settlement line composer (preview + commit)
+
+### Decisions (locked)
+
+1. **Already settled:** `CommissionCalculation` rows linked to any `ContractorSettlementLine` whose run is **not** `voided` cannot be composed again; enforced in UI defaults and in `ComposeLine`.
+2. **Finalized + period overlap:** Only **`finalized`** calculations whose **`revenue_input`** period overlaps the settlement run (`period_start_on` / `period_end_on`) are eligible candidates.
+3. **Charges:** Only **`ContractorCharge.status = open`** with **`open_balance_cents > 0`** participate; ordering for deductions is **`due_on IS NULL` first**, then **`due_on ASC`**, then **`id ASC`** (nil due = immediately due).
+4. **Formula:** `net = gross_commission + manual_addition − manual_reduction − charge_deductions` (manual reductions are **not** `ContractorChargeRecovery`).
+5. **Primary operator path:** Select **commission calculations**; **revenue inputs** are derived from those calculations for join rows. Legacy **`revenue_input_ids`** inference remains supported for seeds/tests.
+6. **One line per engagement per run:** `ComposeLine` rejects a second line for the same `engagement_id` on the same run.
+7. **`PreviewLine`:** Read-only (no lines, recoveries, or charge mutations).
+8. **`ComposeLine`:** Mutates charges/recoveries immediately; run may still be `draft` or `calculated` when adding lines for **different** engagements.
+9. **Void:** While **`contractor_settlement_lines` exist**, **void is blocked** in admin (recoveries are not reversed in this slice). **Future:** `ReverseLine` / `VoidRunWithReversal`.
+
+### Services
+
+| Piece | Role |
+| --- | --- |
+| `Financials::ContractorSettlement::LineComputation` | Pure gross / manual / per-charge deductions / net validation. |
+| `Financials::ContractorSettlement::SettlementComposerCandidates` | Eligible commission/charge rows + default flags + settled calc detection. |
+| `Financials::ContractorSettlement::PreviewLine` | Builds preview result + warnings; calls `LineComputation` (waterfall or explicit per-charge cents). |
+| `Financials::ContractorSettlement::ComposeLine` | Transactional commit; shares math with preview; optional `charge_deductions_cents_by_id` for partial deductions. |
+
+### Admin routes
+
+- **`GET`** `line_composer` — engagement-specific composer with defaults.
+- **`POST`** `preview_settlement_line` — recompute preview from posted selections (same screen).
+- **`POST`** `compose_line` — commit (array params + optional `charge_deductions[id]` dollar fields parsed to cents).
 
 ---
 
@@ -71,7 +103,7 @@ Line-level adjustments: `manual_adjustment_positive_cents` / `manual_adjustment_
 ### Settlement lifecycle (admin)
 
 - **`finalize`:** from `draft` or `calculated` → `finalized` (+ event).
-- **`void`:** from `draft`, `calculated`, or `finalized` → `voided` (+ `voided` event, optional reason).
+- **`void`:** from `draft`, `calculated`, or `finalized` **only when the run has zero settlement lines** → `voided` (+ `voided` event). If lines exist, void is **blocked** until a reversal workflow reverses recoveries (not in current MVP slice).
 - **`mark_paid`:** from `finalized` only → `paid_recorded` (+ `payment_recorded` event).
 - Settlement **show** lists run events (audit trail).
 
@@ -80,6 +112,7 @@ Line-level adjustments: `manual_adjustment_positive_cents` / `manual_adjustment_
 | Date | Notes |
 | --- | --- |
 | 2026-05-16 | `contractor_settlement_run_events`; void / mark paid wired in admin. |
+| 2026-05-17 | Void gated when composed lines exist; settlement composer + preview services. |
 
 See [workforce-financial-modeling.md](workforce-financial-modeling.md) for cross-domain “no generic financial blob” posture.
 

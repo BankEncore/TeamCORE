@@ -7,7 +7,7 @@
     <%= button_to "Finalize", finalize_admin_contractor_settlement_run_path(@run), method: :post, class: "tc-btn tc-btn--primary" %>
   <% end %>
   <% if @run.status == "finalized" %>
-    <%= form_with url: mark_paid_admin_contractor_settlement_run_path(@run), method: :post, class: "mt-3 flex flex-wrap gap-2 items-end max-w-xl" do %>
+    <%= form_with url: mark_paid_admin_contractor_settlement_run_path(@run), method: :post, local: true, data: { turbo: false }, class: "mt-3 flex flex-wrap gap-2 items-end max-w-xl" do %>
       <div class="tc-field flex-1 min-w-[12rem]">
         <%= label_tag :reason, "Payment note (optional)", class: "tc-label" %>
         <%= text_field_tag :reason, nil, class: "tc-input", placeholder: "Check #, date, memo" %>
@@ -16,12 +16,18 @@
     <% end %>
   <% end %>
   <% if @run.status.in?(%w[draft calculated finalized]) %>
-    <%= form_with url: void_admin_contractor_settlement_run_path(@run), method: :post, class: "mt-3 space-y-2 max-w-xl" do %>
-      <div class="tc-field">
-        <%= label_tag :reason, "Void reason (optional)", class: "tc-label" %>
-        <%= text_field_tag :reason, nil, class: "tc-input", placeholder: "Why this run is voided" %>
-      </div>
-      <%= submit_tag "Void run", class: "tc-btn tc-btn--quiet" %>
+    <% if @lines.empty? %>
+      <%= form_with url: void_admin_contractor_settlement_run_path(@run), method: :post, local: true, data: { turbo: false }, class: "mt-3 space-y-2 max-w-xl" do %>
+        <div class="tc-field">
+          <%= label_tag :reason, "Void reason (optional)", class: "tc-label" %>
+          <%= text_field_tag :reason, nil, class: "tc-input", placeholder: "Why this run is voided" %>
+        </div>
+        <%= submit_tag "Void run", class: "tc-btn tc-btn--quiet" %>
+      <% end %>
+    <% else %>
+      <p class="text-sm text-slate-600 mt-3 max-w-xl">
+        Void is unavailable while this run has composed settlement lines (charge recoveries already applied).
+      </p>
     <% end %>
   <% end %>
 
@@ -126,36 +132,24 @@
     </div>
   <% end %>
 
-  <% if @run.status == "draft" %>
-    <h2 class="text-lg font-semibold mt-6">Add line (MVP)</h2>
-    <%= form_with url: compose_line_admin_contractor_settlement_run_path(@run), method: :post, class: "space-y-3 max-w-xl" do %>
-      <div class="tc-field">
-        <%= label_tag :engagement_id, "Contractor engagement", class: "tc-label" %>
-        <%= select_tag :engagement_id,
-              options_from_collection_for_select(@contractor_engagements, :id, ->(e) { "##{e.id} #{e.team_member.party.display_name} (#{e.relationship_type})" }),
-              class: "tc-select" %>
-      </div>
-      <div class="tc-field">
-        <%= label_tag :revenue_input_ids, "Revenue input IDs (comma)", class: "tc-label" %>
-        <%= text_field_tag :revenue_input_ids, nil, class: "tc-input" %>
-      </div>
-      <div class="tc-field">
-        <%= label_tag :commission_calculation_ids, "Commission calc IDs (comma, optional)", class: "tc-label" %>
-        <%= text_field_tag :commission_calculation_ids, nil, class: "tc-input" %>
-      </div>
-      <div class="tc-field">
-        <%= label_tag :contractor_charge_ids, "Charge IDs (comma)", class: "tc-label" %>
-        <%= text_field_tag :contractor_charge_ids, nil, class: "tc-input" %>
-      </div>
-      <div class="tc-field">
-        <%= label_tag :manual_positive_money, "Manual + (dollars)", class: "tc-label" %>
-        <%= text_field_tag :manual_positive_money, "0.00", class: "tc-input", placeholder: "0.00", inputmode: "decimal", autocomplete: "off" %>
-      </div>
-      <div class="tc-field">
-        <%= label_tag :manual_negative_money, "Manual − (dollars)", class: "tc-label" %>
-        <%= text_field_tag :manual_negative_money, "0.00", class: "tc-input", placeholder: "0.00", inputmode: "decimal", autocomplete: "off" %>
-      </div>
-      <%= submit_tag "Compose line", class: "tc-btn tc-btn--secondary" %>
+  <% if @run.status.in?(%w[draft calculated]) %>
+    <% eng_opts = @contractor_engagements.reject { |e| @lines.any? { |ln| ln.engagement_id == e.id } } %>
+    <% if eng_opts.any? %>
+      <h2 class="text-lg font-semibold mt-6">Add settlement line</h2>
+      <%= form_with url: line_composer_admin_contractor_settlement_run_path(@run), method: :get, class: "flex flex-wrap gap-3 items-end max-w-xl" do %>
+        <div class="tc-field flex-1 min-w-[14rem]">
+          <%= label_tag :engagement_id, "Contractor engagement", class: "tc-label" %>
+          <%= select_tag :engagement_id,
+                options_from_collection_for_select(eng_opts, :id, ->(e) { "##{e.id} #{e.team_member.party.display_name} (#{e.relationship_type})" }),
+                class: "tc-select" %>
+        </div>
+        <%= submit_tag "Open line composer", class: "tc-btn tc-btn--secondary" %>
+      <% end %>
+      <p class="text-xs text-slate-600 mt-2 max-w-xl">
+        Select commissions and charges with a net preview before composing. At most one line per engagement on this run.
+      </p>
+    <% else %>
+      <p class="text-sm text-slate-600 mt-6 max-w-xl">Every contractor engagement already has a settlement line on this run.</p>
     <% end %>
   <% end %>
 
