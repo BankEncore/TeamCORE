@@ -19,6 +19,7 @@ class FinancialsContractorSettlementComposeLineTest < ActiveSupport::TestCase
     )
     Financials::ApplyCommissionAndDraw.call(revenue_input: @rev, actor: @actor)
     @calc = CommissionCalculation.find_by!(revenue_input_id: @rev.id)
+    @calc.update!(status: "finalized")
 
     @charge = ContractorCharge.create!(
       agency: @agency,
@@ -106,6 +107,51 @@ class FinancialsContractorSettlementComposeLineTest < ActiveSupport::TestCase
         contractor_charge_ids: []
       )
     end
-    assert_match(/draft/i, err.message)
+    assert_match(/draft or calculated/i, err.message)
+  end
+
+  test "rejects second line for same engagement on same run" do
+    Financials::ContractorSettlement::ComposeLine.call(
+      run: @run,
+      engagement: @ic[:engagement],
+      actor: @actor,
+      revenue_input_ids: [ @rev.id ],
+      commission_calculation_ids: [],
+      contractor_charge_ids: [],
+      manual_positive: 0,
+      manual_negative: 0
+    )
+
+    err = assert_raises(ArgumentError) do
+      Financials::ContractorSettlement::ComposeLine.call(
+        run: @run,
+        engagement: @ic[:engagement],
+        actor: @actor,
+        revenue_input_ids: [ @rev.id ],
+        commission_calculation_ids: [],
+        contractor_charge_ids: [],
+        manual_positive: 0,
+        manual_negative: 0
+      )
+    end
+    assert_match(/already exists/i, err.message)
+  end
+
+  test "rejects draft commission calculation" do
+    @calc.update!(status: "draft")
+
+    err = assert_raises(ArgumentError) do
+      Financials::ContractorSettlement::ComposeLine.call(
+        run: @run,
+        engagement: @ic[:engagement],
+        actor: @actor,
+        revenue_input_ids: [ @rev.id ],
+        commission_calculation_ids: [],
+        contractor_charge_ids: [],
+        manual_positive: 0,
+        manual_negative: 0
+      )
+    end
+    assert_match(/finalized/i, err.message)
   end
 end

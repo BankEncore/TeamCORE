@@ -4,7 +4,7 @@
   <% if flash[:alert].present? %>
     <p class="text-red-700 text-sm mb-4"><%= flash[:alert] %></p>
   <% end %>
-  <%= form_with url: login_path, method: :post, data: { turbo: false } do |f| %>
+  <%= form_with url: login_path, method: :post, local: true, data: { turbo: false } do |f| %>
     <div class="mb-3">
       <%= label_tag :email, "Email", class: "block text-sm font-medium text-slate-700 mb-1" %>
       <%= email_field_tag :email, params[:email], class: "w-full border border-slate-300 rounded px-3 py-2", autocomplete: "username" %>

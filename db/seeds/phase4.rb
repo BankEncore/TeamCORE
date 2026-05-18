@@ -150,6 +150,10 @@ co_rev.assign_attributes(
 co_rev.save!
 Financials::ApplyCommissionAndDraw.call(revenue_input: co_rev, actor: admin_user)
 
+[ robert_manual, robert_imported, co_rev ].each do |rev|
+  CommissionCalculation.where(revenue_input_id: rev.id).update_all(status: "finalized")
+end
+
 equipment_charge = ContractorCharge.find_or_initialize_by(
   agency:,
   engagement: robert_eng,

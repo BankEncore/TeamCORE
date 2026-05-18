@@ -92,6 +92,8 @@ Rails.application.routes.draw do
     resources :contractor_charges, only: %i[index], controller: "contractor_charge_queue"
     resources :contractor_settlement_runs, only: %i[index show new create] do
       member do
+        get :line_composer
+        post :preview_settlement_line
         post :finalize
         post :compose_line
         post :void

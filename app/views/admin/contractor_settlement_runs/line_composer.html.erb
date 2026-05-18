@@ -1,0 +1,158 @@
+<% content_for :title, "Settlement line composer — run ##{@run.id}" %>
+<div class="tc-page-stack">
+  <%= link_to "← Run ##{@run.id}", admin_contractor_settlement_run_path(@run), class: "text-sm #{tc_link_classes}" %>
+  <h1 class="text-2xl font-semibold">Compose settlement line</h1>
+  <p class="text-sm font-mono">
+    Run <%= @run.period_start_on %> – <%= @run.period_end_on %> · <%= @run.status %>
+    · Engagement #<%= @engagement.id %> <%= @engagement.relationship_type %>
+    <% if @engagement.team_member&.party %>
+      · <%= @engagement.team_member.party.display_name %>
+    <% end %>
+  </p>
+
+  <div class="rounded border border-amber-200 bg-amber-50 text-amber-950 text-sm p-3 mt-4 max-w-3xl">
+    Confirm the preview below before composing. Composing creates recoveries and updates contractor charge balances immediately.
+  </div>
+
+  <% if @preview.warnings.any? %>
+    <div class="rounded border border-slate-200 bg-slate-50 text-sm p-3 mt-3 max-w-3xl">
+      <div class="font-semibold mb-1">Warnings</div>
+      <ul class="list-disc list-inside space-y-1">
+        <% @preview.warnings.each do |w| %>
+          <li class="font-mono text-xs"><%= w.inspect %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <% mp_default = sprintf("%.2f", @preview.computation.manual_adjustment_positive_cents / 100.0) %>
+  <% mn_default = sprintf("%.2f", @preview.computation.manual_adjustment_negative_cents / 100.0) %>
+  <% ch_params = params[:charge_deductions] %>
+
+  <%= form_with url: preview_settlement_line_admin_contractor_settlement_run_path(@run),
+        method: :post,
+        local: true,
+        data: { turbo: false },
+        html: { class: "mt-6 space-y-6 max-w-5xl", autocomplete: "off" } do %>
+    <%= hidden_field_tag :engagement_id, @engagement.id %>
+    <%= hidden_field_tag :include_future_due, "0" %>
+    <label class="inline-flex items-center gap-2 text-sm">
+      <%= check_box_tag :include_future_due, "1", params[:include_future_due] == "1", id: "include_future_due_cb", class: "rounded border-slate-300" %>
+      Include future-due charges as selectable (unchecked by default)
+    </label>
+
+    <section>
+      <h2 class="text-lg font-semibold mb-2">Commission calculations</h2>
+      <p class="text-xs text-slate-600 mb-2">Select finalized calculations for this engagement; revenue inputs are linked automatically.</p>
+      <div class="tc-table-wrap">
+        <table class="tc-data-table text-xs">
+          <thead>
+            <tr>
+              <th>Include</th>
+              <th>ID</th>
+              <th>Status</th>
+              <th>Gross commission</th>
+              <th>Revenue period</th>
+              <th>Note</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @preview.commission_candidate_rows.each do |row| %>
+              <% disabled = row.exclusion_reason == :already_on_run %>
+              <tr class="<%= 'opacity-60' if disabled %>">
+                <td>
+                  <% unless disabled %>
+                    <%= check_box_tag "commission_calculation_ids[]", row.calculation.id, @preview.selected_commission_calculation_ids.include?(row.calculation.id), id: "commission_calc_#{row.calculation.id}", class: "rounded border-slate-300" %>
+                  <% end %>
+                </td>
+                <td class="font-mono"><%= row.calculation.id %></td>
+                <td><%= row.calculation.status %></td>
+                <td><%= tc_money(row.calculation.gross_commission_pay_cents) %></td>
+                <td class="font-mono whitespace-nowrap">
+                  <% if row.calculation.revenue_input %>
+                    <%= row.calculation.revenue_input.period_start_on %> – <%= row.calculation.revenue_input.period_end_on %>
+                  <% else %>
+                    —
+                  <% end %>
+                </td>
+                <td><%= row.exclusion_reason&.to_s&.humanize || "—" %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="text-lg font-semibold mb-2">Open contractor charges</h2>
+      <p class="text-xs text-slate-600 mb-2">Due date sort: nil due first, then earliest due. Adjust “Deduct now” before composing if needed.</p>
+      <div class="tc-table-wrap">
+        <table class="tc-data-table text-xs">
+          <thead>
+            <tr>
+              <th>Include</th>
+              <th>ID</th>
+              <th>Type</th>
+              <th>Due</th>
+              <th>Open balance</th>
+              <th>Deduct now ($)</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @preview.charge_candidate_rows.each do |row| %>
+              <% cr = @preview.computation.charge_rows.find { |r| r.contractor_charge_id == row.charge.id } %>
+              <% default_d = cr ? sprintf("%.2f", cr.deduct_now_cents / 100.0) : "0.00" %>
+              <% raw_v = ch_params&.dig(row.charge.id.to_s) || ch_params&.dig(row.charge.id) %>
+              <tr>
+                <td>
+                  <%= check_box_tag "contractor_charge_ids[]", row.charge.id, @preview.selected_contractor_charge_ids.include?(row.charge.id), id: "charge_#{row.charge.id}", class: "rounded border-slate-300" %>
+                </td>
+                <td class="font-mono"><%= row.charge.id %></td>
+                <td><%= row.charge.charge_type %></td>
+                <td class="font-mono"><%= row.charge.due_on&.iso8601 || "—" %></td>
+                <td><%= tc_money(row.charge.open_balance_cents) %></td>
+                <td>
+                  <%= text_field_tag "charge_deductions[#{row.charge.id}]", raw_v.presence || default_d, class: "tc-input font-mono text-xs py-1 max-w-[7rem]", autocomplete: "off" %>
+                </td>
+                <td class="text-slate-600">
+                  <%= row.warnings.map(&:to_s).join(", ") %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="grid gap-4 sm:grid-cols-2 max-w-xl">
+      <div class="tc-field">
+        <%= label_tag :manual_positive_money, "Manual addition ($)", class: "tc-label" %>
+        <%= text_field_tag :manual_positive_money, params.fetch(:manual_positive_money, mp_default), class: "tc-input", autocomplete: "off" %>
+      </div>
+      <div class="tc-field">
+        <%= label_tag :manual_negative_money, "Manual reduction ($)", class: "tc-label" %>
+        <%= text_field_tag :manual_negative_money, params.fetch(:manual_negative_money, mn_default), class: "tc-input", autocomplete: "off" %>
+      </div>
+    </section>
+
+    <section class="rounded border border-slate-200 p-4 bg-white max-w-xl">
+      <h2 class="text-sm font-semibold mb-2">Preview totals</h2>
+      <dl class="text-sm space-y-1 font-mono">
+        <div class="flex justify-between gap-4"><dt>Gross commission</dt><dd><%= tc_money(@preview.computation.gross_commission_cents) %></dd></div>
+        <div class="flex justify-between gap-4"><dt>Manual addition</dt><dd><%= tc_money(@preview.computation.manual_adjustment_positive_cents) %></dd></div>
+        <div class="flex justify-between gap-4"><dt>Manual reduction</dt><dd><%= tc_money(@preview.computation.manual_adjustment_negative_cents) %></dd></div>
+        <div class="flex justify-between gap-4"><dt>Charge deductions</dt><dd><%= tc_money(@preview.computation.total_charge_deductions_cents) %></dd></div>
+        <div class="flex justify-between gap-4 font-semibold pt-2 border-t border-slate-100"><dt>Net settlement</dt><dd><%= tc_money(@preview.computation.net_settlement_cents) %></dd></div>
+      </dl>
+    </section>
+
+    <div class="flex flex-wrap gap-2">
+      <%= submit_tag "Update preview", class: "tc-btn tc-btn--secondary", data: { turbo: false } %>
+      <%= submit_tag "Compose settlement line",
+            class: "tc-btn tc-btn--primary",
+            formaction: compose_line_admin_contractor_settlement_run_path(@run),
+            data: { turbo: false } %>
+    </div>
+  <% end %>
+</div>

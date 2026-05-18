@@ -5,7 +5,7 @@
   <%= link_to "New revenue row", new_admin_engagement_revenue_input_path(@engagement), class: "tc-btn tc-btn--primary" %>
 
   <h2 class="text-sm font-semibold mt-6 mb-2">Import CSV</h2>
-  <%= form_with url: import_csv_admin_engagement_revenue_inputs_path(@engagement), method: :post, multipart: true, class: "flex flex-wrap gap-2 items-end" do %>
+  <%= form_with url: import_csv_admin_engagement_revenue_inputs_path(@engagement), method: :post, local: true, data: { turbo: false }, multipart: true, class: "flex flex-wrap gap-2 items-end" do %>
     <%= file_field_tag :csv_file, accept: "text/csv,.csv", class: "text-sm" %>
     <%= submit_tag "Upload", class: "tc-btn tc-btn--secondary" %>
   <% end %>
