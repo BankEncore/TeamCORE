@@ -19,6 +19,8 @@
 - **`ContractorCharge`** — agency, engagement, `charge_type`, `status`, money columns, optional `due_on`, `description`.
 - **`ContractorChargeWaiver`** — amount, actor, reason; drives balance / status updates on the charge (see model).
 - **`ContractorChargeRecovery`** — `source_type`, `amount_cents`, `occurred_on`, optional `contractor_settlement_line_id` when applied in settlement, optional `actor`.
+  - **`settlement_deduction`** — applied when composing a settlement line; reduces `open_balance_cents` on the charge.
+  - **`settlement_deduction_reversal`** — audit row when a settlement run is voided; balance is restored on the charge explicitly (not derived from summing recoveries). Original `settlement_deduction` rows are retained.
 
 ### Relationship-type guards
 
@@ -39,6 +41,7 @@ Use **targeted**, queryable rows — not a generic financial JSON blob ([workfor
 | Date | Notes |
 | --- | --- |
 | 2026-05-16 | `contractor_charges`, `contractor_charge_waivers`, `contractor_charge_recoveries` with `actor` where applicable. |
+| 2026-05-18 | `settlement_deduction_reversal` source type for void-with-reversal on settlement runs. |
 
 ---
 

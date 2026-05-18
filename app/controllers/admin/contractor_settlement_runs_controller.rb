@@ -61,28 +61,14 @@ module Admin
     end
 
     def void
-      unless @run.status.in?(%w[draft calculated finalized])
-        redirect_to admin_contractor_settlement_run_path(@run), alert: "Run cannot be voided from #{@run.status}."
-        return
-      end
-
-      if @run.contractor_settlement_lines.exists?
-        redirect_to admin_contractor_settlement_run_path(@run),
-          alert: "This settlement run has composed lines and cannot be voided until reversal support exists."
-        return
-      end
-
-      reason = params[:reason].to_s.strip.presence || "Voided by admin"
-      ContractorSettlementRun.transaction do
-        @run.update!(status: "voided")
-        ContractorSettlementRunEvent.create!(
-          contractor_settlement_run: @run,
-          event_type: "voided",
-          actor: current_user,
-          reason:
-        )
-      end
-      redirect_to admin_contractor_settlement_run_path(@run), notice: "Settlement run voided."
+      Financials::ContractorSettlement::VoidRunWithReversal.call(
+        run: @run,
+        actor: current_user,
+        reason: params[:reason]
+      )
+      redirect_to admin_contractor_settlement_run_path(@run), notice: "Settlement run voided. Charge balances restored where applicable."
+    rescue Financials::ContractorSettlement::VoidRunWithReversal::Error => e
+      redirect_to admin_contractor_settlement_run_path(@run), alert: e.message
     end
 
     def mark_paid

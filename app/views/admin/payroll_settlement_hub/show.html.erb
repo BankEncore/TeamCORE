@@ -10,17 +10,29 @@
     </div>
   </header>
 
-  <div class="tc-panel">
-    <div class="tc-panel__header">
-      <div class="tc-panel__title">Launch</div>
-    </div>
-    <div class="tc-panel__body text-sm space-y-2">
-      <ul class="m-0 list-none space-y-2 p-0">
-        <li><%= link_to "Pay periods", admin_pay_periods_path, class: tc_link_classes %></li>
-        <li><%= link_to "Contractor charges", admin_contractor_charges_path, class: tc_link_classes %></li>
-        <li><%= link_to "Contractor settlement runs", admin_contractor_settlement_runs_path, class: tc_link_classes %></li>
-        <li><%= link_to "Payroll adjustment codes", admin_payroll_adjustment_codes_path, class: tc_link_classes %></li>
-      </ul>
-    </div>
+  <div class="grid gap-4 md:grid-cols-2">
+    <section class="tc-panel">
+      <div class="tc-panel__header">
+        <div class="tc-panel__title">Payroll</div>
+      </div>
+      <div class="tc-panel__body text-sm space-y-2">
+        <ul class="m-0 list-none space-y-2 p-0">
+          <li><%= link_to "Pay periods", admin_pay_periods_path, class: tc_link_classes %></li>
+          <li><%= link_to "Payroll adjustment codes", admin_payroll_adjustment_codes_path, class: tc_link_classes %></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="tc-panel">
+      <div class="tc-panel__header">
+        <div class="tc-panel__title">Contractor settlements</div>
+      </div>
+      <div class="tc-panel__body text-sm space-y-2">
+        <ul class="m-0 list-none space-y-2 p-0">
+          <li><%= link_to "Contractor charges", admin_contractor_charges_path, class: tc_link_classes %></li>
+          <li><%= link_to "Contractor settlement runs", admin_contractor_settlement_runs_path, class: tc_link_classes %></li>
+        </ul>
+      </div>
+    </section>
   </div>
 </div>

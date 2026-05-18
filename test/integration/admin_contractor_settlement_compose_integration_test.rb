@@ -39,22 +39,39 @@ class AdminContractorSettlementComposeIntegrationTest < ActionDispatch::Integrat
     follow_redirect!
   end
 
-  test "void is blocked after composed lines exist" do
+  test "void succeeds after composed lines and restores charge state" do
+    charge = ContractorCharge.create!(
+      agency: @agency,
+      engagement: @engagement,
+      charge_type: "technology_fee",
+      status: "open",
+      original_amount_cents: 100_000,
+      open_balance_cents: 100_000
+    )
+
     Financials::ContractorSettlement::ComposeLine.call(
       run: @run,
       engagement: @engagement,
       actor: @user,
       revenue_input_ids: [ @rev.id ],
       commission_calculation_ids: [],
-      contractor_charge_ids: [],
+      contractor_charge_ids: [ charge.id ],
       manual_positive: 0,
       manual_negative: 0
     )
+    charge.reload
+    assert_operator charge.open_balance_cents, :<, 100_000
 
-    post void_admin_contractor_settlement_run_path(@run), params: { reason: "try void" }
+    post void_admin_contractor_settlement_run_path(@run), params: { reason: "wrong selections" }
     assert_redirected_to admin_contractor_settlement_run_path(@run)
     follow_redirect!
-    assert_match(/cannot be voided|reversal/i, flash[:alert].to_s)
+    assert_match(/voided/i, flash[:notice].to_s)
+
+    @run.reload
+    charge.reload
+    assert_equal "voided", @run.status
+    assert_equal 100_000, charge.open_balance_cents
+    assert ContractorChargeRecovery.exists?(source_type: "settlement_deduction_reversal", contractor_charge_id: charge.id)
   end
 
   test "line composer includes authenticity token when forgery protection is enabled" do

@@ -15,20 +15,29 @@
       <%= submit_tag "Mark paid", class: "tc-btn tc-btn--secondary" %>
     <% end %>
   <% end %>
-  <% if @run.status.in?(%w[draft calculated finalized]) %>
-    <% if @lines.empty? %>
-      <%= form_with url: void_admin_contractor_settlement_run_path(@run), method: :post, local: true, data: { turbo: false }, class: "mt-3 space-y-2 max-w-xl" do %>
+  <% voidable = @run.status.in?(%w[draft calculated finalized]) && @settlement_exports.empty? %>
+  <% if voidable %>
+    <div class="mt-3 max-w-xl space-y-2">
+      <% if @lines.any? %>
+        <p class="text-sm text-slate-600">
+          Voiding restores contractor charge balances, records reversal recoveries for audit, and frees commission calculations for a future run.
+          Settlement lines on this run are kept for history.
+        </p>
+      <% end %>
+      <%= form_with url: void_admin_contractor_settlement_run_path(@run), method: :post, local: true, data: { turbo: false }, class: "space-y-2" do %>
         <div class="tc-field">
-          <%= label_tag :reason, "Void reason (optional)", class: "tc-label" %>
-          <%= text_field_tag :reason, nil, class: "tc-input", placeholder: "Why this run is voided" %>
+          <%= label_tag :reason, "Void reason (required)", class: "tc-label" %>
+          <%= text_field_tag :reason, nil, class: "tc-input", placeholder: "Why this run is voided", required: true %>
         </div>
         <%= submit_tag "Void run", class: "tc-btn tc-btn--quiet" %>
       <% end %>
-    <% else %>
-      <p class="text-sm text-slate-600 mt-3 max-w-xl">
-        Void is unavailable while this run has composed settlement lines (charge recoveries already applied).
-      </p>
-    <% end %>
+    </div>
+  <% elsif @run.status == "paid_recorded" %>
+    <p class="text-sm text-slate-600 mt-3 max-w-xl">Paid settlement runs cannot be voided.</p>
+  <% elsif @run.status == "voided" %>
+    <p class="text-sm text-slate-600 mt-3 max-w-xl">This settlement run is voided.</p>
+  <% elsif @run.status.in?(%w[draft calculated finalized]) && @settlement_exports.any? %>
+    <p class="text-sm text-slate-600 mt-3 max-w-xl">Settlement runs with exports cannot be voided.</p>
   <% end %>
 
   <h2 class="text-lg font-semibold mt-6">Lines</h2>

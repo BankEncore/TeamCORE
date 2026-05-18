@@ -63,10 +63,15 @@ class AdminWorkspaceHubsTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "payroll settlement hub links contractor charges" do
+  test "payroll settlement hub two column layout and links" do
     get admin_payroll_settlement_hub_path
     assert_response :success
+    assert_select ".tc-panel__title", text: "Payroll"
+    assert_select ".tc-panel__title", text: "Contractor settlements"
+    assert_select "a[href='#{admin_pay_periods_path}']", text: "Pay periods"
+    assert_select "a[href='#{admin_payroll_adjustment_codes_path}']", text: "Payroll adjustment codes"
     assert_select "a[href='#{admin_contractor_charges_path}']", text: "Contractor charges"
+    assert_select "a[href='#{admin_contractor_settlement_runs_path}']", text: "Contractor settlement runs"
   end
 
   test "search lists team members section before parties section when both hit" do

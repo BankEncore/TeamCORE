@@ -59,7 +59,7 @@ Line-level adjustments: `manual_adjustment_positive_cents` / `manual_adjustment_
 | Date | Notes |
 | --- | --- |
 | 2026-05-16 | Hybrid totals + joins; `ComposeLine` caps deductions so net ≥ 0. |
-| 2026-05-17 | `LineComputation`, `PreviewLine`, `SettlementComposerCandidates`; admin line composer UI; void blocked when lines exist; compose allowed on `draft` or `calculated` runs for additional engagements. |
+| 2026-05-17 | `LineComputation`, `PreviewLine`, `SettlementComposerCandidates`; admin line composer UI; compose allowed on `draft` or `calculated` runs for additional engagements. |
 
 ---
 
@@ -75,7 +75,7 @@ Line-level adjustments: `manual_adjustment_positive_cents` / `manual_adjustment_
 6. **One line per engagement per run:** `ComposeLine` rejects a second line for the same `engagement_id` on the same run.
 7. **`PreviewLine`:** Read-only (no lines, recoveries, or charge mutations).
 8. **`ComposeLine`:** Mutates charges/recoveries immediately; run may still be `draft` or `calculated` when adding lines for **different** engagements.
-9. **Void:** While **`contractor_settlement_lines` exist**, **void is blocked** in admin (recoveries are not reversed in this slice). **Future:** `ReverseLine` / `VoidRunWithReversal`.
+9. **Void with reversal (unpaid, unexported runs):** Runs in `draft`, `calculated`, or `finalized` may be voided when **not** `paid_recorded`, **no** settlement exports exist, and the operator supplies a **required** void reason. **Finalized but unexported** means internally approved but not yet sent externally; void is allowed with reversal. Voiding keeps settlement lines and join rows; restores charge `open_balance_cents`; creates `settlement_deduction_reversal` recovery rows (original `settlement_deduction` rows are retained). Commission calculations and revenue inputs are not mutated; calcs on voided runs become composer-eligible again. See [contractor-charges.md](contractor-charges.md) for reversal `source_type`. MVP does not support void after pay/export, per-line undo UI, or auto-replacement runs.
 
 ### Services
 
@@ -85,6 +85,7 @@ Line-level adjustments: `manual_adjustment_positive_cents` / `manual_adjustment_
 | `Financials::ContractorSettlement::SettlementComposerCandidates` | Eligible commission/charge rows + default flags + settled calc detection. |
 | `Financials::ContractorSettlement::PreviewLine` | Builds preview result + warnings; calls `LineComputation` (waterfall or explicit per-charge cents). |
 | `Financials::ContractorSettlement::ComposeLine` | Transactional commit; shares math with preview; optional `charge_deductions_cents_by_id` for partial deductions. |
+| `Financials::ContractorSettlement::VoidRunWithReversal` | Transactional void: reverse settlement deductions, mark run `voided`, append event. |
 
 ### Admin routes
 
@@ -103,7 +104,7 @@ Line-level adjustments: `manual_adjustment_positive_cents` / `manual_adjustment_
 ### Settlement lifecycle (admin)
 
 - **`finalize`:** from `draft` or `calculated` → `finalized` (+ event).
-- **`void`:** from `draft`, `calculated`, or `finalized` **only when the run has zero settlement lines** → `voided` (+ `voided` event). If lines exist, void is **blocked** until a reversal workflow reverses recoveries (not in current MVP slice).
+- **`void`:** from `draft`, `calculated`, or `finalized` when **not** `paid_recorded` and **no** settlement exports → `voided` (+ `voided` event). Composed lines are retained; charge balances restored via `VoidRunWithReversal` and `settlement_deduction_reversal` rows.
 - **`mark_paid`:** from `finalized` only → `paid_recorded` (+ `payment_recorded` event).
 - Settlement **show** lists run events (audit trail).
 
@@ -113,6 +114,7 @@ Line-level adjustments: `manual_adjustment_positive_cents` / `manual_adjustment_
 | --- | --- |
 | 2026-05-16 | `contractor_settlement_run_events`; void / mark paid wired in admin. |
 | 2026-05-17 | Void gated when composed lines exist; settlement composer + preview services. |
+| 2026-05-18 | `VoidRunWithReversal`; void with charge reversal rows for unpaid, unexported runs. |
 
 See [workforce-financial-modeling.md](workforce-financial-modeling.md) for cross-domain “no generic financial blob” posture.
 
