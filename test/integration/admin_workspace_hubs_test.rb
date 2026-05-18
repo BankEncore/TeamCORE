@@ -48,6 +48,27 @@ class AdminWorkspaceHubsTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "section nav lists workspace hubs and omits Reference CRUD links" do
+    get admin_root_path
+    assert_response :success
+
+    assert_select "nav.tc-section-nav" do
+      assert_select "a[href='#{admin_people_hub_path}']", text: "People"
+      assert_select "a[href='#{admin_onboarding_hub_path}']", text: "Onboarding"
+      assert_select "a[href='#{admin_reports_root_path}']", text: "Reports"
+
+      assert_select "a[href='#{admin_parties_path}']", count: 0
+      assert_select "a[href='#{admin_engagements_path}']", count: 0
+      assert_select "a[href='#{admin_document_types_path}']", count: 0
+    end
+  end
+
+  test "payroll settlement hub links contractor charges" do
+    get admin_payroll_settlement_hub_path
+    assert_response :success
+    assert_select "a[href='#{admin_contractor_charges_path}']", text: "Contractor charges"
+  end
+
   test "search lists team members section before parties section when both hit" do
     party = Party.create!(agency: @agency, party_type: "person", display_name: "HubSearchUnique", status: "active")
     PersonProfile.create!(party: party, first_name: "H", last_name: "U")

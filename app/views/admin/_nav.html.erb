@@ -19,15 +19,13 @@
     <% end %>
     <div class="tc-app-header__tools shrink-0" style="margin-left: auto;">
       <% if current_user.agencies.many? %>
-        <%= form_with url: admin_agency_context_path, method: :patch, data: { turbo: false }, class: "flex flex-wrap items-end gap-2" do %>
+        <%= form_with url: admin_agency_context_path, method: :patch, data: { turbo: false }, class: "flex shrink-0 flex-nowrap items-center gap-2" do %>
           <%= hidden_field_tag :return_to, request.fullpath %>
-          <div class="tc-field tc-field--compact">
-            <%= label_tag :agency_id, "Agency", class: "tc-label" %>
-            <%= select_tag :agency_id,
-                  options_from_collection_for_select(current_user.agencies.order(:name), :id, :name, current_agency&.id),
-                  class: "tc-select min-w-[10rem]" %>
-          </div>
-          <%= submit_tag "Switch", class: "tc-btn tc-btn--secondary" %>
+          <%= label_tag :agency_id, "Agency", class: "sr-only" %>
+          <%= select_tag :agency_id,
+                options_from_collection_for_select(current_user.agencies.order(:name), :id, :name, current_agency&.id),
+                class: "tc-select min-h-[2.25rem] min-w-[10rem] py-1" %>
+          <%= submit_tag "Switch", class: "tc-btn tc-btn--secondary shrink-0", style: "min-height: 2.25rem;" %>
         <% end %>
       <% elsif current_agency.present? %>
         <span class="font-medium" style="color: color-mix(in srgb, white 90%, transparent);"><%= current_agency.name %></span>
@@ -42,7 +40,6 @@
 <nav class="tc-section-nav" aria-label="Admin sections">
   <div class="tc-section-nav__inner">
     <div class="tc-section-nav__group">
-      <span class="tc-section-nav__label">Workspace</span>
       <div class="tc-section-nav__links">
         <%= tc_nav_link_to "Dashboard", admin_root_path %>
         <% if current_agency.present? %>
@@ -51,8 +48,6 @@
           <%= tc_nav_link_to "Documents", admin_documents_hub_path %>
           <%= tc_nav_link_to "Payroll & settlement", admin_payroll_settlement_hub_path %>
           <%= tc_nav_link_to "Time & leave", admin_time_leave_hub_path %>
-        <% end %>
-        <% if current_agency.present? %>
           <% reports_active = tc_reports_nav_active? %>
           <%= link_to "Reports", admin_reports_root_path,
                 class: [
@@ -64,42 +59,5 @@
         <% end %>
       </div>
     </div>
-
-    <% if current_agency.present? %>
-      <div class="tc-section-nav__group">
-        <span class="tc-section-nav__label">Reference</span>
-        <div class="tc-section-nav__links">
-          <%= tc_nav_link_to "Agencies", admin_agencies_path %>
-          <%= tc_nav_link_to "Departments", admin_departments_path %>
-          <%= tc_nav_link_to "Locations", admin_locations_path %>
-          <%= tc_nav_link_to "Teams", admin_teams_path %>
-          <%= tc_nav_link_to "Parties", admin_parties_path %>
-          <%= tc_nav_link_to "Team members", admin_team_members_path %>
-          <%= tc_nav_link_to "Engagements", admin_engagements_path %>
-          <%= tc_nav_link_to "Pay periods", admin_pay_periods_path %>
-          <%= tc_nav_link_to "Weekly timesheets", admin_weekly_timesheets_path %>
-          <%= tc_nav_link_to "Leave requests", admin_leave_requests_path %>
-          <%= tc_nav_link_to "Leave types", admin_leave_types_path %>
-          <%= tc_nav_link_to "Compensation plans", admin_compensation_plans_path %>
-          <%= tc_nav_link_to "Charges", admin_contractor_charges_path %>
-          <%= tc_nav_link_to "Settlement runs", admin_contractor_settlement_runs_path %>
-          <%= tc_nav_link_to "Payroll adjustment codes", admin_payroll_adjustment_codes_path %>
-          <%= tc_nav_link_to "Doc records", admin_document_records_path %>
-          <%= tc_nav_link_to "Workbench", admin_document_workbench_path %>
-          <%= tc_nav_link_to "Pending review", admin_document_reviews_path %>
-          <%= tc_nav_link_to "Document alerts", admin_document_alerts_path %>
-          <%= tc_nav_link_to "Document types", admin_document_types_path %>
-          <%= tc_nav_link_to "Requirements", admin_document_requirements_path %>
-          <%= tc_nav_link_to "Subcontractors", admin_reports_subcontractors_path %>
-        </div>
-      </div>
-    <% elsif current_user.agencies.any? %>
-      <div class="tc-section-nav__group">
-        <span class="tc-section-nav__label">Reference</span>
-        <div class="tc-section-nav__links">
-          <%= tc_nav_link_to "Agencies", admin_agencies_path %>
-        </div>
-      </div>
-    <% end %>
   </div>
 </nav>
