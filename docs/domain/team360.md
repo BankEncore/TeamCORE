@@ -13,6 +13,10 @@ Team360 **organizes and presents** authoritative data only. **No `team360s` tabl
 - **Product interaction and layout:** [`ux-design-guide.md`](../product/ux-design-guide.md) — Team360 page structure, panels, badges, two-column record layout.
 - **CSS:** Use existing `tc-*` classes from [`app/assets/tailwind/teamcore/`](../../app/assets/tailwind/teamcore/) (imported via [`app/assets/tailwind/application.css`](../../app/assets/tailwind/application.css)). Do not fork a parallel design system.
 
+## Next actions (UX-2)
+
+When an engagement is focused and document readiness is evaluated, Team360 may show a **Next actions** panel: prioritized CTAs derived only from [`Admin::EngagementSetupChecklistPresenter`](../../app/presenters/admin/engagement_setup_checklist_presenter.rb) gap rows (needs_attention / warning). Implementation: [`Team360::NextActionsPresenter`](../../app/presenters/team360/next_actions_presenter.rb). It does **not** re-run document rules; links deep‑link into existing admin routes with safe **`team360_return_to`** round‑tripping per the [admin return navigation contract](../product/ux-design-guide.md#admin-return-navigation-contract). Full rows remain in the **Setup checklist** panel (`#team360-setup-checklist`).
+
 ## Panel taxonomy
 
 | Type | Examples | Rule |

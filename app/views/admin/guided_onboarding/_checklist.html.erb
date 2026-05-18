@@ -1,33 +1,43 @@
-<% presenter = local_assigns.fetch(:presenter) %>
-<section class="tc-panel" id="team360-setup-checklist">
+<% rows = local_assigns.fetch(:rows) %>
+<section class="tc-panel" id="guided-onboarding-checklist">
   <div class="tc-panel__header">
     <div>
       <div class="tc-panel__title">Setup checklist</div>
-      <p class="tc-panel__subtitle">At-a-glance next steps — derived from current records and document readiness (not stored).</p>
+      <p class="tc-panel__subtitle">At-a-glance status for this flow — derived from your selection and the same engagement signals as Team360 (not stored).</p>
     </div>
   </div>
   <div class="tc-panel__body">
-    <% rows = presenter.rows %>
     <% if rows.blank? %>
-      <p class="text-sm" style="color: var(--tc-text-muted);">No checklist rows — add engagement details to see guidance.</p>
+      <p class="text-sm" style="color: var(--tc-text-muted);">No checklist rows.</p>
     <% else %>
       <ul class="m-0 list-none space-y-2 p-0 text-sm">
         <% rows.each do |row| %>
           <% badge_status =
-               case row.bucket
+               case row.status
                when "complete" then "active"
                when "needs_attention" then "not_ready"
                when "warning" then "warning"
                when "not_applicable" then "not_applicable"
+               when "pending" then "pending"
                else "info"
                end %>
           <li class="flex flex-wrap items-baseline gap-2 border-b pb-2 last:border-0" style="border-color: var(--tc-border);">
             <span class="<%= tc_status_badge_classes(badge_status) %>">
-              <%= row.bucket.humanize %>
+              <%= row.status.to_s.humanize %>
             </span>
             <span class="font-medium" style="color: var(--tc-text);"><%= row.label %></span>
             <% if row.detail.present? %>
               <span class="text-xs w-full" style="color: var(--tc-text-muted);"><%= row.detail %></span>
+            <% end %>
+            <% if row.primary_href.present? && row.primary_label.present? %>
+              <span class="w-full mt-1">
+                <%= link_to row.primary_label, row.primary_href, class: "tc-btn tc-btn--primary" %>
+              </span>
+            <% end %>
+            <% if row.secondary_href.present? && row.secondary_label.present? %>
+              <span class="w-full">
+                <%= link_to row.secondary_label, row.secondary_href, class: tc_link_classes(:muted) %>
+              </span>
             <% end %>
           </li>
         <% end %>

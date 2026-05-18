@@ -11,6 +11,13 @@ Rails.application.routes.draw do
     root "dashboard#show"
     resource :agency_context, only: %i[show update], controller: "agency_context"
 
+    get "people", to: "people_hub#show", as: :people_hub
+    get "onboarding", to: "onboarding_hub#show", as: :onboarding_hub
+    get "documents", to: "documents_hub#show", as: :documents_hub
+    get "payroll_settlement", to: "payroll_settlement_hub#show", as: :payroll_settlement_hub
+    get "time_leave", to: "time_leave_hub#show", as: :time_leave_hub
+    get "configuration", to: "configuration_hub#show", as: :configuration_hub
+
     get "guided", to: "guided_onboarding#hub", as: :guided_setup
     get "guided/employee", to: "guided_onboarding#employee", as: :guided_employee
     get "guided/individual_contractor", to: "guided_onboarding#individual_contractor", as: :guided_individual_contractor

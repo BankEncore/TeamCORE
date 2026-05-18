@@ -68,6 +68,10 @@
     </div>
   <% end %>
 
+  <% if @team360_next_actions.present? %>
+    <%= render "admin/team360/next_actions", actions: @team360_next_actions, more_actions: @team360_next_actions_more %>
+  <% end %>
+
   <div class="tc-record-layout">
     <div class="tc-record-main tc-team360">
       <section class="tc-panel">

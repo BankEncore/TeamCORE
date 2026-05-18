@@ -10,6 +10,8 @@ At the center of TeamCORE is the concept of the **Team Member**. A team member m
 
 TeamCORE should support multiple active engagements for a team member when needed, but this should be treated as an exception rather than the normal workflow. Most team members will have one active engagement at a time, while valid overlapping engagements can be supported when agency operations require them.
 
+Workspace information architecture (UX-0) and persona-centered journeys live in [ux-design-guide.md](./ux-design-guide.md) and [journeys/README.md](./journeys/README.md).
+
 ## Purpose
 
 The purpose of TeamCORE is to give travel agencies a structured, auditable, and agency-specific system for managing people, contractors, and workforce-related obligations.

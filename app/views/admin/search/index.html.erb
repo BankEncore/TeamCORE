@@ -2,7 +2,7 @@
 <div class="tc-page-stack">
   <p class="text-sm"><%= link_to "← Dashboard", admin_root_path, class: tc_link_classes %></p>
   <h1 class="text-2xl font-semibold">Search</h1>
-  <p class="text-sm text-slate-600">Agency-scoped. Type at least two characters. Exact and prefix matches rank first.</p>
+  <p class="text-sm text-slate-600">Agency-scoped. Type at least two characters. Exact and prefix matches rank first. Results list <strong>team members first</strong> (Team360 links), then parties, then engagements.</p>
 
   <%= form_with url: admin_search_path, method: :get, data: { turbo: false }, class: "my-4 flex flex-wrap gap-2 items-end" do %>
     <%= label_tag :q, "Query", class: "sr-only" %>
@@ -16,24 +16,6 @@
 
   <% if @q.length >= 2 %>
     <section class="tc-panel mt-4">
-      <div class="tc-panel__header"><div class="tc-panel__title">Parties</div></div>
-      <div class="tc-panel__body text-sm">
-        <% if @party_hits.blank? %>
-          <p class="text-slate-500">No party matches.</p>
-        <% else %>
-          <ul class="m-0 list-none space-y-2 p-0">
-            <% @party_hits.each do |p| %>
-              <li class="flex flex-wrap gap-3 items-baseline">
-                <span><%= p.display_name %></span>
-                <%= link_to "Party hub", admin_party_path(p), class: tc_link_classes %>
-              </li>
-            <% end %>
-          </ul>
-        <% end %>
-      </div>
-    </section>
-
-    <section class="tc-panel mt-4">
       <div class="tc-panel__header"><div class="tc-panel__title">Team members</div></div>
       <div class="tc-panel__body text-sm">
         <% if @team_member_hits.blank? %>
@@ -44,6 +26,24 @@
               <li class="flex flex-wrap gap-3 items-baseline">
                 <span>TM #<%= tm.id %> · <%= tm.party.display_name %></span>
                 <%= link_to "Team360", admin_team_member_team360_path(tm), class: tc_link_classes %>
+              </li>
+            <% end %>
+          </ul>
+        <% end %>
+      </div>
+    </section>
+
+    <section class="tc-panel mt-4">
+      <div class="tc-panel__header"><div class="tc-panel__title">Parties</div></div>
+      <div class="tc-panel__body text-sm">
+        <% if @party_hits.blank? %>
+          <p class="text-slate-500">No party matches.</p>
+        <% else %>
+          <ul class="m-0 list-none space-y-2 p-0">
+            <% @party_hits.each do |p| %>
+              <li class="flex flex-wrap gap-3 items-baseline">
+                <span><%= p.display_name %></span>
+                <%= link_to "Party hub", admin_party_path(p), class: tc_link_classes %>
               </li>
             <% end %>
           </ul>

@@ -1,0 +1,25 @@
+<% content_for :title, "Payroll & settlement — #{current_agency.name}" %>
+<div class="tc-page-stack">
+  <header class="tc-page-header">
+    <div>
+      <p class="tc-page-header__eyebrow">Workspace</p>
+      <h1 class="tc-page-header__title">Payroll &amp; settlement</h1>
+      <p class="tc-page-header__subtitle">
+        Employee payroll inputs and contractor settlement stay on separate rails — jump into each operational surface here.
+      </p>
+    </div>
+  </header>
+
+  <div class="tc-panel">
+    <div class="tc-panel__header">
+      <div class="tc-panel__title">Launch</div>
+    </div>
+    <div class="tc-panel__body text-sm space-y-2">
+      <ul class="m-0 list-none space-y-2 p-0">
+        <li><%= link_to "Pay periods", admin_pay_periods_path, class: tc_link_classes %></li>
+        <li><%= link_to "Contractor settlement runs", admin_contractor_settlement_runs_path, class: tc_link_classes %></li>
+        <li><%= link_to "Payroll adjustment codes", admin_payroll_adjustment_codes_path, class: tc_link_classes %></li>
+      </ul>
+    </div>
+  </div>
+</div>
