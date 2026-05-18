@@ -66,7 +66,7 @@ Primary nav labels for UX-1 (IA-first, **all admins** until TC-29):
 
 - Dashboard · People · Onboarding · Documents · Payroll & Settlement · Time & Leave · Reports · Configuration  
 
-**Search** is a **global header affordance** (UX-1), not a nav section. **Reference** (or an equivalent secondary grouping) holds legacy model indexes and deep CRUD entry points.
+**Search** is a **global header affordance** (UX-1), not a nav section. The section nav lists **Dashboard**, workspace hubs, **Reports**, and **Configuration** only; model indexes, workbenches, and deep CRUD entry points are reached from **hub launchers**, the **Dashboard**, the **Reports** namespace, and **search** — not from a second nav rail.
 
 For persona-centered flows, route helpers, and return expectations locked to today’s Rails routes, see [Persona-centered journeys](./journeys/README.md).
 

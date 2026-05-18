@@ -61,7 +61,7 @@
     }
   
     .tc-app-header__tools {
-      @apply flex flex-wrap items-center gap-3 text-sm;
+      @apply flex flex-nowrap items-center gap-3 text-sm;
       color: color-mix(in srgb, white 88%, var(--tc-secondary-soft));
     }
   
