@@ -1,0 +1,358 @@
+# ADR-0002: Payroll period and workweek foundations (TC-23a)
+
+## Status
+
+Accepted
+
+### Revision note — MVP time tracking (daily hours only)
+
+Relative to earlier Phase 5 drafts that allowed punch/timeclock data as a supporting operational layer:
+
+- **Revised:** MVP employee time tracking is **daily-hours-based** only. The **canonical** payroll-oriented source is the **daily worked-hours entry**. **Weekly timesheets** are the standard aggregation and approval surface for those entries within each workweek.
+- **Removed from MVP:** Timeclock/punch capture, biometric attendance, geofencing, GPS/location tracking, and attendance-enforcement engines. These remain **deferred** (see Consequences → Deferred); **future punch/timeclock support must not require redesign** of the payroll-period foundation in this ADR.
+
+---
+
+## Context
+
+Phase 5 introduces employee-focused:
+
+- time tracking
+- timesheet workflows
+- leave workflows
+- overtime aggregation
+- payroll preparation workflows
+- payroll export/import processing
+- payroll reporting
+
+These workflows require shared operational calendar semantics to avoid duplicated or conflicting logic across:
+
+- employee time tracking
+- weekly timesheets
+- overtime calculation
+- leave integration
+- payroll summaries
+- payroll exports/imports
+- Team360 reporting
+- operational reporting
+
+TeamCORE is not a payroll tax engine or accounting platform.
+
+Payroll workflows in MVP are operational workforce workflows intended to prepare, organize, export, import, and summarize payroll-related information for external payroll processing systems.
+
+External payroll providers remain authoritative for:
+
+- payroll execution
+- tax calculations
+- tax filings
+- direct deposit
+- payroll compliance processing
+
+Contractor settlement cycles remain distinct from employee payroll workflows.
+
+---
+
+## Decision
+
+TeamCORE introduces a lightweight employee payroll-period foundation under TC-23a.
+
+The TC-23a foundation is intentionally operational and workflow-oriented rather than accounting-oriented.
+
+---
+
+## Payroll frequencies
+
+MVP supports:
+
+- weekly
+- biweekly
+- semimonthly
+- monthly
+
+Payroll frequency is configured at the agency level in MVP.
+
+Future payroll-group or location-specific calendars are deferred.
+
+---
+
+## Workweeks and pay periods are distinct concepts
+
+TeamCORE distinguishes between:
+
+| Concept | Purpose |
+| --- | --- |
+| Workweek | Overtime and weekly operational aggregation |
+| Pay Period | Payroll preparation, exports, approvals, and payroll summaries |
+
+This distinction is required because overtime is calculated weekly while payroll periods may span multiple workweeks.
+
+---
+
+## Workweek posture
+
+- Workweeks are agency-configured.
+- Default workweek start day is Monday.
+- Any weekday may be configured as the workweek start day.
+- Workweeks are derived operational constructs and are not persisted as standalone records in MVP.
+- Workweeks are primarily used for:
+  - overtime calculation
+  - weekly timesheets
+  - reporting
+  - operational visibility
+
+---
+
+## Pay period posture
+
+Pay periods are persisted operational records used for:
+
+- payroll summaries
+- payroll exports
+- approval completeness
+- reporting
+- Team360 payroll visibility
+
+Pay periods are automatically generated from agency payroll settings.
+
+MVP assumes one payroll frequency per agency.
+
+Pay periods should not overlap within an agency.
+
+---
+
+## Semimonthly periods
+
+Semimonthly payroll periods use fixed halves:
+
+| Period | Dates |
+| --- | --- |
+| First half | 1st–15th |
+| Second half | 16th–end of month |
+
+Custom semimonthly anchors are deferred.
+
+---
+
+## Timezone posture
+
+MVP uses a single agency-level timezone for:
+
+- payroll-period calculations
+- workweek calculations
+- overtime aggregation
+- operational reporting boundaries
+
+Multi-timezone workforce handling is deferred.
+
+---
+
+## Time-entry posture
+
+MVP employee time tracking is daily-hours-based.
+
+The canonical operational payroll-oriented source is the employee daily worked-hours entry.
+
+MVP intentionally defers:
+
+- timeclock punch systems
+- biometric attendance systems
+- geofencing
+- GPS/location tracking
+- attendance-enforcement engines
+
+Future punch/timeclock support may be introduced later without redesigning the payroll-period foundation.
+
+---
+
+## Weekly timesheet posture
+
+MVP standardizes on weekly timesheets.
+
+Weekly timesheets:
+
+- aggregate daily worked-hour entries
+- support approval workflows
+- support overtime aggregation
+- roll into payroll-period summaries
+
+Payroll periods may contain multiple approved weekly timesheets.
+
+---
+
+## Overtime posture
+
+MVP supports basic weekly overtime.
+
+### Rules
+
+- Overtime is based on worked hours only.
+- Approved leave/PTO does not count toward overtime thresholds.
+- Overtime is operationally derived from approved worked time.
+- Continuous overtime visibility is required during the pay period.
+
+### Overtime threshold
+
+The agency overtime threshold is configurable.
+
+Default:
+- 40 hours per workweek
+
+Future overtime rules intentionally deferred include:
+
+- daily overtime
+- double-time
+- holiday overtime
+- jurisdiction-specific labor rules
+- employee-class-specific overtime rules
+
+The TC-23a design must not block future overtime expansion.
+
+---
+
+## Payroll earning posture
+
+Payroll preparation is payroll-code-oriented rather than summary-only.
+
+Examples include:
+
+| Code | Meaning |
+| --- | --- |
+| `REG` | Regular worked hours |
+| `OT` | Overtime worked hours |
+| `PTO` | Paid time off |
+| `HOL` | Holiday leave |
+| `SICK` | Sick leave |
+
+MVP earning codes remain system-defined and fixed.
+
+Agency-configurable earning-code systems are deferred.
+
+---
+
+## Payroll summary structure
+
+Payroll summaries distinguish:
+
+| Field | Meaning |
+| --- | --- |
+| `regular_hours` | Non-overtime worked hours |
+| `overtime_hours` | Worked hours exceeding overtime threshold |
+| `leave_hours` | Approved paid leave hours |
+| `total_paid_hours` | Worked + payable leave hours |
+
+This distinction preserves the rule that leave contributes to payroll totals but not overtime eligibility.
+
+---
+
+## Pay period lifecycle
+
+MVP pay periods use a lightweight lifecycle:
+
+- `open`
+- `closed`
+
+### Open periods
+
+Open periods:
+
+- remain editable
+- allow approvals and corrections
+- allow multiple draft payroll exports
+- support ongoing overtime aggregation
+- support payroll-summary recalculation
+
+### Closed periods
+
+Closed periods represent payroll-processing completion/finalization.
+
+Closed periods:
+
+- become immutable by default
+- should block standard editing
+- may support administrative reopening workflows later
+
+---
+
+## Export posture
+
+TeamCORE permits multiple draft payroll exports while a period remains open.
+
+The final export associated with pay-period closure becomes the authoritative finalized export artifact.
+
+Exports should be historically retained for operational and audit visibility.
+
+---
+
+## Closure requirements
+
+Pay periods should not close when:
+
+- missing employee timesheets exist
+- pending approvals exist
+
+Administrative override capability is allowed.
+
+Override bypasses validation checks only and does not bypass authorization or audit expectations.
+
+Closure authority is capability/permission-based rather than hardcoded to specific roles.
+
+---
+
+## Contractor separation
+
+Employee payroll periods remain distinct from contractor settlement cycles.
+
+TC-23a intentionally does not unify:
+
+- employee payroll periods
+- contractor settlement periods
+- contractor settlement exports
+
+Shared infrastructure may be reconsidered later if operationally justified.
+
+---
+
+## Consequences
+
+### Positive
+
+- Shared operational calendar semantics across Phase 5
+- Clear distinction between workweeks and payroll periods
+- Lightweight MVP operational model
+- Overtime-ready architecture
+- Continuous operational overtime visibility
+- Simplified payroll export workflow
+- Clear payroll-preparation posture
+- Preserves TeamCORE’s non-payroll-engine boundary
+
+### Deferred
+
+The following are intentionally deferred:
+
+- payroll groups
+- multi-calendar payroll schedules
+- retro payroll adjustment engines
+- advanced overtime engines
+- jurisdiction-specific labor rules
+- multi-timezone workforce logic
+- payroll tax processing
+- payroll reconciliation engines
+- contractor time workflows
+- scheduling engines
+- attendance-enforcement systems
+- biometric time systems
+- GPS/geofencing workflows
+- accrual engines
+
+---
+
+## References
+
+- TC-23a — Work Calendar / Pay Period Foundation
+- TC-23 — Employee Time Tracking MVP
+- TC-24 — Employee Timesheet Approval
+- TC-27 — Payroll Input Workflow
+- [ADR-0003 — Employee time capture and timesheet approval boundaries (TC-23 / TC-24)](./adr-0003-employee-time-and-timesheet-approval-boundaries.md) — submission vs approval ownership, projected vs approved overtime
+- `mvp-scope.md`
+- `overview.md`
+- `employee-contractor-applicability-matrix.md`

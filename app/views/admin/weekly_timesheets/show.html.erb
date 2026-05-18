@@ -1,0 +1,100 @@
+<% content_for :title, "Weekly timesheet ##{@weekly_timesheet.id}" %>
+<div class="tc-page-stack">
+  <header class="tc-page-header">
+    <div>
+      <p class="tc-page-header__eyebrow">Payroll · Time</p>
+      <h1 class="tc-page-header__title">Weekly timesheet</h1>
+      <p class="tc-page-header__subtitle font-mono text-sm">
+        <%= @weekly_timesheet.week_start_on %> – <%= @weekly_timesheet.week_end_on %>
+        · <%= @weekly_timesheet.status %>
+        · <%= @weekly_timesheet.engagement.team_member.party.display_name %>
+      </p>
+      <div class="flex flex-wrap gap-2 mt-3">
+        <%= link_to "Back to queue", admin_weekly_timesheets_path, class: "tc-btn tc-btn--secondary tc-btn--sm" %>
+        <%= link_to "Engagement", admin_engagement_path(@weekly_timesheet.engagement), class: "tc-btn tc-btn--secondary tc-btn--sm" %>
+      </div>
+    </div>
+  </header>
+
+  <div class="grid gap-4 md:grid-cols-2">
+    <section class="tc-panel">
+      <div class="tc-panel__header">
+        <div class="tc-panel__title">Hours</div>
+      </div>
+      <div class="tc-panel__body text-sm space-y-1">
+        <% @daily_hours.each do |row| %>
+          <p class="font-mono text-xs"><%= row.work_date %> · <%= row.hours %> h · <%= row.source %></p>
+        <% end %>
+        <% if @daily_hours.empty? %>
+          <p class="text-slate-600">No daily rows for this week.</p>
+        <% end %>
+      </div>
+    </section>
+
+    <section class="tc-panel">
+      <div class="tc-panel__header">
+        <div class="tc-panel__title">Overtime visibility</div>
+      </div>
+      <div class="tc-panel__body text-sm space-y-2">
+        <p>
+          <strong><%= @overtime_view.visibility_mode %></strong> posture
+        </p>
+        <p class="font-mono text-xs">REG <%= @overtime_view.regular_hours.to_s("F") %> h · OT <%= @overtime_view.overtime_hours.to_s("F") %> h</p>
+        <p class="text-xs text-slate-600">Projected overtime is not payroll-ready until approved.</p>
+      </div>
+    </section>
+  </div>
+
+  <% if @weekly_timesheet.status == "submitted" %>
+    <section class="tc-panel">
+      <div class="tc-panel__header">
+        <div class="tc-panel__title">Actions</div>
+      </div>
+      <div class="tc-panel__body text-sm space-y-4">
+        <div>
+          <%= button_to "Approve", approve_admin_weekly_timesheet_path(@weekly_timesheet), method: :post, class: "tc-btn tc-btn--teal" %>
+        </div>
+        <%= form_with url: send_back_admin_weekly_timesheet_path(@weekly_timesheet), method: :post, class: "space-y-2 max-w-md" do |f| %>
+          <%= f.label :reason, "Return for correction (optional reason)", class: "block text-xs font-medium" %>
+          <%= f.text_area :reason, name: :reason, rows: 3, class: "tc-input w-full text-sm" %>
+          <%= f.submit "Return for correction", class: "tc-btn tc-btn--secondary" %>
+        <% end %>
+      </div>
+    </section>
+  <% elsif @weekly_timesheet.status == "approved" %>
+    <section class="tc-panel">
+      <div class="tc-panel__header">
+        <div class="tc-panel__title">Actions</div>
+      </div>
+      <div class="tc-panel__body text-sm space-y-4">
+        <%= form_with url: reopen_admin_weekly_timesheet_path(@weekly_timesheet), method: :post, class: "space-y-2 max-w-md" do |f| %>
+          <%= f.label :reason, "Reopen to draft (optional note)", class: "block text-xs font-medium" %>
+          <%= f.text_area :reason, name: :reason, rows: 3, class: "tc-input w-full text-sm" %>
+          <%= f.submit "Reopen to draft", class: "tc-btn tc-btn--secondary", data: { turbo_confirm: "Reopen removes payroll-eligible approval until re-approved." } %>
+        <% end %>
+      </div>
+    </section>
+  <% end %>
+
+  <section class="tc-panel">
+    <div class="tc-panel__header">
+      <div class="tc-panel__title">Approval history</div>
+    </div>
+    <div class="tc-panel__body text-sm">
+      <% if @approval_events.empty? %>
+        <p class="text-slate-600">No approval events yet.</p>
+      <% else %>
+        <ul class="list-none space-y-2 p-0 m-0 font-mono text-xs">
+          <% @approval_events.each do |ev| %>
+            <li>
+              <%= ev.occurred_at.in_time_zone.to_fs(:db) %>
+              · <%= ev.event_type %>
+              · <%= ev.transition_from %> → <%= ev.transition_to %>
+              <% if ev.metadata_hash["reason"].present? %> — <%= ev.metadata_hash["reason"] %><% end %>
+            </li>
+          <% end %>
+        </ul>
+      <% end %>
+    </div>
+  </section>
+</div>

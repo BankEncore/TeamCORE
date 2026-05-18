@@ -1,0 +1,40 @@
+<%= form_with model: [:admin, @leave_type], class: "space-y-4 max-w-xl" do |f| %>
+  <% if @leave_type.errors.any? %>
+    <div class="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+      <ul class="m-0 list-disc pl-4"><% @leave_type.errors.full_messages.each do |m| %><li><%= m %></li><% end %></ul>
+    </div>
+  <% end %>
+
+  <div class="tc-field">
+    <%= f.label :code, class: "tc-label" %>
+    <%= f.text_field :code, class: "tc-input font-mono", required: true %>
+  </div>
+  <div class="tc-field">
+    <%= f.label :name, class: "tc-label" %>
+    <%= f.text_field :name, class: "tc-input", required: true %>
+  </div>
+  <div class="tc-field">
+    <%= f.label :approval_policy, "Approval policy", class: "tc-label" %>
+    <%= f.select :approval_policy,
+          LeaveType::APPROVAL_POLICIES.map { |p| [ p == "auto" ? "Auto-approve on submit" : "Manual review", p ] },
+          {},
+          class: "tc-select min-w-[16rem]" %>
+    <p class="text-xs mt-1 text-slate-600">Auto types approve immediately after submit when overlap and balance checks pass.</p>
+  </div>
+  <div class="flex flex-wrap gap-4">
+    <label class="flex items-center gap-2 text-sm"><%= f.check_box :paid %> Paid designation</label>
+    <label class="flex items-center gap-2 text-sm"><%= f.check_box :balance_tracked %> Balance tracked</label>
+    <label class="flex items-center gap-2 text-sm"><%= f.check_box :active %> Active</label>
+  </div>
+  <div class="tc-field">
+    <%= f.label :payroll_earning_code_id, "Payroll earning code (paid types)", class: "tc-label" %>
+    <%= f.collection_select :payroll_earning_code_id,
+          PayrollEarningCode.where(category: "payable_leave").ordered,
+          :id, :code, { include_blank: "—" }, class: "tc-select min-w-[12rem]" %>
+  </div>
+  <div class="tc-field">
+    <%= f.label :description, class: "tc-label" %>
+    <%= f.text_area :description, rows: 3, class: "tc-textarea" %>
+  </div>
+  <div><%= f.submit class: "tc-btn tc-btn--primary" %></div>
+<% end %>

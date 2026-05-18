@@ -1,0 +1,43 @@
+<% content_for :title, "Weekly timesheets — pending approval" %>
+<div class="tc-page-stack">
+  <header class="tc-page-header">
+    <div>
+      <p class="tc-page-header__eyebrow">Payroll · Time</p>
+      <h1 class="tc-page-header__title">Pending weekly timesheets</h1>
+      <p class="tc-page-header__subtitle">Submitted sheets awaiting approval for <%= current_agency.name %>.</p>
+    </div>
+  </header>
+
+  <div class="tc-panel">
+    <div class="tc-panel__body overflow-x-auto">
+      <% if @queue_rows.empty? %>
+        <p class="text-sm text-slate-600">No submitted timesheets in queue.</p>
+      <% else %>
+        <table class="min-w-full text-sm">
+          <thead>
+            <tr class="text-left border-b" style="border-color: var(--tc-border);">
+              <th class="py-2 pr-4">Employee</th>
+              <th class="py-2 pr-4">Week</th>
+              <th class="py-2 pr-4">Submitted</th>
+              <th class="py-2 pr-4">Days pending</th>
+              <th class="py-2"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @queue_rows.each do |row| %>
+              <% sheet = row[:sheet] %>
+              <% tm = sheet.engagement.team_member %>
+              <tr class="border-b" style="border-color: var(--tc-border);">
+                <td class="py-2 pr-4"><%= tm.party.display_name %></td>
+                <td class="py-2 pr-4 font-mono text-xs"><%= sheet.week_start_on %> – <%= sheet.week_end_on %></td>
+                <td class="py-2 pr-4 font-mono text-xs"><%= sheet.submitted_at&.in_time_zone&.to_fs(:db) || "—" %></td>
+                <td class="py-2 pr-4"><%= row[:days_pending].nil? ? "—" : row[:days_pending] %></td>
+                <td class="py-2"><%= link_to "Review", admin_weekly_timesheet_path(sheet), class: tc_link_classes %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      <% end %>
+    </div>
+  </div>
+</div>

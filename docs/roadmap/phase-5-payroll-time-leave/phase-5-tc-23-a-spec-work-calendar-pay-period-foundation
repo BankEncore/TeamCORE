@@ -17,6 +17,8 @@ TC-23a defines shared operational workforce-period semantics for employee payrol
 
 TC-23a intentionally remains lightweight and operational in scope. TeamCORE is not a payroll tax engine or accounting platform.
 
+**Normative companion:** [ADR-0002 — Payroll period and workweek foundations](../../adr/adr-0002-payroll-period-and-workweek-foundations). **MVP time posture:** employee payroll-oriented time is **daily-hours-based**; **punch/timeclock** capture is **out of MVP** (see Excluded and Future-Compatible Areas).
+
 ---
 
 # Scope
@@ -25,18 +27,24 @@ TC-23a intentionally remains lightweight and operational in scope. TeamCORE is n
 
 ### Agency payroll/work-calendar configuration
 
-- Payroll frequency
+- Payroll frequency (**one frequency per agency** in MVP)
 - Workweek start day
-- Agency payroll timezone
+- Agency payroll timezone (single timezone per agency in MVP)
 - Weekly overtime threshold
+- Pay-schedule anchor semantics for weekly/biweekly/monthly (semimonthly uses fixed halves)
 
 ### Payroll period management
 
 - Automatic pay-period generation
+- **Non-overlapping** pay periods within an agency
 - Pay-period lifecycle (`open`, `closed`)
 - Payroll-period summaries
 - Payroll-period completeness validation
 - Payroll export linkage/history
+
+### Payroll earning vocabulary (foundation)
+
+- Fixed system earning codes (e.g. `REG`, `OT`, `PTO`, `HOL`, `SICK`) and categories for downstream summaries and exports — catalog only in TC-23a; agency-configurable earning-code engines are deferred
 
 ### Overtime foundations
 
@@ -64,18 +72,29 @@ TC-23a intentionally remains lightweight and operational in scope. TeamCORE is n
 
 ### Not implemented by TC-23a
 
-- Employee time entry UX
+- Employee time entry UX (see **MVP time-entry assumptions** below — TC-23a only defines calendar contracts)
 - Timesheet approval workflows
 - Leave approval workflows
 - Payroll tax calculations
 - Direct deposit
 - Contractor settlement periods
-- Scheduling/attendance systems
+- **Timeclock punch systems, biometric attendance, geofencing/GPS location tracking, attendance-enforcement engines**
+- Scheduling engines
 - Shift planning
 - Payroll reconciliation engines
 - Multi-timezone workforce handling
 - Advanced overtime engines
 - Retro payroll engines
+
+---
+
+# MVP time-entry assumptions (contract context)
+
+TC-23a does **not** implement recording or approval UX for hours. Downstream Phase 5 epics rely on these **semantics**:
+
+- **Canonical source:** employee **daily worked-hour totals** per calendar day (interpreted in the **agency payroll timezone**).
+- **Weekly timesheets:** MVP standardizes on **weekly** timesheets that **aggregate** those daily entries within each **workweek**. Pay periods may span multiple workweeks.
+- **Deferred:** punch/timeclock streams and punch-derived payroll logic in MVP. If punch/timeclock is introduced later, punch data must **roll up** to daily worked-hour totals for payroll without redesigning pay-period or workweek foundations (ADR‑0002).
 
 ---
 
@@ -88,6 +107,7 @@ A workweek:
 - is agency-configured
 - defaults to Monday
 - may start on any weekday
+- is a **derived** operational boundary in MVP (not persisted as its own lifecycle record)
 - exists primarily for:
   - overtime
   - weekly timesheets
@@ -103,6 +123,8 @@ A pay period:
 
 - is a persisted operational payroll record
 - is automatically generated
+- belongs to **exactly one agency payroll frequency regime** in MVP (**one frequency per agency**)
+- **must not overlap** another pay period for the same agency (by date range)
 - supports payroll summaries
 - supports payroll exports
 - supports payroll reporting
@@ -139,9 +161,10 @@ Semimonthly periods use fixed halves:
 
 Open periods:
 
-- allow time corrections
-- allow approvals
-- allow leave integration
+- allow corrections to **daily worked-hour** data (via downstream time UX — not TC-23a)
+- allow approvals (downstream)
+- allow leave integration (downstream)
+- allow **ongoing** overtime aggregation and **payroll-summary recalculation**
 - allow payroll exports
 - allow multiple draft exports
 
@@ -190,6 +213,8 @@ Future advanced overtime rules are deferred.
 | `leave_hours` | Approved payable leave hours |
 | `total_paid_hours` | Regular + overtime + payable leave |
 
+Hour buckets align with fixed **payroll earning codes** (TC-23a catalog); downstream exports map codes to columns.
+
 ---
 
 # Payroll Export Posture
@@ -212,12 +237,14 @@ Exports should remain historically visible.
 
 Periods should not close when:
 
-- missing timesheets exist
+- missing **employee** timesheets exist
 - pending approvals exist
 
 ## Override
 
 Administrative override is allowed.
+
+**Semantics:** override bypasses **closure validation checks only** (e.g. missing employee timesheets / pending approvals). It does **not** bypass authorization to close, audit expectations, or immutability rules for closed periods (ADR‑0002).
 
 ## Authority
 
@@ -242,7 +269,7 @@ TC-23a intentionally avoids unifying:
 TC-23a supports future reporting for:
 
 - current pay-period status
-- missing timesheets
+- missing **employee** timesheets
 - pending approvals
 - overtime visibility
 - payroll export history
@@ -261,6 +288,7 @@ TC-23a must leave room for:
 - retro payroll adjustments
 - multi-state employees
 - scheduling integration
+- **punch/timeclock or biometric capture that rolls up to daily worked-hour totals**
 - contractor time workflows
 - accrual engines
 - payroll APIs

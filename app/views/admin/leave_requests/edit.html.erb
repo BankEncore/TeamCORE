@@ -1,0 +1,6 @@
+<% content_for :title, "Edit leave request" %>
+<div class="tc-page-stack">
+  <p class="text-sm"><%= link_to "← Request", admin_leave_request_path(@leave_request), class: tc_link_classes %></p>
+  <h1 class="text-xl font-semibold">Edit draft leave request</h1>
+  <%= render "form" %>
+</div>

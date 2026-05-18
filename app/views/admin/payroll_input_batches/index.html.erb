@@ -1,0 +1,46 @@
+<% content_for :title, "Payroll input batches — Pay period ##{@pay_period.id}" %>
+<div class="tc-page-stack">
+  <%= link_to "← Pay period", admin_pay_period_path(@pay_period), class: "text-sm #{tc_link_classes}" %>
+  <h1 class="text-2xl font-semibold">Payroll input batches</h1>
+  <p class="text-sm text-slate-600"><%= @pay_period.start_on %> – <%= @pay_period.end_on %> · <%= @pay_period.status %></p>
+
+  <div class="mt-4 flex flex-wrap gap-2">
+    <%= button_to "Ensure draft batch",
+          admin_pay_period_payroll_input_batches_path(@pay_period),
+          method: :post,
+          class: "tc-btn tc-btn--primary",
+          data: { turbo: false } %>
+    <%= link_to "Adjustment codes", admin_payroll_adjustment_codes_path, class: "tc-btn tc-btn--secondary" %>
+  </div>
+
+  <section class="tc-panel mt-6">
+    <div class="tc-panel__body">
+      <% if @batches.blank? %>
+        <p class="text-sm text-slate-600">No batches yet. Create a draft to assemble payroll input from approved time and leave.</p>
+      <% else %>
+        <div class="tc-table-wrap">
+          <table class="tc-data-table text-sm">
+            <thead>
+              <tr>
+                <th>Reference</th>
+                <th>Status</th>
+                <th>Rows</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @batches.each do |b| %>
+                <tr>
+                  <td class="font-mono"><%= b.reference_number %></td>
+                  <td><%= b.status %></td>
+                  <td><%= b.payroll_input_rows.count %></td>
+                  <td><%= link_to "Open", admin_pay_period_payroll_input_batch_path(@pay_period, b), class: tc_link_classes %></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% end %>
+    </div>
+  </section>
+</div>

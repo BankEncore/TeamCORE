@@ -1,0 +1,39 @@
+reg:
+  code: REG
+  category: worked_regular
+  name: Regular worked hours
+  position: 10
+  created_at: <%= Time.utc(2025, 1, 1).to_fs(:db) %>
+  updated_at: <%= Time.utc(2025, 1, 1).to_fs(:db) %>
+
+ot:
+  code: OT
+  category: worked_overtime
+  name: Overtime worked hours
+  position: 20
+  created_at: <%= Time.utc(2025, 1, 1).to_fs(:db) %>
+  updated_at: <%= Time.utc(2025, 1, 1).to_fs(:db) %>
+
+pto:
+  code: PTO
+  category: payable_leave
+  name: Paid time off
+  position: 30
+  created_at: <%= Time.utc(2025, 1, 1).to_fs(:db) %>
+  updated_at: <%= Time.utc(2025, 1, 1).to_fs(:db) %>
+
+hol:
+  code: HOL
+  category: payable_leave
+  name: Holiday leave
+  position: 40
+  created_at: <%= Time.utc(2025, 1, 1).to_fs(:db) %>
+  updated_at: <%= Time.utc(2025, 1, 1).to_fs(:db) %>
+
+sick:
+  code: SICK
+  category: payable_leave
+  name: Sick leave
+  position: 50
+  created_at: <%= Time.utc(2025, 1, 1).to_fs(:db) %>
+  updated_at: <%= Time.utc(2025, 1, 1).to_fs(:db) %>

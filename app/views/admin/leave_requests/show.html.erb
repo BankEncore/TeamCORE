@@ -1,0 +1,104 @@
+<% content_for :title, "Leave request ##{@leave_request.id}" %>
+<div class="tc-page-stack">
+  <p class="text-sm"><%= link_to "← Queue", admin_leave_requests_path, class: tc_link_classes %></p>
+
+  <header class="tc-page-header">
+    <div>
+      <p class="tc-page-header__eyebrow">Leave request #<%= @leave_request.id %></p>
+      <h1 class="tc-page-header__title"><%= @leave_request.leave_type.name %></h1>
+      <p class="tc-page-header__subtitle">
+        <%= @leave_request.engagement.team_member.party.display_name %>
+        · <span class="font-mono"><%= @leave_request.status %></span>
+        · <%= @visibility.visibility_label %>
+        · Policy: <span class="font-mono"><%= @leave_request.leave_type.approval_policy %></span>
+        <% if @leave_request.auto_approved? %>
+          · <span class="text-emerald-700 font-medium">Auto-approved</span>
+        <% end %>
+      </p>
+    </div>
+    <% if @leave_request.status == "draft" %>
+      <%= link_to "Edit", edit_admin_leave_request_path(@leave_request), class: "tc-btn tc-btn--secondary" %>
+    <% end %>
+  </header>
+
+  <div class="tc-panel">
+    <div class="tc-panel__header"><div class="tc-panel__title">Schedule</div></div>
+    <div class="tc-panel__body">
+      <table class="min-w-full text-sm">
+        <thead>
+          <tr class="text-left border-b" style="border-color: var(--tc-border);">
+            <th class="py-2 pr-4">Date</th>
+            <th class="py-2">Hours</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @leave_request.leave_request_days.order(:leave_date).each do |d| %>
+            <tr class="border-b" style="border-color: var(--tc-border);">
+              <td class="py-2 pr-4 font-mono"><%= d.leave_date %></td>
+              <td class="py-2"><%= d.hours %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+      <% if @leave_request.notes.present? %>
+        <p class="mt-3 text-sm"><strong>Notes:</strong> <%= @leave_request.notes %></p>
+      <% end %>
+      <% if @leave_request.review_notes.present? %>
+        <p class="mt-2 text-sm"><strong>Review notes:</strong> <%= @leave_request.review_notes %></p>
+      <% end %>
+      <% if @leave_request.cancellation_reason.present? %>
+        <p class="mt-2 text-sm"><strong>Cancellation:</strong> <%= @leave_request.cancellation_reason %></p>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="flex flex-wrap gap-3">
+    <% if @leave_request.status == "draft" %>
+      <%= button_to "Submit for approval", submit_admin_leave_request_path(@leave_request), method: :post, class: "tc-btn tc-btn--primary" %>
+      <%= button_to "Cancel request", cancel_admin_leave_request_path(@leave_request), method: :post,
+            params: { reason: "Withdrawn" }, class: "tc-btn tc-btn--secondary" %>
+    <% end %>
+    <% if @leave_request.status == "submitted" %>
+      <%= button_to "Approve", approve_admin_leave_request_path(@leave_request), method: :post, class: "tc-btn tc-btn--primary" %>
+    <% end %>
+    <% if @leave_request.status == "approved" %>
+      <%= button_to "Reopen to draft", reopen_admin_leave_request_path(@leave_request), method: :post,
+            params: { reason: "Correction needed" }, class: "tc-btn tc-btn--secondary" %>
+      <%= button_to "Cancel approved request", cancel_admin_leave_request_path(@leave_request), method: :post,
+            params: { reason: "Cancelled by agency" }, class: "tc-btn tc-btn--secondary" %>
+    <% end %>
+  </div>
+
+  <% if @leave_request.status == "submitted" %>
+    <%= form_with url: reject_admin_leave_request_path(@leave_request), method: :post, class: "mt-4 space-y-2 max-w-md", data: { turbo: false } do %>
+      <div class="tc-field">
+        <%= label_tag :review_notes, "Reject with notes (optional)", class: "tc-label" %>
+        <%= text_area_tag :review_notes, nil, rows: 2, class: "tc-textarea" %>
+      </div>
+      <%= submit_tag "Reject request", class: "tc-btn tc-btn--secondary" %>
+    <% end %>
+  <% end %>
+
+  <section class="tc-panel mt-6">
+    <div class="tc-panel__header"><div class="tc-panel__title">Approval history</div></div>
+    <div class="tc-panel__body text-sm">
+      <% if @approval_events.empty? %>
+        <p class="text-slate-600">No events yet.</p>
+      <% else %>
+        <ul class="m-0 list-none space-y-2 p-0">
+          <% @approval_events.each do |ev| %>
+            <li class="font-mono text-xs border-b pb-2" style="border-color: var(--tc-border);">
+              <%= ev.occurred_at.in_time_zone.to_fs(:db) %>
+              · <%= ev.event_type %>
+              · <%= ev.transition_from %> → <%= ev.transition_to %>
+              <% if ev.actor %>(<%= ev.actor.email %>)<% elsif ev.metadata_hash["actor_kind"].present? %>
+                (<%= ev.metadata_hash["actor_kind"] == Leave::LeaveRequestService::SYSTEM_ACTOR_KIND ? "system policy" : ev.metadata_hash["actor_kind"] %>)
+              <% end %>
+              <% r = ev.metadata_hash["reason"].presence %><%= r ? " — #{r}" : "" %>
+            </li>
+          <% end %>
+        </ul>
+      <% end %>
+    </div>
+  </section>
+</div>

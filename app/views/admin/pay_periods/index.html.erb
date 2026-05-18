@@ -2,10 +2,18 @@
 <div class="tc-page-stack">
   <%= link_to "← Dashboard", admin_root_path, class: "text-sm #{tc_link_classes}" %>
   <h1 class="text-2xl font-semibold">Pay periods</h1>
-  <%= link_to "New pay period", new_admin_pay_period_path, class: "tc-btn tc-btn--primary" %>
+  <p class="text-sm text-slate-600 max-w-2xl">
+    Period boundaries are generated from the agency payroll calendar (see Agency settings). Use generate to idempotently create missing rows.
+  </p>
+  <%= button_to "Generate / backfill pay periods",
+      generate_admin_pay_periods_path,
+      method: :post,
+      params: { horizon_months_ahead: 24, horizon_months_back: 36 },
+      form: { data: { turbo: false } },
+      class: "tc-btn tc-btn--primary mt-3" %>
   <div class="tc-table-wrap mt-4">
     <table class="tc-data-table text-sm">
-      <thead><tr><th>ID</th><th>Label</th><th>Start</th><th>End</th><th></th></tr></thead>
+      <thead><tr><th>ID</th><th>Label</th><th>Start</th><th>End</th><th>Frequency</th><th>Status</th><th></th></tr></thead>
       <tbody>
         <% @pay_periods.each do |p| %>
           <tr>
@@ -13,6 +21,8 @@
             <td><%= p.label.presence || "—" %></td>
             <td><%= p.start_on %></td>
             <td><%= p.end_on %></td>
+            <td><%= p.payroll_frequency %></td>
+            <td><%= p.status %></td>
             <td><%= link_to "Open", admin_pay_period_path(p), class: tc_link_classes %></td>
           </tr>
         <% end %>

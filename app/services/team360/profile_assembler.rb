@@ -59,7 +59,10 @@ module Team360
         document_types_by_id: doc_types_by_id,
         records_by_id: records_by_id,
         subcontractor_rows: build_subcontractor_rows(party),
-        workforce_financial: build_workforce_financial(focused)
+        workforce_financial: build_workforce_financial(focused),
+        payroll_prep_panel: build_payroll_prep_panel(focused),
+        weekly_timesheets_panel: build_weekly_timesheets_panel(focused),
+        leave_panel: build_leave_panel(focused)
       )
     end
 
@@ -291,6 +294,151 @@ module Team360
       end
 
       out
+    end
+
+    def build_payroll_prep_panel(focused_engagement)
+      return nil unless focused_engagement&.employee_path?
+
+      period =
+        PayPeriod
+          .where(agency_id: @agency.id)
+          .where("start_on <= ? AND end_on >= ?", @as_of_date, @as_of_date)
+          .first
+      return nil unless period
+
+      batch =
+        PayrollInputBatch
+          .where(pay_period_id: period.id, status: %w[finalized exported])
+          .order(Arel.sql("CASE status WHEN 'exported' THEN 0 ELSE 1 END"), finalized_at: :desc)
+          .first
+      return nil unless batch
+
+      rows =
+        batch.payroll_input_rows.where(engagement_id: focused_engagement.id).order(:earning_code, :id).map do |r|
+          {
+            earning_code: r.earning_code,
+            direction: r.direction,
+            hours: r.hours&.to_s("F"),
+            amount: r.amount&.to_s("F"),
+            currency: r.currency
+          }
+        end
+
+      out = {
+        pay_period_id: period.id,
+        pay_period_range: "#{period.start_on} – #{period.end_on}",
+        batch_reference: batch.reference_number,
+        batch_status: batch.status,
+        rows: rows
+      }
+
+      if batch.payroll_export.present?
+        ex = batch.payroll_export
+        out[:payroll_export_sequence] = ex.export_sequence
+        out[:payroll_export_at] = ex.exported_at&.iso8601
+        out[:payroll_export_file_present] = ex.export_file.attached?
+      end
+
+      out
+    end
+
+    def build_weekly_timesheets_panel(focused_engagement)
+      return nil unless focused_engagement&.employee_path?
+
+      focused_engagement
+        .weekly_timesheets
+        .includes(:weekly_timesheet_approval_events)
+        .order(week_start_on: :desc)
+        .limit(16)
+        .map { |sheet| serialize_weekly_timesheet_panel_row(sheet) }
+    end
+
+    def serialize_weekly_timesheet_panel_row(sheet)
+      ot = Payroll::TimesheetOvertimePresenter.for_timesheet(sheet)
+      events =
+        sheet.weekly_timesheet_approval_events.recent_first.limit(8).map do |ev|
+          {
+            id: ev.id,
+            event_type: ev.event_type,
+            transition_from: ev.transition_from,
+            transition_to: ev.transition_to,
+            occurred_at: ev.occurred_at,
+            actor_email: ev.actor&.email,
+            reason: ev.metadata_hash["reason"]
+          }
+        end
+
+      {
+        id: sheet.id,
+        week_start_on: sheet.week_start_on,
+        week_end_on: sheet.week_end_on,
+        status: sheet.status,
+        submitted_at: sheet.submitted_at,
+        approved_at: sheet.approved_at,
+        regular_hours: ot.regular_hours.to_s("F"),
+        overtime_hours: ot.overtime_hours.to_s("F"),
+        overtime_visibility: ot.visibility_mode.to_s,
+        approval_events: events
+      }
+    end
+
+    def build_leave_panel(focused_engagement)
+      return nil unless focused_engagement&.employee_path?
+
+      balances =
+        focused_engagement
+          .leave_balances
+          .includes(:leave_type)
+          .order(:id)
+          .map do |b|
+            {
+              leave_type_code: b.leave_type.code,
+              balance_hours: BigDecimal(b.balance_hours.to_s).to_s("F")
+            }
+          end
+
+      requests =
+        focused_engagement
+          .leave_requests
+          .includes(:leave_type, :leave_request_days, leave_request_approval_events: :actor)
+          .order(id: :desc)
+          .limit(12)
+          .map { |req| serialize_leave_request_panel_row(req) }
+
+      { balances:, requests: }
+    end
+
+    def serialize_leave_request_panel_row(req)
+      vis = Payroll::LeavePayrollVisibilityPresenter.for_leave_request(req)
+      days =
+        req.leave_request_days.sort_by(&:leave_date).map do |d|
+          { leave_date: d.leave_date, hours: BigDecimal(d.hours.to_s).to_s("F") }
+        end
+      events =
+        req.leave_request_approval_events.recent_first.limit(6).map do |ev|
+          {
+            occurred_at: ev.occurred_at,
+            event_type: ev.event_type,
+            transition_from: ev.transition_from,
+            transition_to: ev.transition_to,
+            actor_email: ev.actor&.email,
+            actor_kind: ev.metadata_hash["actor_kind"],
+            reason: ev.metadata_hash["reason"]
+          }
+        end
+
+      {
+        id: req.id,
+        leave_type_code: req.leave_type.code,
+        approval_policy: req.leave_type.approval_policy,
+        auto_approved: req.auto_approved?,
+        status: req.status,
+        start_on: req.start_on,
+        end_on: req.end_on,
+        visibility_label: vis.visibility_label,
+        days:,
+        events:
+      }
     end
 
     def build_subcontractor_rows(party)

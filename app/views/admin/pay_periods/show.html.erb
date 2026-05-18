@@ -2,6 +2,82 @@
 <div class="tc-page-stack">
   <%= link_to "← Pay periods", admin_pay_periods_path, class: "text-sm #{tc_link_classes}" %>
   <h1 class="text-2xl font-semibold">Pay period #<%= @pay_period.id %></h1>
-  <p class="text-sm"><%= @pay_period.start_on %> – <%= @pay_period.end_on %></p>
-  <%= link_to "Edit", edit_admin_pay_period_path(@pay_period), class: "tc-btn tc-btn--secondary" %>
+  <p class="text-sm"><%= @pay_period.start_on %> – <%= @pay_period.end_on %> · <%= @pay_period.payroll_frequency %> · <%= @pay_period.status %></p>
+  <% if @pay_period.open? %>
+    <%= link_to "Edit label", edit_admin_pay_period_path(@pay_period), class: "tc-btn tc-btn--secondary" %>
+  <% end %>
+
+  <section class="mt-8">
+    <h2 class="text-lg font-semibold mb-2">Payroll input (TC‑27)</h2>
+      <p class="text-sm text-slate-600 mb-3">Assemble approved time and leave into payroll-preparation batches; export files from finalized batches (TC‑27 / TC‑20).</p>
+    <%= link_to "Payroll input batches", admin_pay_period_payroll_input_batches_path(@pay_period), class: "tc-btn tc-btn--secondary" %>
+  </section>
+
+  <section class="mt-8">
+    <h2 class="text-lg font-semibold mb-2">Payroll exports</h2>
+    <% if @payroll_exports.blank? %>
+      <p class="text-sm text-slate-600">No exports recorded yet.</p>
+    <% else %>
+      <div class="tc-table-wrap">
+        <table class="tc-data-table text-sm">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>When</th>
+              <th>Format</th>
+              <th>Final?</th>
+              <th>By</th>
+              <th>Validation</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @payroll_exports.each do |ex| %>
+              <tr>
+                <td class="font-mono"><%= ex.export_sequence %></td>
+                <td><%= ex.exported_at&.strftime("%Y-%m-%d %H:%M") %></td>
+                <td><%= ex.file_format %></td>
+                <td><%= ex.is_final? ? "yes" : "draft" %></td>
+                <td><%= ex.exported_by&.email || "—" %></td>
+                <td class="text-xs text-slate-600 max-w-xs truncate" title="<%= ex.validation_summary&.to_json %>">
+                  <% if ex.validation_summary.is_a?(Hash) %>
+                    <%= ex.validation_summary["payroll_input_row_count"] || ex.validation_summary[:payroll_input_row_count] %> rows
+                  <% else %>
+                    —
+                  <% end %>
+                </td>
+                <td>
+                  <% if ex.export_file.attached? %>
+                    <%= link_to "Download", download_admin_payroll_export_path(ex), class: tc_link_classes %>
+                  <% else %>
+                    —
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% end %>
+  </section>
+
+  <% if @pay_period.open? %>
+    <section class="mt-8 max-w-xl border border-slate-200 rounded p-4">
+      <h2 class="text-lg font-semibold mb-2">Close pay period</h2>
+      <p class="text-sm text-slate-600 mb-3">
+        Closure marks payroll processing complete for this operational window. Validation overrides apply only to missing-timesheet / pending-approval checks (Phase 5 workflows).
+      </p>
+      <%= form_with url: close_admin_pay_period_path(@pay_period), method: :post, data: { turbo: false } do %>
+        <label class="flex items-center gap-2 text-sm mb-2">
+          <%= check_box_tag :override_validation, "1", false %>
+          Override closure validation (missing timesheets / pending approvals)
+        </label>
+        <div class="tc-field mb-3">
+          <%= label_tag :override_reason, "Override reason (required if overriding)", class: "tc-label" %>
+          <%= text_area_tag :override_reason, nil, rows: 2, class: "tc-input w-full" %>
+        </div>
+        <%= submit_tag "Close pay period", class: "tc-btn tc-btn--primary" %>
+      <% end %>
+    </section>
+  <% end %>
 </div>

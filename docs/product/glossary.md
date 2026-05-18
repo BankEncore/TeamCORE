@@ -581,13 +581,17 @@ Settlement imports should include validation and error handling before imported 
 
 In the MVP, time tracking is employee-only unless a later decision expands it to other worker types.
 
+**MVP posture:** employees record **daily worked-hour totals** (per calendar day in the agency payroll timezone). Those entries are the **canonical** payroll-oriented time source. **Timeclock/punch capture** is **not** in MVP; see **Timeclock** and ADR‑0002.
+
 ---
 
 ### Timeclock
 
-A **Timeclock** is a self-service or administrative workflow used to record clock-in and clock-out activity.
+A **Timeclock** is a workflow or device pattern that records **clock-in and clock-out** (or equivalent punch events) and typically builds duration from paired punches.
 
-Timeclock records may feed timesheets, payroll inputs, reporting, and Team360 summaries.
+**MVP:** TeamCORE **does not** implement timeclock/punch capture, biometric attendance tied to punches, geofencing/GPS enforcement, or punch-derived payroll hours. MVP payroll-oriented time is **daily-hours-based** (see **Time Tracking**, **Timesheet**, ADR‑0002).
+
+**Future:** punch/timeclock support may be added later without redesigning pay-period or workweek foundations if punch streams roll up to daily worked-hour totals for payroll.
 
 ---
 
@@ -595,7 +599,9 @@ Timeclock records may feed timesheets, payroll inputs, reporting, and Team360 su
 
 A **Timesheet** is a record of employee time for a defined period.
 
-Timesheets may include clocked time, manually entered time, adjustments, submission status, approval status, and payroll input readiness.
+**MVP:** timesheets are **weekly** (one **workweek** per timesheet). They **aggregate daily worked-hour entries** within that week, carry submission and approval status, and feed payroll-period summaries when approved.
+
+Timesheets may include manually entered or supervisor-entered **daily** hour totals, adjustments, and payroll input readiness. **Clocked/punch-based** duration is **not** an MVP requirement.
 
 ---
 
@@ -943,7 +949,7 @@ Team360 should display authoritative information from underlying domain records.
 - Avoid using payroll language for contractor settlement workflows.
 - Avoid using settlement language for employee payroll workflows.
 - Update this glossary when a later ADR changes terminology.
-- Link major terminology changes to the roadmap decision log or an ADR.
+- Link major terminology changes to the roadmap decision log or an ADR (e.g. ADR‑0002 for pay-period / workweek / MVP time-entry posture).
 - Keep Phase 1 identity, organization, and engagement terms stable before implementation begins.
 
 ---
@@ -961,6 +967,8 @@ The workweek is distinct from the payroll pay period because overtime calculatio
 
 MVP workweeks are configured at the agency level.
 
+**Persistence:** MVP treats workweeks as **derived** operational boundaries (from workweek start weekday and agency timezone); standalone persisted Workweek rows are **not** required (ADR‑0002).
+
 ---
 
 ### Pay Period
@@ -975,7 +983,7 @@ A **Pay Period** is the operational payroll preparation period used for:
 
 Pay periods are automatically generated from agency payroll settings.
 
-In MVP, employee payroll pay periods remain distinct from contractor settlement cycles.
+In MVP, **one payroll frequency applies per agency**, pay periods **do not overlap** within an agency, and employee payroll pay periods remain distinct from contractor settlement cycles.
 
 ---
 
@@ -996,7 +1004,7 @@ Payroll summaries support payroll preparation and export workflows but are not t
 
 ### Worked Hours
 
-**Worked Hours** are employee hours derived from approved worked time entries.
+**Worked Hours** are employee hours derived from **approved** daily worked-time entries (typically via approved **weekly timesheets**).
 
 Worked hours contribute toward overtime calculations and payroll totals.
 

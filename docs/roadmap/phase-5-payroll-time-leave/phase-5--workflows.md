@@ -28,7 +28,10 @@ Companion references:
 - `mvp-scope.md`
 - `overview.md`
 - `employee-contractor-applicability-matrix.md`
-- `ADR-0002: Payroll period and workweek foundations`
+- `ADR-0002: Payroll period and workweek foundations` ([adr-0002-payroll-period-and-workweek-foundations](../../adr/adr-0002-payroll-period-and-workweek-foundations))
+- `ADR-0003: Employee time capture and timesheet approval boundaries (TC-23 / TC-24)` ([adr-0003-employee-time-and-timesheet-approval-boundaries.md](../../adr/adr-0003-employee-time-and-timesheet-approval-boundaries.md))
+
+**Alignment:** MVP employee time is **daily-hours-based** only (canonical daily worked-hours entries). **Timeclock/punch capture** and related attendance enforcement are **out of MVP** and listed under deferrals; see ADR‑0002 revision note. **Submission vs timesheet approval ownership**, **locking norms**, and **projected vs approved overtime** are normative in **ADR‑0003**.
 
 ---
 
@@ -60,16 +63,9 @@ Contractor settlement cycles are handled separately and are not implemented thro
 
 ## Daily worked-hour entries are authoritative
 
-The canonical payroll-oriented operational source is the employee daily worked-hours entry.
+The canonical payroll-oriented operational source is the employee **daily worked-hours entry** (total worked hours per calendar day in the agency payroll timezone).
 
-Timeclock punches are supporting operational records only.
-
-Punches may assist:
-- operational visibility
-- break tracking
-- hour derivation
-
-but punches themselves are not the authoritative payroll source.
+**Removed from MVP:** timeclock punch streams, punch-derived hour derivation, biometric clocks, geofencing/GPS attendance, and attendance-enforcement engines. Those capabilities are **deferred** so later punch/timeclock features can be added **without redesigning** pay-period or workweek foundations (ADR‑0002).
 
 ---
 
@@ -101,10 +97,12 @@ This distinction is important because payroll periods may span multiple workweek
 
 MVP agencies configure:
 
-- payroll frequency
+- payroll frequency (**one frequency per agency**)
 - workweek start day
 - agency timezone
 - overtime threshold
+
+Pay periods **must not overlap** within an agency (boundaries come from generation and agency settings).
 
 Supported payroll frequencies:
 
@@ -137,11 +135,12 @@ MVP pay periods use a lightweight lifecycle:
 
 Open periods allow:
 
-- time entry
+- time entry (daily worked hours)
 - corrections
 - leave integration
 - approvals
-- overtime visibility
+- overtime visibility and ongoing aggregation
+- payroll-summary recalculation
 - payroll exports
 - multiple draft exports
 
@@ -163,33 +162,22 @@ Administrative reopening or override may occur through authorized workflows.
 
 ## Time entry posture
 
-Employees may record:
-
-- daily worked hours
-- manual worked hours
-- optional timeclock punches
-- multiple work segments within a day
+Employees (or supervisors on their behalf) record **daily worked-hour totals** — the canonical unit for payroll-oriented time in MVP.
 
 Examples:
 
 ```text
-8.0 worked hours
-````
-
-or:
-
-```text
-9:00 AM–12:00 PM
-1:00 PM–5:00 PM
+Mon 2025-01-06: 8.0 hours worked
+Tue 2025-01-07: 7.5 hours worked
 ```
 
-Punches support operational visibility but daily worked-hour entries remain authoritative.
+Intra-day clock ranges, automatic punch pairing, and segment-level engineering **are not MVP requirements**; any future UI that breaks down a day still **rolls up** to authoritative daily totals for payroll (ADR‑0002).
 
 ---
 
 ## Break posture
 
-MVP supports recording break punches or segmented work periods.
+Without punch infrastructure, MVP does **not** model break punches or automated break deductions.
 
 MVP does not implement:
 
@@ -198,7 +186,7 @@ MVP does not implement:
 * automatic unpaid-break calculations
 * compliance meal engines
 
-Break handling remains operational and lightweight.
+Break handling remains intentionally lightweight (policy and communication outside the system, or simple notes if added later).
 
 ---
 
@@ -214,12 +202,9 @@ Supervisor-entered time is treated as approved by default in MVP.
 
 ## Timesheet cadence
 
-Timesheets may operate on:
+MVP **standardizes on weekly timesheets**: each timesheet covers **one workweek** and **aggregates daily worked-hour entries** for that week. Approved weekly timesheets roll into pay-period summaries; a single pay period may span **multiple** workweeks.
 
-* weekly cadence
-* pay-period cadence
-
-depending on agency operational posture.
+**Deferred:** alternate MVP cadences such as pay-period-only timesheets without weekly aggregation, unless product re-opens that decision.
 
 ---
 
@@ -236,7 +221,7 @@ Employee submits timesheet
 ↓
 Supervisor reviews
 ↓
-Supervisor approves or rejects
+Supervisor approves or sends back for correction (returns sheet to draft)
 ```
 
 ---
@@ -268,26 +253,30 @@ Supervisors/payroll administrators may reopen or adjust approved time if necessa
 
 Leave applies to employees only in MVP.
 
+**Normative boundaries:** [ADR-0004 — Leave vs time and payroll hooks](../../adr/adr-0004-leave-vs-time-and-payroll-hooks.md).
+
 MVP supports:
 
 * full-day leave
 * partial-day leave
 * hourly leave tracking
 
-Canonical leave storage is hours-based.
+Canonical leave storage is **hours-based**, allocated per calendar date on **`LeaveRequestDay`** rows (workflow container: **`LeaveRequest`**).
 
 ---
 
 ## Leave approval flow
 
+**Implementation detail:** Each **`LeaveType`** has an **`approval_policy`** of **`manual`** (queue for human approve/reject) or **`auto`** (approve immediately after successful submit when overlap and balance checks pass). Overlapping **`LeaveRequestDay`** rows are blocked when another request for the same engagement is **`submitted`** or **`approved`**. Auto-approved transitions record **`LeaveRequestApprovalEvent`** rows with a **nullable actor** and **`actor_kind: system_policy`** per [ADR-0005 — System actors in workflow audit events](../../adr/adr-0005-system-actors-in-workflow-audit-events.md).
+
 Typical workflow:
 
 ```text
-Employee submits leave request
+Request drafted with daily hour rows → submitted for review
 ↓
-Supervisor/admin approval
+Supervisor/admin approval or rejection (manual types); or automatic approval (auto types)
 ↓
-Approved leave contributes payable payroll entries
+Approved leave feeds payroll-preparation visibility (summaries / earning-code buckets — not paycheck generation)
 ```
 
 ---
@@ -296,17 +285,17 @@ Approved leave contributes payable payroll entries
 
 Approved leave:
 
-* contributes to payable payroll totals
-* does NOT contribute toward overtime thresholds
+* surfaces in **payroll-preparation visibility** aggregates for paid vs unpaid designation (**ADR‑0004**)
+* does NOT contribute toward **weekly overtime thresholds** (worked hours only)
 
 Examples:
 
-| Type          | Counts toward OT? | Counts toward payroll totals? |
-| ------------- | ----------------- | ----------------------------- |
-| Worked hours  | Yes               | Yes                           |
-| PTO           | No                | Yes                           |
-| Holiday leave | No                | Yes                           |
-| Sick leave    | No                | Yes                           |
+| Type          | Counts toward OT? | Payroll-prep visibility (approved)? |
+| ------------- | ----------------- | ----------------------------------- |
+| Worked hours  | Yes               | Yes (approved worked time)          |
+| PTO           | No                | Yes (paid leave designation)        |
+| Holiday leave | No              | Yes (paid leave designation)      |
+| Sick leave    | No                | Yes (paid leave designation)      |
 
 ---
 
@@ -477,10 +466,14 @@ MVP intentionally avoids:
 
 Periods should not close when:
 
-* missing timesheets exist
-* pending approvals exist
+* an **approved** weekly timesheet is missing for any **workweek intersecting** the pay period (per active employee engagement)
+* **pending approvals** exist (**submitted** timesheets overlapping the period — operational backlog signal)
 
 Administrative override is allowed.
+
+**Override semantics:** override bypasses **closure validation checks only** (e.g. unapproved / missing approved timesheets / pending approvals). It does **not** bypass authorization to close, audit expectations, or immutability rules for closed periods (ADR‑0002).
+
+**Note:** Early Phase 5 drafts gated closure on **row existence** only; the normative rule is **approved** weekly timesheets for each intersecting workweek so payroll preparation reflects payroll-eligible worked time only.
 
 ---
 
@@ -527,7 +520,9 @@ The following are intentionally deferred:
 * direct deposit processing
 * payroll APIs
 * payroll reconciliation engines
-* attendance enforcement
+* **timeclock punch systems and punch-derived workflows**
+* **biometric attendance and attendance-enforcement engines**
+* **geofencing, GPS, and location-based time capture**
 * scheduling engines
 * meal-rule compliance engines
 * advanced overtime engines

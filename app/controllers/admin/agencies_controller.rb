@@ -12,9 +12,11 @@ module Admin
     end
 
     def edit
+      @agency.build_agency_payroll_configuration unless @agency.agency_payroll_configuration
     end
 
     def update
+      @agency.build_agency_payroll_configuration unless @agency.agency_payroll_configuration
       if @agency.update(agency_params)
         redirect_to admin_agency_path(@agency), notice: "Agency updated."
       else
@@ -29,7 +31,19 @@ module Admin
     end
 
     def agency_params
-      params.require(:agency).permit(:name, :code, :status)
+      params.require(:agency).permit(
+        :name,
+        :code,
+        :status,
+        agency_payroll_configuration_attributes: %i[
+          id
+          payroll_frequency
+          workweek_starts_on
+          payroll_timezone
+          weekly_overtime_threshold_hours
+          pay_schedule_anchor_on
+        ]
+      )
     end
   end
 end

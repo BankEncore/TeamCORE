@@ -1,0 +1,182 @@
+<% content_for :title, "Payroll input #{@batch.reference_number}" %>
+<div class="tc-page-stack">
+  <%= link_to "← Batches", admin_pay_period_payroll_input_batches_path(@pay_period), class: "text-sm #{tc_link_classes}" %>
+  <h1 class="text-2xl font-semibold">Payroll input batch</h1>
+  <p class="text-sm font-mono"><%= @batch.reference_number %> · <%= @batch.status %> · Pay period <%= @pay_period.start_on %> – <%= @pay_period.end_on %></p>
+
+  <% if @batch.draft? %>
+    <div class="mt-4 flex flex-wrap gap-2">
+      <%= button_to "Recalculate",
+            recalculate_admin_pay_period_payroll_input_batch_path(@pay_period, @batch),
+            method: :post,
+            class: "tc-btn tc-btn--secondary",
+            data: { turbo: false } %>
+      <%= button_to "Finalize",
+            finalize_admin_pay_period_payroll_input_batch_path(@pay_period, @batch),
+            method: :post,
+            class: "tc-btn tc-btn--primary",
+            data: { turbo: false } %>
+    </div>
+    <p class="text-sm mt-2">
+      <%= link_to "Add manual adjustment", new_admin_pay_period_payroll_input_batch_payroll_input_adjustment_path(@pay_period, @batch), class: tc_link_classes %>
+    </p>
+  <% end %>
+
+  <% if @batch.finalized? && @pay_period.open? %>
+    <section class="mt-6 border border-slate-200 rounded p-4 max-w-xl">
+      <h2 class="text-lg font-semibold mb-2">Draft payroll export</h2>
+      <p class="text-sm text-slate-600 mb-3">Generate a review file without closing the pay period (TC‑20).</p>
+      <div class="flex flex-wrap gap-2">
+        <%= button_to "Draft CSV",
+              draft_payroll_export_admin_pay_period_payroll_input_batch_path(@pay_period, @batch),
+              method: :post,
+              params: { file_format: "csv" },
+              class: "tc-btn tc-btn--secondary",
+              data: { turbo: false } %>
+        <%= button_to "Draft XLSX",
+              draft_payroll_export_admin_pay_period_payroll_input_batch_path(@pay_period, @batch),
+              method: :post,
+              params: { file_format: "xlsx" },
+              class: "tc-btn tc-btn--secondary",
+              data: { turbo: false } %>
+      </div>
+    </section>
+
+    <section class="mt-6 border border-amber-200 rounded p-4 max-w-xl">
+      <h2 class="text-lg font-semibold mb-2">Reverse finalized batch</h2>
+      <%= form_with url: reverse_admin_pay_period_payroll_input_batch_path(@pay_period, @batch), method: :post, data: { turbo: false } do %>
+        <label class="tc-label">Reason</label>
+        <%= text_area_tag :reason, nil, rows: 3, class: "tc-input w-full mb-3", required: true %>
+        <%= submit_tag "Reverse and open new draft", class: "tc-btn tc-btn--secondary" %>
+      <% end %>
+    </section>
+
+    <section class="mt-6 border border-slate-200 rounded p-4 max-w-xl">
+      <h2 class="text-lg font-semibold mb-2">Final payroll export (closes pay period)</h2>
+      <p class="text-sm text-slate-600 mb-3">Creates an immutable export file, records final export metadata, and closes the pay period via <code class="font-mono text-xs">Payroll::PayPeriodClosureService</code>.</p>
+      <%= form_with url: complete_final_export_admin_pay_period_payroll_input_batch_path(@pay_period, @batch), method: :post, data: { turbo: false } do %>
+        <div class="tc-field mb-3">
+          <%= label_tag :file_format, "Export format", class: "tc-label" %>
+          <%= select_tag :file_format, options_for_select([ %w[CSV csv], %w[XLSX xlsx] ], "csv"), class: "tc-select" %>
+        </div>
+        <label class="flex items-center gap-2 text-sm mb-2">
+          <%= check_box_tag :override_validation, "1", false %>
+          Override closure validation (missing timesheets / pending approvals)
+        </label>
+        <div class="tc-field mb-3">
+          <%= label_tag :override_reason, "Override reason (required if overriding)", class: "tc-label" %>
+          <%= text_area_tag :override_reason, nil, rows: 2, class: "tc-input w-full" %>
+        </div>
+        <%= submit_tag "Record final export & close period", class: "tc-btn tc-btn--primary" %>
+      <% end %>
+    </section>
+  <% end %>
+
+  <% if @batch.reversed? %>
+    <p class="text-sm mt-4 text-slate-600">This batch was reversed. <%= link_to "Open superseding batch", (@batch.superseded_by_batch_id.present? ? admin_pay_period_payroll_input_batch_path(@pay_period, @batch.superseded_by_batch_id) : admin_pay_period_payroll_input_batches_path(@pay_period)), class: tc_link_classes %>.</p>
+  <% end %>
+
+  <% if @batch.exported? %>
+    <p class="text-sm mt-4 text-slate-600">Exported · Pay period closed · Export #<%= @batch.payroll_export&.export_sequence %></p>
+  <% end %>
+
+  <% if @source_payroll_exports.present? %>
+    <section class="tc-panel mt-8">
+      <div class="tc-panel__header">
+        <div class="tc-panel__title">Payroll exports for this batch</div>
+      </div>
+      <div class="tc-panel__body overflow-x-auto">
+        <table class="tc-data-table text-sm">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>When</th>
+              <th>Format</th>
+              <th>Final?</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @source_payroll_exports.each do |ex| %>
+              <tr>
+                <td class="font-mono"><%= ex.export_sequence %></td>
+                <td><%= ex.exported_at&.strftime("%Y-%m-%d %H:%M") %></td>
+                <td><%= ex.file_format %></td>
+                <td><%= ex.is_final? ? "yes" : "draft" %></td>
+                <td>
+                  <% if ex.export_file.attached? %>
+                    <%= link_to "Download", download_admin_payroll_export_path(ex), class: tc_link_classes %>
+                  <% else %>
+                    —
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  <% end %>
+
+  <section class="tc-panel mt-8">
+    <div class="tc-panel__header">
+      <div class="tc-panel__title">Manual adjustments (draft)</div>
+    </div>
+    <div class="tc-panel__body">
+      <% if @adjustments.blank? %>
+        <p class="text-sm text-slate-600">No adjustments on this batch.</p>
+      <% else %>
+        <ul class="text-sm space-y-2 list-none p-0 m-0">
+          <% @adjustments.each do |adj| %>
+            <li class="flex flex-wrap justify-between gap-2 border-b border-slate-100 pb-2">
+              <span><%= adj.payroll_adjustment_code.code %> · <%= adj.engagement_id %> · hours <%= adj.hours %> · amt <%= adj.amount %> <%= adj.currency %></span>
+              <% if @batch.draft? %>
+                <%= button_to "Remove",
+                      admin_pay_period_payroll_input_batch_payroll_input_adjustment_path(@pay_period, @batch, adj),
+                      method: :delete,
+                      class: "text-xs #{tc_link_classes}",
+                      data: { turbo: false } %>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
+      <% end %>
+    </div>
+  </section>
+
+  <section class="tc-panel mt-6">
+    <div class="tc-panel__header">
+      <div class="tc-panel__title">Assembled rows</div>
+    </div>
+    <div class="tc-panel__body overflow-x-auto">
+      <% if @rows.blank? %>
+        <p class="text-sm text-slate-600">No rows yet — recalculate the draft.</p>
+      <% else %>
+        <table class="tc-data-table text-sm">
+          <thead>
+            <tr>
+              <th>Engagement</th>
+              <th>Code</th>
+              <th>Dir</th>
+              <th>Hours</th>
+              <th>Amount</th>
+              <th>Source</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @rows.each do |r| %>
+              <tr>
+                <td class="font-mono"><%= r.engagement_id %></td>
+                <td><%= r.earning_code %></td>
+                <td><%= r.direction %></td>
+                <td><%= r.hours %></td>
+                <td><%= r.amount %></td>
+                <td class="text-xs font-mono"><%= r.source_type %> #<%= r.source_id %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      <% end %>
+    </div>
+  </section>
+</div>

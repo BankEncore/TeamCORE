@@ -1,0 +1,50 @@
+<% content_for :title, "Leave types — #{current_agency.name}" %>
+<div class="tc-page-stack">
+  <header class="tc-page-header">
+    <div>
+      <p class="tc-page-header__eyebrow">Payroll · Leave</p>
+      <h1 class="tc-page-header__title">Leave types</h1>
+      <p class="tc-page-header__subtitle">Agency-defined categories for absence tracking.</p>
+    </div>
+    <%= link_to "New leave type", new_admin_leave_type_path, class: "tc-btn tc-btn--primary" %>
+  </header>
+
+  <div class="tc-panel">
+    <div class="tc-panel__body overflow-x-auto">
+      <% if @leave_types.empty? %>
+        <p class="text-sm text-slate-600">No leave types.</p>
+      <% else %>
+        <table class="min-w-full text-sm">
+          <thead>
+            <tr class="text-left border-b" style="border-color: var(--tc-border);">
+              <th class="py-2 pr-4">Code</th>
+              <th class="py-2 pr-4">Name</th>
+              <th class="py-2 pr-4">Approval</th>
+              <th class="py-2 pr-4">Paid</th>
+              <th class="py-2 pr-4">Balance</th>
+              <th class="py-2 pr-4">Active</th>
+              <th class="py-2"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @leave_types.each do |lt| %>
+              <tr class="border-b" style="border-color: var(--tc-border);">
+                <td class="py-2 pr-4 font-mono text-xs"><%= lt.code %></td>
+                <td class="py-2 pr-4"><%= lt.name %></td>
+                <td class="py-2 pr-4 text-xs"><%= lt.approval_policy == "auto" ? "auto" : "manual" %></td>
+                <td class="py-2 pr-4"><%= lt.paid? ? "yes" : "no" %></td>
+                <td class="py-2 pr-4"><%= lt.balance_tracked? ? "yes" : "no" %></td>
+                <td class="py-2 pr-4"><%= lt.active? ? "yes" : "no" %></td>
+                <td class="py-2">
+                  <%= link_to "Edit", edit_admin_leave_type_path(lt), class: tc_link_classes %>
+                  <%= button_to "Delete", admin_leave_type_path(lt), method: :delete,
+                        form_class: "inline", class: "text-xs text-red-600 underline ml-2", data: { turbo_confirm: "Delete this leave type?" } %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      <% end %>
+    </div>
+  </div>
+</div>

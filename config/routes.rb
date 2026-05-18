@@ -39,7 +39,48 @@ Rails.application.routes.draw do
     resources :team_members, only: %i[index show new create edit update] do
       resource :team360, only: %i[show], controller: "team360"
     end
-    resources :pay_periods
+    resources :pay_periods, only: %i[index show edit update] do
+      collection do
+        post :generate
+      end
+      member do
+        post :close
+      end
+      resources :payroll_input_batches, only: %i[index show create] do
+        resources :payroll_input_adjustments, only: %i[new create destroy]
+        member do
+          post :recalculate
+          post :finalize
+          post :reverse
+          post :complete_final_export
+          post :draft_payroll_export
+        end
+      end
+    end
+
+    resources :payroll_exports, only: [], controller: "payroll_exports" do
+      member do
+        get :download
+      end
+    end
+    resources :weekly_timesheets, only: %i[index show] do
+      member do
+        post :approve
+        post :send_back
+        post :reopen
+      end
+    end
+    resources :payroll_adjustment_codes
+    resources :leave_types
+    resources :leave_requests do
+      member do
+        post :submit
+        post :approve
+        post :reject
+        post :cancel
+        post :reopen
+      end
+    end
     resources :compensation_plans
     resources :contractor_charges, only: %i[index], controller: "contractor_charge_queue"
     resources :contractor_settlement_runs, only: %i[index show new create] do
@@ -48,9 +89,18 @@ Rails.application.routes.draw do
         post :compose_line
         post :void
         post :mark_paid
+        post :draft_settlement_export
+        post :final_settlement_export
+      end
+    end
+
+    resources :contractor_settlement_exports, only: [], controller: "contractor_settlement_exports" do
+      member do
+        get :download
       end
     end
     resources :engagements, only: %i[index show new create edit update] do
+      resources :leave_balances, only: %i[index create], controller: "engagement_leave_balances"
       resources :placements, controller: "engagement_placements", only: %i[index show new create edit update]
       resources :supervision_assignments, controller: "engagement_supervisions", only: %i[index show new create edit update]
       scope module: :engagements do

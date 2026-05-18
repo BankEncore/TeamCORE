@@ -42,6 +42,90 @@
     </table>
   </div>
 
+  <% if @run.status.in?(%w[calculated finalized]) %>
+    <section class="mt-6 border border-slate-200 rounded p-4 max-w-xl">
+      <h2 class="text-lg font-semibold mb-2">Draft settlement export</h2>
+      <p class="text-sm text-slate-600 mb-3">Repeatable review export; does not change run status (TC‑20).</p>
+      <div class="flex flex-wrap gap-2">
+        <%= button_to "Draft CSV",
+              draft_settlement_export_admin_contractor_settlement_run_path(@run),
+              method: :post,
+              params: { file_format: "csv" },
+              class: "tc-btn tc-btn--secondary",
+              data: { turbo: false } %>
+        <%= button_to "Draft XLSX",
+              draft_settlement_export_admin_contractor_settlement_run_path(@run),
+              method: :post,
+              params: { file_format: "xlsx" },
+              class: "tc-btn tc-btn--secondary",
+              data: { turbo: false } %>
+      </div>
+    </section>
+  <% end %>
+
+  <% if @run.status == "finalized" %>
+    <section class="mt-6 border border-slate-200 rounded p-4 max-w-xl">
+      <h2 class="text-lg font-semibold mb-2">Final settlement export</h2>
+      <p class="text-sm text-slate-600 mb-3">Immutable outbound artifact for this run (one final export per run).</p>
+      <div class="flex flex-wrap gap-2">
+        <%= button_to "Final CSV",
+              final_settlement_export_admin_contractor_settlement_run_path(@run),
+              method: :post,
+              params: { file_format: "csv" },
+              class: "tc-btn tc-btn--primary",
+              data: { turbo: false } %>
+        <%= button_to "Final XLSX",
+              final_settlement_export_admin_contractor_settlement_run_path(@run),
+              method: :post,
+              params: { file_format: "xlsx" },
+              class: "tc-btn tc-btn--primary",
+              data: { turbo: false } %>
+      </div>
+    </section>
+  <% end %>
+
+  <% if @settlement_exports.present? %>
+    <h2 class="text-lg font-semibold mt-6">Settlement exports</h2>
+    <div class="tc-table-wrap">
+      <table class="tc-data-table text-xs">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>When</th>
+            <th>Format</th>
+            <th>Final?</th>
+            <th>Lines</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @settlement_exports.each do |ex| %>
+            <tr>
+              <td class="font-mono"><%= ex.export_sequence %></td>
+              <td><%= ex.exported_at&.strftime("%Y-%m-%d %H:%M") %></td>
+              <td><%= ex.file_format %></td>
+              <td><%= ex.is_final? ? "yes" : "draft" %></td>
+              <td class="truncate max-w-[8rem]" title="<%= ex.validation_summary&.to_json %>">
+                <% if ex.validation_summary.is_a?(Hash) %>
+                  <%= ex.validation_summary["line_count"] || ex.validation_summary[:line_count] %>
+                <% else %>
+                  —
+                <% end %>
+              </td>
+              <td>
+                <% if ex.export_file.attached? %>
+                  <%= link_to "Download", download_admin_contractor_settlement_export_path(ex), class: tc_link_classes %>
+                <% else %>
+                  —
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% end %>
+
   <% if @run.status == "draft" %>
     <h2 class="text-lg font-semibold mt-6">Add line (MVP)</h2>
     <%= form_with url: compose_line_admin_contractor_settlement_run_path(@run), method: :post, class: "space-y-3 max-w-xl" do %>

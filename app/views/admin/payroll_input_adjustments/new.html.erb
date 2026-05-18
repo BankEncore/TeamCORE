@@ -1,0 +1,41 @@
+<% content_for :title, "New payroll adjustment" %>
+<div class="tc-page-stack">
+  <%= link_to "← Batch", admin_pay_period_payroll_input_batch_path(@pay_period, @batch), class: "text-sm #{tc_link_classes}" %>
+  <h1 class="text-2xl font-semibold">Add adjustment</h1>
+
+  <%= form_with model: @adjustment,
+        url: admin_pay_period_payroll_input_batch_payroll_input_adjustments_path(@pay_period, @batch),
+        data: { turbo: false } do |f| %>
+    <% if @adjustment.errors.any? %>
+      <div class="text-red-700 text-sm mb-4">
+        <%= @adjustment.errors.full_messages.to_sentence %>
+      </div>
+    <% end %>
+
+    <div class="tc-field">
+      <%= f.label :payroll_adjustment_code_id, "Code", class: "tc-label" %>
+      <%= f.collection_select :payroll_adjustment_code_id, @codes, :id, :code, {}, class: "tc-select" %>
+    </div>
+    <div class="tc-field">
+      <%= f.label :engagement_id, class: "tc-label" %>
+      <%= f.collection_select :engagement_id, @engagements, :id, :id, {}, class: "tc-select" %>
+    </div>
+    <div class="tc-field">
+      <%= f.label :hours, class: "tc-label" %>
+      <%= f.text_field :hours, class: "tc-input" %>
+    </div>
+    <div class="tc-field">
+      <%= f.label :amount, class: "tc-label" %>
+      <%= f.text_field :amount, class: "tc-input" %>
+    </div>
+    <div class="tc-field">
+      <%= f.label :currency, class: "tc-label" %>
+      <%= f.text_field :currency, value: @adjustment.currency.presence || "USD", class: "tc-input" %>
+    </div>
+    <div class="tc-field">
+      <%= f.label :notes, class: "tc-label" %>
+      <%= f.text_area :notes, rows: 2, class: "tc-input w-full" %>
+    </div>
+    <%= f.submit "Save & recalculate batch", class: "tc-btn tc-btn--primary" %>
+  <% end %>
+</div>

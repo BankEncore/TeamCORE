@@ -10,7 +10,35 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_16_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_18_024000) do
+  create_table "active_storage_attachments", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.bigint "blob_id", null: false
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.bigint "record_id", null: false
+    t.string "record_type", null: false
+    t.index ["blob_id"], name: "index_active_storage_attachments_on_blob_id"
+    t.index ["record_type", "record_id", "name", "blob_id"], name: "index_active_storage_attachments_uniqueness", unique: true
+  end
+
+  create_table "active_storage_blobs", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.bigint "byte_size", null: false
+    t.string "checksum"
+    t.string "content_type"
+    t.datetime "created_at", null: false
+    t.string "filename", null: false
+    t.string "key", null: false
+    t.text "metadata"
+    t.string "service_name", null: false
+    t.index ["key"], name: "index_active_storage_blobs_on_key", unique: true
+  end
+
+  create_table "active_storage_variant_records", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.bigint "blob_id", null: false
+    t.string "variation_digest", null: false
+    t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
   create_table "agencies", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
     t.string "code", null: false
     t.datetime "created_at", null: false
@@ -18,6 +46,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_16_120000) do
     t.string "status", default: "active", null: false
     t.datetime "updated_at", null: false
     t.index ["code"], name: "index_agencies_on_code", unique: true
+  end
+
+  create_table "agency_payroll_configurations", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.bigint "agency_id", null: false
+    t.datetime "created_at", null: false
+    t.date "pay_schedule_anchor_on"
+    t.string "payroll_frequency", null: false
+    t.string "payroll_timezone", default: "Etc/UTC", null: false
+    t.datetime "updated_at", null: false
+    t.decimal "weekly_overtime_threshold_hours", precision: 8, scale: 2, default: "40.0", null: false
+    t.integer "workweek_starts_on", default: 1, null: false
+    t.index ["agency_id"], name: "index_agency_payroll_configurations_on_agency_id", unique: true
   end
 
   create_table "commission_calculations", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
@@ -139,6 +179,26 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_16_120000) do
     t.index ["engagement_id"], name: "index_contractor_charges_on_engagement_id"
   end
 
+  create_table "contractor_settlement_exports", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.bigint "byte_size"
+    t.string "content_sha256", limit: 64
+    t.bigint "contractor_settlement_run_id", null: false
+    t.datetime "created_at", null: false
+    t.integer "export_sequence", null: false
+    t.datetime "exported_at", null: false
+    t.bigint "exported_by_id"
+    t.string "file_format", null: false
+    t.boolean "is_final", default: false, null: false
+    t.text "notes"
+    t.string "original_filename"
+    t.datetime "updated_at", null: false
+    t.text "validation_summary", size: :long, collation: "utf8mb4_bin"
+    t.index ["contractor_settlement_run_id", "export_sequence"], name: "index_settlement_exports_on_run_and_sequence", unique: true
+    t.index ["contractor_settlement_run_id"], name: "idx_on_contractor_settlement_run_id_64056197c8"
+    t.index ["exported_by_id"], name: "index_contractor_settlement_exports_on_exported_by_id"
+    t.check_constraint "json_valid(`validation_summary`)", name: "validation_summary"
+  end
+
   create_table "contractor_settlement_line_commission_calculations", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
     t.bigint "commission_calculation_id", null: false
     t.bigint "contractor_settlement_line_id", null: false
@@ -195,6 +255,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_16_120000) do
     t.datetime "updated_at", null: false
     t.index ["agency_id", "period_start_on", "period_end_on"], name: "index_settlement_runs_on_agency_and_period"
     t.index ["agency_id"], name: "index_contractor_settlement_runs_on_agency_id"
+  end
+
+  create_table "daily_worked_hours", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "engagement_id", null: false
+    t.decimal "hours", precision: 8, scale: 2, null: false
+    t.text "notes"
+    t.integer "source", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.date "work_date", null: false
+    t.index ["engagement_id", "work_date"], name: "index_daily_worked_hours_on_engagement_and_work_date", unique: true
+    t.index ["engagement_id"], name: "index_daily_worked_hours_on_engagement_id"
   end
 
   create_table "departments", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
@@ -357,6 +429,92 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_16_120000) do
     t.index ["team_member_id"], name: "index_engagements_on_team_member_id"
   end
 
+  create_table "leave_balance_adjustments", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.datetime "adjusted_at", null: false
+    t.bigint "adjusted_by_id", null: false
+    t.decimal "adjustment_hours", precision: 10, scale: 2, null: false
+    t.datetime "created_at", null: false
+    t.bigint "leave_balance_id", null: false
+    t.text "reason", null: false
+    t.datetime "updated_at", null: false
+    t.index ["adjusted_by_id"], name: "index_leave_balance_adjustments_on_adjusted_by_id"
+    t.index ["leave_balance_id"], name: "index_leave_balance_adjustments_on_leave_balance_id"
+  end
+
+  create_table "leave_balances", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.decimal "balance_hours", precision: 10, scale: 2, default: "0.0", null: false
+    t.datetime "created_at", null: false
+    t.bigint "engagement_id", null: false
+    t.bigint "leave_type_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["engagement_id", "leave_type_id"], name: "index_leave_balances_on_engagement_id_and_leave_type_id", unique: true
+    t.index ["engagement_id"], name: "index_leave_balances_on_engagement_id"
+    t.index ["leave_type_id"], name: "index_leave_balances_on_leave_type_id"
+  end
+
+  create_table "leave_request_approval_events", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.bigint "actor_id"
+    t.datetime "created_at", null: false
+    t.string "event_type", null: false
+    t.bigint "leave_request_id", null: false
+    t.text "metadata", size: :long, collation: "utf8mb4_bin"
+    t.datetime "occurred_at", null: false
+    t.string "transition_from", null: false
+    t.string "transition_to", null: false
+    t.datetime "updated_at", null: false
+    t.index ["actor_id"], name: "index_leave_request_approval_events_on_actor_id"
+    t.index ["leave_request_id", "occurred_at"], name: "index_leave_request_approval_events_on_req_and_time", order: { occurred_at: :desc }
+    t.index ["leave_request_id"], name: "index_leave_request_approval_events_on_leave_request_id"
+    t.check_constraint "json_valid(`metadata`)", name: "metadata"
+  end
+
+  create_table "leave_request_days", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.decimal "hours", precision: 8, scale: 2, null: false
+    t.date "leave_date", null: false
+    t.bigint "leave_request_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["leave_request_id", "leave_date"], name: "index_leave_request_days_on_request_and_date", unique: true
+    t.index ["leave_request_id"], name: "index_leave_request_days_on_leave_request_id"
+  end
+
+  create_table "leave_requests", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.text "cancellation_reason"
+    t.datetime "created_at", null: false
+    t.date "end_on"
+    t.bigint "engagement_id", null: false
+    t.bigint "leave_type_id", null: false
+    t.text "notes"
+    t.text "review_notes"
+    t.datetime "reviewed_at"
+    t.bigint "reviewed_by_id"
+    t.date "start_on"
+    t.string "status", default: "draft", null: false
+    t.datetime "submitted_at"
+    t.datetime "updated_at", null: false
+    t.index ["engagement_id", "status"], name: "index_leave_requests_on_engagement_id_and_status"
+    t.index ["engagement_id"], name: "index_leave_requests_on_engagement_id"
+    t.index ["leave_type_id"], name: "index_leave_requests_on_leave_type_id"
+    t.index ["reviewed_by_id"], name: "index_leave_requests_on_reviewed_by_id"
+  end
+
+  create_table "leave_types", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.boolean "active", default: true, null: false
+    t.bigint "agency_id", null: false
+    t.string "approval_policy", default: "manual", null: false
+    t.boolean "balance_tracked", default: false, null: false
+    t.string "code", null: false
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.string "name", null: false
+    t.boolean "paid", default: false, null: false
+    t.bigint "payroll_earning_code_id"
+    t.datetime "updated_at", null: false
+    t.index ["agency_id", "code"], name: "index_leave_types_on_agency_id_and_code", unique: true
+    t.index ["agency_id"], name: "index_leave_types_on_agency_id"
+    t.index ["payroll_earning_code_id"], name: "index_leave_types_on_payroll_earning_code_id"
+  end
+
   create_table "locations", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
     t.bigint "agency_id", null: false
     t.string "code", null: false
@@ -429,15 +587,147 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_16_120000) do
     t.index ["target_party_id"], name: "index_party_relationships_on_target_party_id"
   end
 
+  create_table "pay_period_closure_events", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.bigint "actor_id", null: false
+    t.datetime "created_at", null: false
+    t.string "event_type", null: false
+    t.text "metadata", size: :long, collation: "utf8mb4_bin"
+    t.datetime "occurred_at", null: false
+    t.text "override_reason"
+    t.boolean "override_validation", default: false, null: false
+    t.bigint "pay_period_id", null: false
+    t.bigint "payroll_input_batch_id"
+    t.string "source", null: false
+    t.datetime "updated_at", null: false
+    t.index ["actor_id"], name: "index_pay_period_closure_events_on_actor_id"
+    t.index ["pay_period_id"], name: "index_pay_period_closure_events_on_pay_period_id"
+    t.index ["payroll_input_batch_id"], name: "index_pay_period_closure_events_on_payroll_input_batch_id"
+    t.check_constraint "json_valid(`metadata`)", name: "metadata"
+  end
+
   create_table "pay_periods", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
     t.bigint "agency_id", null: false
+    t.datetime "closed_at"
+    t.bigint "closed_by_id"
     t.datetime "created_at", null: false
     t.date "end_on", null: false
     t.string "label"
+    t.string "payroll_frequency", default: "legacy", null: false
     t.date "start_on", null: false
+    t.string "status", default: "open", null: false
     t.datetime "updated_at", null: false
     t.index ["agency_id", "start_on", "end_on"], name: "index_pay_periods_on_agency_and_bounds"
     t.index ["agency_id"], name: "index_pay_periods_on_agency_id"
+    t.index ["closed_by_id"], name: "index_pay_periods_on_closed_by_id"
+  end
+
+  create_table "payroll_adjustment_codes", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.boolean "active", default: true, null: false
+    t.bigint "agency_id", null: false
+    t.string "code", null: false
+    t.datetime "created_at", null: false
+    t.string "direction", null: false
+    t.string "name", null: false
+    t.datetime "updated_at", null: false
+    t.index ["agency_id", "code"], name: "index_payroll_adjustment_codes_on_agency_id_and_code", unique: true
+    t.index ["agency_id"], name: "index_payroll_adjustment_codes_on_agency_id"
+  end
+
+  create_table "payroll_earning_codes", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.string "category", null: false
+    t.string "code", null: false
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.integer "position", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.index ["code"], name: "index_payroll_earning_codes_on_code", unique: true
+  end
+
+  create_table "payroll_exports", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.bigint "byte_size"
+    t.string "content_sha256", limit: 64
+    t.datetime "created_at", null: false
+    t.integer "export_sequence", null: false
+    t.datetime "exported_at", null: false
+    t.bigint "exported_by_id"
+    t.string "file_format", null: false
+    t.boolean "is_final", default: false, null: false
+    t.text "notes"
+    t.string "original_filename"
+    t.bigint "pay_period_id", null: false
+    t.bigint "payroll_input_batch_id"
+    t.string "storage_reference"
+    t.datetime "updated_at", null: false
+    t.text "validation_summary", size: :long, collation: "utf8mb4_bin"
+    t.index ["exported_by_id"], name: "index_payroll_exports_on_exported_by_id"
+    t.index ["pay_period_id", "export_sequence"], name: "index_payroll_exports_on_pay_period_and_sequence", unique: true
+    t.index ["pay_period_id"], name: "index_payroll_exports_on_pay_period_id"
+    t.index ["payroll_input_batch_id"], name: "index_payroll_exports_on_payroll_input_batch_id"
+    t.check_constraint "json_valid(`validation_summary`)", name: "validation_summary"
+  end
+
+  create_table "payroll_input_adjustments", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.decimal "amount", precision: 14, scale: 4
+    t.datetime "created_at", null: false
+    t.string "currency", default: "USD", null: false
+    t.bigint "engagement_id", null: false
+    t.decimal "hours", precision: 12, scale: 4
+    t.text "notes"
+    t.bigint "payroll_adjustment_code_id", null: false
+    t.bigint "payroll_input_batch_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["engagement_id"], name: "index_payroll_input_adjustments_on_engagement_id"
+    t.index ["payroll_adjustment_code_id"], name: "index_payroll_input_adjustments_on_payroll_adjustment_code_id"
+    t.index ["payroll_input_batch_id"], name: "index_payroll_input_adjustments_on_payroll_input_batch_id"
+  end
+
+  create_table "payroll_input_batches", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.bigint "agency_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "exported_at"
+    t.bigint "exported_by_id"
+    t.datetime "finalized_at"
+    t.bigint "finalized_by_id"
+    t.bigint "pay_period_id", null: false
+    t.bigint "payroll_export_id"
+    t.string "reference_number", null: false
+    t.integer "reference_sequence", default: 1, null: false
+    t.text "reversal_reason"
+    t.datetime "reversed_at"
+    t.bigint "reversed_by_id"
+    t.string "status", null: false
+    t.bigint "superseded_by_batch_id"
+    t.bigint "supersedes_batch_id"
+    t.datetime "updated_at", null: false
+    t.index ["agency_id", "pay_period_id", "status"], name: "idx_on_agency_id_pay_period_id_status_cc2e2f4e16"
+    t.index ["agency_id"], name: "index_payroll_input_batches_on_agency_id"
+    t.index ["exported_by_id"], name: "index_payroll_input_batches_on_exported_by_id"
+    t.index ["finalized_by_id"], name: "index_payroll_input_batches_on_finalized_by_id"
+    t.index ["pay_period_id"], name: "index_payroll_input_batches_on_pay_period_id"
+    t.index ["payroll_export_id"], name: "index_payroll_input_batches_on_payroll_export_id"
+    t.index ["reversed_by_id"], name: "index_payroll_input_batches_on_reversed_by_id"
+    t.index ["superseded_by_batch_id"], name: "fk_rails_9783101441"
+    t.index ["supersedes_batch_id"], name: "fk_rails_1e6084095a"
+  end
+
+  create_table "payroll_input_rows", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.decimal "amount", precision: 14, scale: 4
+    t.datetime "created_at", null: false
+    t.string "currency", default: "USD", null: false
+    t.string "direction", default: "earning", null: false
+    t.string "earning_code", null: false
+    t.bigint "engagement_id", null: false
+    t.decimal "hours", precision: 12, scale: 4
+    t.text "metadata", size: :long, collation: "utf8mb4_bin"
+    t.bigint "payroll_input_batch_id", null: false
+    t.bigint "source_id"
+    t.string "source_type"
+    t.datetime "updated_at", null: false
+    t.index ["engagement_id"], name: "index_payroll_input_rows_on_engagement_id"
+    t.index ["payroll_input_batch_id", "engagement_id"], name: "idx_on_payroll_input_batch_id_engagement_id_a6950523ce"
+    t.index ["payroll_input_batch_id"], name: "index_payroll_input_rows_on_payroll_input_batch_id"
+    t.index ["source_type", "source_id"], name: "index_payroll_input_rows_on_source_type_and_source_id"
+    t.check_constraint "json_valid(`metadata`)", name: "metadata"
   end
 
   create_table "person_profiles", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
@@ -520,6 +810,40 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_16_120000) do
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
+  create_table "weekly_timesheet_approval_events", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.bigint "actor_id", null: false
+    t.datetime "created_at", null: false
+    t.string "event_type", null: false
+    t.text "metadata", size: :long, collation: "utf8mb4_bin"
+    t.datetime "occurred_at", null: false
+    t.string "transition_from", null: false
+    t.string "transition_to", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "weekly_timesheet_id", null: false
+    t.index ["actor_id"], name: "index_weekly_timesheet_approval_events_on_actor_id"
+    t.index ["weekly_timesheet_id", "occurred_at"], name: "index_weekly_timesheet_approval_events_on_sheet_and_time", order: { occurred_at: :desc }
+    t.index ["weekly_timesheet_id"], name: "index_weekly_timesheet_approval_events_on_weekly_timesheet_id"
+    t.check_constraint "json_valid(`metadata`)", name: "metadata"
+  end
+
+  create_table "weekly_timesheets", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.datetime "approved_at"
+    t.bigint "approved_by_id"
+    t.datetime "created_at", null: false
+    t.bigint "engagement_id", null: false
+    t.string "status", default: "draft", null: false
+    t.datetime "submitted_at"
+    t.datetime "updated_at", null: false
+    t.date "week_end_on", null: false
+    t.date "week_start_on", null: false
+    t.index ["approved_by_id"], name: "index_weekly_timesheets_on_approved_by_id"
+    t.index ["engagement_id", "week_start_on"], name: "index_weekly_timesheets_on_engagement_and_week_start", unique: true
+    t.index ["engagement_id"], name: "index_weekly_timesheets_on_engagement_id"
+  end
+
+  add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "agency_payroll_configurations", "agencies"
   add_foreign_key "commission_calculations", "agencies"
   add_foreign_key "commission_calculations", "engagements"
   add_foreign_key "commission_calculations", "pay_periods"
@@ -539,6 +863,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_16_120000) do
   add_foreign_key "contractor_charge_waivers", "users", column: "actor_id"
   add_foreign_key "contractor_charges", "agencies"
   add_foreign_key "contractor_charges", "engagements"
+  add_foreign_key "contractor_settlement_exports", "contractor_settlement_runs"
+  add_foreign_key "contractor_settlement_exports", "users", column: "exported_by_id"
   add_foreign_key "contractor_settlement_line_commission_calculations", "commission_calculations"
   add_foreign_key "contractor_settlement_line_commission_calculations", "contractor_settlement_lines"
   add_foreign_key "contractor_settlement_line_revenue_inputs", "contractor_settlement_lines"
@@ -549,6 +875,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_16_120000) do
   add_foreign_key "contractor_settlement_run_events", "contractor_settlement_runs"
   add_foreign_key "contractor_settlement_run_events", "users", column: "actor_id"
   add_foreign_key "contractor_settlement_runs", "agencies"
+  add_foreign_key "daily_worked_hours", "engagements"
   add_foreign_key "departments", "agencies"
   add_foreign_key "departments", "departments", column: "parent_department_id"
   add_foreign_key "document_records", "agencies"
@@ -574,6 +901,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_16_120000) do
   add_foreign_key "engagement_supervision_assignments", "engagements", column: "supervisor_engagement_id"
   add_foreign_key "engagements", "agencies"
   add_foreign_key "engagements", "team_members"
+  add_foreign_key "leave_balance_adjustments", "leave_balances"
+  add_foreign_key "leave_balance_adjustments", "users", column: "adjusted_by_id"
+  add_foreign_key "leave_balances", "engagements"
+  add_foreign_key "leave_balances", "leave_types"
+  add_foreign_key "leave_request_approval_events", "leave_requests"
+  add_foreign_key "leave_request_approval_events", "users", column: "actor_id"
+  add_foreign_key "leave_request_days", "leave_requests"
+  add_foreign_key "leave_requests", "engagements"
+  add_foreign_key "leave_requests", "leave_types"
+  add_foreign_key "leave_requests", "users", column: "reviewed_by_id"
+  add_foreign_key "leave_types", "agencies"
+  add_foreign_key "leave_types", "payroll_earning_codes"
   add_foreign_key "locations", "agencies"
   add_foreign_key "organization_profiles", "parties"
   add_foreign_key "parties", "agencies"
@@ -581,7 +920,28 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_16_120000) do
   add_foreign_key "party_relationships", "agencies"
   add_foreign_key "party_relationships", "parties", column: "source_party_id"
   add_foreign_key "party_relationships", "parties", column: "target_party_id"
+  add_foreign_key "pay_period_closure_events", "pay_periods"
+  add_foreign_key "pay_period_closure_events", "payroll_input_batches"
+  add_foreign_key "pay_period_closure_events", "users", column: "actor_id"
   add_foreign_key "pay_periods", "agencies"
+  add_foreign_key "pay_periods", "users", column: "closed_by_id"
+  add_foreign_key "payroll_adjustment_codes", "agencies"
+  add_foreign_key "payroll_exports", "pay_periods"
+  add_foreign_key "payroll_exports", "payroll_input_batches"
+  add_foreign_key "payroll_exports", "users", column: "exported_by_id"
+  add_foreign_key "payroll_input_adjustments", "engagements"
+  add_foreign_key "payroll_input_adjustments", "payroll_adjustment_codes"
+  add_foreign_key "payroll_input_adjustments", "payroll_input_batches"
+  add_foreign_key "payroll_input_batches", "agencies"
+  add_foreign_key "payroll_input_batches", "pay_periods"
+  add_foreign_key "payroll_input_batches", "payroll_exports"
+  add_foreign_key "payroll_input_batches", "payroll_input_batches", column: "superseded_by_batch_id"
+  add_foreign_key "payroll_input_batches", "payroll_input_batches", column: "supersedes_batch_id"
+  add_foreign_key "payroll_input_batches", "users", column: "exported_by_id"
+  add_foreign_key "payroll_input_batches", "users", column: "finalized_by_id"
+  add_foreign_key "payroll_input_batches", "users", column: "reversed_by_id"
+  add_foreign_key "payroll_input_rows", "engagements"
+  add_foreign_key "payroll_input_rows", "payroll_input_batches"
   add_foreign_key "person_profiles", "parties"
   add_foreign_key "revenue_inputs", "agencies"
   add_foreign_key "revenue_inputs", "engagements"
@@ -593,4 +953,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_16_120000) do
   add_foreign_key "teams", "locations"
   add_foreign_key "user_agencies", "agencies"
   add_foreign_key "user_agencies", "users"
+  add_foreign_key "weekly_timesheet_approval_events", "users", column: "actor_id"
+  add_foreign_key "weekly_timesheet_approval_events", "weekly_timesheets"
+  add_foreign_key "weekly_timesheets", "engagements"
+  add_foreign_key "weekly_timesheets", "users", column: "approved_by_id"
 end
