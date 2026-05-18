@@ -1,0 +1,27 @@
+<% content_for :title, "Documents — #{current_agency.name}" %>
+<div class="tc-page-stack">
+  <header class="tc-page-header">
+    <div>
+      <p class="tc-page-header__eyebrow">Workspace</p>
+      <h1 class="tc-page-header__title">Documents</h1>
+      <p class="tc-page-header__subtitle">
+        Operational document surfaces — use workbenches and queues for triage; reports for cohort views (not full tables on this hub).
+      </p>
+    </div>
+  </header>
+
+  <div class="tc-panel">
+    <div class="tc-panel__header">
+      <div class="tc-panel__title">Launch</div>
+    </div>
+    <div class="tc-panel__body text-sm space-y-2">
+      <ul class="m-0 list-none space-y-2 p-0">
+        <li><%= link_to "Document workbench", admin_document_workbench_path, class: tc_link_classes %></li>
+        <li><%= link_to "Document alerts", admin_document_alerts_path, class: tc_link_classes %></li>
+        <li><%= link_to "Pending review", admin_document_reviews_path, class: tc_link_classes %></li>
+        <li><%= link_to "Document records", admin_document_records_path, class: tc_link_classes %></li>
+        <li><%= link_to "Document compliance report", admin_reports_document_compliance_index_path, class: tc_link_classes %></li>
+      </ul>
+    </div>
+  </div>
+</div>

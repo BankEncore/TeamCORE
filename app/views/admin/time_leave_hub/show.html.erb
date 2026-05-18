@@ -1,0 +1,25 @@
+<% content_for :title, "Time & leave — #{current_agency.name}" %>
+<div class="tc-page-stack">
+  <header class="tc-page-header">
+    <div>
+      <p class="tc-page-header__eyebrow">Workspace</p>
+      <h1 class="tc-page-header__title">Time &amp; leave</h1>
+      <p class="tc-page-header__subtitle">
+        Employee time and leave workflows (MVP — contractors do not submit time here).
+      </p>
+    </div>
+  </header>
+
+  <div class="tc-panel">
+    <div class="tc-panel__header">
+      <div class="tc-panel__title">Launch</div>
+    </div>
+    <div class="tc-panel__body text-sm space-y-2">
+      <ul class="m-0 list-none space-y-2 p-0">
+        <li><%= link_to "Weekly timesheets", admin_weekly_timesheets_path, class: tc_link_classes %></li>
+        <li><%= link_to "Leave requests", admin_leave_requests_path, class: tc_link_classes %></li>
+        <li><%= link_to "Leave types", admin_leave_types_path, class: tc_link_classes %></li>
+      </ul>
+    </div>
+  </div>
+</div>

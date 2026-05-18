@@ -37,11 +37,13 @@ Payroll and settlement journeys stay `current`; phase-dependent behavior is call
 
 ## Route inventory baseline
 
-Last verified against: `BankEncore/TeamCORE main @ cfa75d749b5a10363914fb1e5fc4e4862ca466cb`
-
 Primary source: `config/routes.rb`
 
-Refresh this baseline when admin routes change materially.
+This inventory includes **UX-1 workspace hub** routes (`GET /admin/people`, `/admin/onboarding`, `/admin/documents`, `/admin/payroll_settlement`, `/admin/time_leave`, `/admin/configuration`).
+
+After UX-1 merges to main, set: `Last verified against: BankEncore/TeamCORE main @ <commit-sha>`.
+
+Refresh when admin routes change materially.
 
 ## Route helper appendix (admin)
 
@@ -50,8 +52,9 @@ Abbreviated inventory derived from `config/routes.rb` at the baseline SHA. Prefe
 | Area | Representative helpers | Path patterns |
 | ---- | ------------------------ | ------------- |
 | Dashboard | `admin_root_path` | `/admin` |
+| Workspace hubs (UX-1) | `admin_people_hub_path`, `admin_onboarding_hub_path`, `admin_documents_hub_path`, `admin_payroll_settlement_hub_path`, `admin_time_leave_hub_path`, `admin_configuration_hub_path` | `/admin/people`, `/admin/onboarding`, `/admin/documents`, `/admin/payroll_settlement`, `/admin/time_leave`, `/admin/configuration` |
 | Search | `admin_search_path` | `/admin/search` |
-| Guided onboarding | `admin_guided_setup_path`, `admin_guided_employee_path`, `admin_guided_individual_contractor_path`, `admin_guided_contractor_organization_path`, `admin_guided_subcontractor_path` | `/admin/guided`, `/admin/guided/employee`, `/admin/guided/individual_contractor`, `/admin/guided/contractor_organization`, `/admin/guided/subcontractor` |
+| Guided onboarding | `admin_guided_setup_path`, `admin_guided_employee_path`, `admin_guided_individual_contractor_path`, `admin_guided_contractor_organization_path`, `admin_guided_subcontractor_path` | `/admin/guided`, `/admin/guided/employee`, `/admin/guided/individual_contractor`, `/admin/guided/contractor_organization`, `/admin/guided/subcontractor` — each workforce guided URL renders an in-page **setup checklist** (`#guided-onboarding-checklist`; UX-3). The guided hub itself has no checklist panel. |
 | Parties | `admin_parties_path`, `admin_party_path(party)`, `admin_new_person_party_path`, `admin_person_parties_path`, `admin_new_organization_party_path`, `admin_organization_parties_path` | `/admin/parties`, `/admin/parties/:id`, `/admin/parties/new/person`, `POST /admin/parties/person`, `/admin/parties/new/organization`, `POST /admin/parties/organization` |
 | Team members | `admin_team_members_path`, `admin_team_member_path(team_member)`, `new_admin_team_member_path`, `edit_admin_team_member_path` | `/admin/team_members`, `/admin/team_members/:id`, `/admin/team_members/new`, `/admin/team_members/:id/edit` |
 | Team360 | `admin_team_member_team360_path(team_member, engagement_id: …)` | `/admin/team_members/:team_member_id/team360?engagement_id=:engagement_id` |
@@ -69,5 +72,3 @@ Abbreviated inventory derived from `config/routes.rb` at the baseline SHA. Prefe
 | Contractor charges queue | `admin_contractor_charges_path` | `/admin/contractor_charges` |
 | Reports | `admin_reports_root_path`, `admin_reports_team_members_path`, `admin_reports_engagements_path`, `admin_reports_document_compliance_index_path`, `admin_reports_contractor_documentation_index_path`, `admin_reports_subcontractors_path` | `/admin/reports`, `/admin/reports/team_members`, `/admin/reports/engagements`, `/admin/reports/document_compliance`, `/admin/reports/contractor_documentation`, `/admin/reports/subcontractors` |
 | Reference / configuration CRUD | `admin_agencies_path`, `admin_departments_path`, `admin_locations_path`, `admin_teams_path`, `admin_compensation_plans_path`, `admin_payroll_adjustment_codes_path` | `/admin/agencies`, `/admin/departments`, `/admin/locations`, `/admin/teams`, `/admin/compensation_plans`, `/admin/payroll_adjustment_codes` |
-
-Planned UX-1 workspace hubs (`/admin/people`, `/admin/onboarding`, `/admin/documents`, etc.) are documented in the UX guide; they are **not** defined in `config/routes.rb` at UX-0 closure.

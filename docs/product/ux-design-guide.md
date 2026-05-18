@@ -72,21 +72,23 @@ For persona-centered flows, route helpers, and return expectations locked to tod
 
 ## Planned hub routes → primary destinations
 
-The workspace hub paths below are **planned for UX-1**; they are not defined in `config/routes.rb` at UX-0 closure. Until those hubs ship, use the **existing** route helpers and path patterns in the right-hand column (verified against `config/routes.rb`).
+Workspace hub paths below are **implemented in UX-1** as thin `GET` surfaces (`Admin::*HubController#show`). Hub pages link into the **existing** route helpers in the right-hand column (no duplicate domain behavior).
 
-| Planned hub (UX-1) | Path pattern | Primary existing destinations (representative helpers) |
-| ------------------ | ------------ | ------------------------------------------------------ |
+| Workspace hub | Path pattern | Primary destinations (representative helpers) |
+| ------------- | ------------ | ------------------------------------------------------ |
 | People | `/admin/people` | `admin_team_members_path`, `admin_search_path`, `admin_guided_setup_path`, `admin_document_workbench_path` |
 | Onboarding | `/admin/onboarding` | `admin_guided_setup_path`, `admin_guided_employee_path`, `admin_guided_individual_contractor_path`, `admin_guided_contractor_organization_path`, `admin_guided_subcontractor_path` |
 | Documents | `/admin/documents` | `admin_document_workbench_path`, `admin_document_alerts_path`, `admin_document_reviews_path`, `admin_document_records_path`, `admin_reports_document_compliance_index_path` |
 | Payroll & Settlement | `/admin/payroll_settlement` | `admin_pay_periods_path`, `admin_contractor_settlement_runs_path`, `admin_payroll_adjustment_codes_path` |
 | Time & Leave | `/admin/time_leave` | `admin_weekly_timesheets_path`, `admin_leave_requests_path`, `admin_leave_types_path` |
-| Reports | `/admin/reports` (conventional; today use namespace root) | `admin_reports_root_path`, `admin_reports_team_members_path`, `admin_reports_engagements_path` |
+| Reports | `/admin/reports` (namespace root) | `admin_reports_root_path`, `admin_reports_team_members_path`, `admin_reports_engagements_path` |
 | Configuration | `/admin/configuration` | `admin_agencies_path`, `admin_departments_path`, `admin_locations_path`, `admin_teams_path`, `admin_compensation_plans_path`, `admin_document_types_path`, `admin_document_requirements_path` |
+
+Hub route helpers: `admin_people_hub_path`, `admin_onboarding_hub_path`, `admin_documents_hub_path`, `admin_payroll_settlement_hub_path`, `admin_time_leave_hub_path`, `admin_configuration_hub_path`.
 
 ## `/admin/onboarding` vs `/admin/guided`
 
-UX-1 will introduce `/admin/onboarding` as a thin workspace hub. It will not replace `/admin/guided`. Existing `/admin/guided/*` routes remain the implementation routes for guided onboarding flows.
+The `/admin/onboarding` workspace hub does **not** replace `/admin/guided`. Existing `/admin/guided/*` routes remain the implementation routes for guided onboarding flows.
 
 Current guided URLs (reference):
 
@@ -122,3 +124,9 @@ UX-1 and UX-2 should align implementations with the **Return navigation expectat
 ## Guided onboarding
 
 Orchestration only: step launchers, links to existing resources, and prefilled params—not a new domain layer or a persisted wizard state machine for v1.
+
+### UX-3 checklist-driven guided flows
+
+Each `/admin/guided/*` flow renders a **derived checklist** after the title: party identity → team member → engagement shell rows always appear; when an engagement exists for the selected party and the flow’s relationship type, additional rows mirror [`Admin::EngagementSetupChecklistPresenter`](../../app/presenters/admin/engagement_setup_checklist_presenter.rb) (fed by [`Documents::ReadinessEvaluator`](../../app/services/documents/readiness_evaluator.rb)), plus an activation readiness snapshot with a Team360 link. Primary CTAs round-trip via [`return_to` / `team360_return_to`](#admin-return-navigation-contract) to the current guided URL (`request.fullpath`).
+
+Implementation: [`GuidedOnboarding::ChecklistPresenter`](../../app/presenters/guided_onboarding/checklist_presenter.rb), [`Admin::GuidedOnboardingController`](../../app/controllers/admin/guided_onboarding_controller.rb). Checklist anchor: `#guided-onboarding-checklist`.

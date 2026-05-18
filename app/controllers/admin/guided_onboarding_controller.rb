@@ -3,27 +3,59 @@
 module Admin
   class GuidedOnboardingController < Admin::BaseController
     before_action :require_current_agency!
+    before_action :load_party_context, only: %i[
+      employee
+      individual_contractor
+      contractor_organization
+      subcontractor
+    ]
+    before_action :assign_guided_checklist, only: %i[
+      employee
+      individual_contractor
+      contractor_organization
+      subcontractor
+    ]
 
     def hub
     end
 
     def employee
-      load_party_context
     end
 
     def individual_contractor
-      load_party_context
     end
 
     def contractor_organization
-      load_party_context
     end
 
     def subcontractor
-      load_party_context
     end
 
     private
+
+    def guided_relationship_type
+      case action_name
+      when "employee" then "employee"
+      when "individual_contractor" then "individual_contractor"
+      when "contractor_organization" then "contractor_organization"
+      when "subcontractor" then "subcontractor"
+      else
+        raise ArgumentError, "unexpected guided action #{action_name.inspect}"
+      end
+    end
+
+    def assign_guided_checklist
+      @guided_checklist_rows =
+        GuidedOnboarding::ChecklistPresenter.new(
+          agency: current_agency,
+          selected_party: @selected_party,
+          relationship_type: guided_relationship_type,
+          org_flow: action_name == "contractor_organization",
+          guided_return_path: request.fullpath,
+          search_q: @search_q,
+          team_member_id_param: params[:team_member_id]
+        ).rows
+    end
 
     def load_party_context
       q = params[:q].to_s.strip

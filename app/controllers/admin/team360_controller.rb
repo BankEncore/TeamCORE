@@ -19,7 +19,7 @@ module Admin
         ).call
 
       if @snapshot.focused_engagement_id.present?
-        eng =
+        @focused_engagement =
           Engagement
             .where(agency_id: current_agency.id)
             .includes(
@@ -30,16 +30,25 @@ module Admin
               :contractor_settlement_lines
             )
             .find_by(id: @snapshot.focused_engagement_id)
-        if eng && @snapshot.readiness_result
+        if @focused_engagement && @snapshot.readiness_result
           @engagement_setup_checklist =
             Admin::EngagementSetupChecklistPresenter.new(
-              engagement: eng,
+              engagement: @focused_engagement,
               document_readiness: @snapshot.readiness_result,
               as_of_date: @as_of_date,
-              placement_rows: eng.engagement_organization_placements.order(:effective_start_on),
-              supervision_rows: eng.engagement_supervision_assignments.order(:effective_start_on),
-              workforce_financial_assignment: CompensationPlanAssignment.current_for_engagement(eng)
+              placement_rows: @focused_engagement.engagement_organization_placements.order(:effective_start_on),
+              supervision_rows: @focused_engagement.engagement_supervision_assignments.order(:effective_start_on),
+              workforce_financial_assignment: CompensationPlanAssignment.current_for_engagement(@focused_engagement)
             )
+          next_presenter =
+            Team360::NextActionsPresenter.new(
+              team_member: @team_member,
+              engagement: @focused_engagement,
+              snapshot: @snapshot,
+              checklist_presenter: @engagement_setup_checklist
+            )
+          @team360_next_actions = next_presenter.actions
+          @team360_next_actions_more = next_presenter.more_actions?
         end
       end
     end

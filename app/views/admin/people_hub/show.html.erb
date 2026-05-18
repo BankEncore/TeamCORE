@@ -1,0 +1,26 @@
+<% content_for :title, "People — #{current_agency.name}" %>
+<div class="tc-page-stack">
+  <header class="tc-page-header">
+    <div>
+      <p class="tc-page-header__eyebrow">Workspace</p>
+      <h1 class="tc-page-header__title">People</h1>
+      <p class="tc-page-header__subtitle">
+        Find team members, start from search, or jump into document triage. Thin launcher surface — detailed lists stay in Reference indexes.
+      </p>
+    </div>
+  </header>
+
+  <div class="tc-panel">
+    <div class="tc-panel__header">
+      <div class="tc-panel__title">Primary launchers</div>
+    </div>
+    <div class="tc-panel__body text-sm space-y-2">
+      <ul class="m-0 list-none space-y-2 p-0">
+        <li><%= link_to "Team members", admin_team_members_path, class: tc_link_classes %></li>
+        <li><%= link_to "Search (full results)", admin_search_path, class: tc_link_classes %></li>
+        <li><%= link_to "Guided onboarding hub", admin_guided_setup_path, class: tc_link_classes %></li>
+        <li><%= link_to "Document workbench", admin_document_workbench_path, class: tc_link_classes %></li>
+      </ul>
+    </div>
+  </div>
+</div>

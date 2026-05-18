@@ -36,7 +36,7 @@ Distinguish **related-only** vs **promoted** subcontractors (do not infer payrol
 
 | Purpose | Route helper | Path pattern |
 | ------- | ------------ | ------------ |
-| Guided subcontractor | `admin_guided_subcontractor_path` | `/admin/guided/subcontractor` |
+| Guided subcontractor | `admin_guided_subcontractor_path` | `/admin/guided/subcontractor` — includes `#guided-onboarding-checklist` for promoted (workforce-grade) orchestration (see [UX design guide](../ux-design-guide.md)). |
 | Guided hub | `admin_guided_setup_path` | `/admin/guided` |
 | Party / relationship CRUD | `admin_party_path`, `admin_party_party_relationships_path`, `new_admin_party_party_relationship_path` | `/admin/parties/:id`, `/admin/parties/:party_id/party_relationships`, `/new` |
 | Team member CRUD | `new_admin_team_member_path`, `admin_team_member_path` | `/admin/team_members/new`, `/admin/team_members/:id` |
@@ -52,6 +52,7 @@ Distinguish **related-only** vs **promoted** subcontractors (do not infer payrol
 2. Open guided subcontractor onboarding when agency uses TeamCORE’s orchestrated checklist.
    - Route helper: `admin_guided_subcontractor_path`
    - Path pattern: `/admin/guided/subcontractor`
+   - **Setup checklist (UX-3):** `#guided-onboarding-checklist` applies only on this promoted path; related-only subcontractors should not treat engagement checklist rows as authoritative when no engagement exists.
 
 3. Establish Party identity + relationships tying subcontractor to prime contractor context via Party Hub tooling (`admin_party_path`, relationship routes).
 
@@ -67,7 +68,7 @@ Same rules as other workforce journeys (**promoted** subcontractors): Team360 su
 
 | Starting surface | Action | Return destination |
 | ---------------- | ------ | ------------------ |
-| Guided subcontractor | Save supporting record | `admin_guided_subcontractor_path` or Team360 |
+| Guided subcontractor | Save supporting record | `admin_guided_subcontractor_path` + `#guided-onboarding-checklist` or Team360 |
 | Party relationship editor | Save relationship (related-only layer) | Parent contractor Party hub or subcontractor Party hub |
 | Document intake | Save subcontractor evidence | Document workbench / Team360 per `return_to` |
 
@@ -86,6 +87,6 @@ Same rules as other workforce journeys (**promoted** subcontractors): Team360 su
 ## Verification checklist
 
 - [ ] Journey labeled `conditional` and prerequisites explicitly acknowledged.
-- [ ] Guided helper references `admin_guided_subcontractor_path` exactly.
+- [ ] Guided helper references `admin_guided_subcontractor_path` exactly; checklist `#guided-onboarding-checklist` documented for promoted flows only.
 - [ ] Team360 URLs document optional `engagement_id` query usage.
 - [ ] **Related-only** vs **promoted** subcontractor paths are explicit (PartyRelationship-only vs TeamMember + Engagement).

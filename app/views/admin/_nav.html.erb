@@ -2,14 +2,22 @@
 
 <header class="tc-app-header">
   <div class="tc-app-header__inner">
-    <%= link_to admin_root_path, class: "tc-app-header__brand" do %>
-      <%= image_tag "logo.png",
-            alt: "TeamCORE",
-            class: "tc-app-header__logo",
-            height: 36,
-            style: "width: auto; max-width: min(200px, 100%); max-height: 2.25rem; object-fit: contain;" %>
+    <div class="flex w-full min-w-0 flex-wrap items-center gap-3">
+      <%= link_to admin_root_path, class: "tc-app-header__brand shrink-0" do %>
+        <%= image_tag "logo.png",
+              alt: "TeamCORE",
+              class: "tc-app-header__logo",
+              height: 36,
+              style: "width: auto; max-width: min(200px, 100%); max-height: 2.25rem; object-fit: contain;" %>
+      <% end %>
+    <% if current_agency.present? %>
+      <%= form_with url: admin_search_path, method: :get, data: { turbo: false }, class: "flex min-w-0 flex-1 flex-wrap items-center gap-2 md:max-w-xl lg:max-w-2xl" do %>
+        <%= label_tag :q, "Search", class: "sr-only" %>
+        <%= text_field_tag :q, params[:q], class: "tc-input min-h-[2.25rem] min-w-0 flex-1", placeholder: "Team members, parties, engagements…" %>
+        <%= submit_tag "Search", class: "tc-btn tc-btn--secondary shrink-0", style: "min-height: 2.25rem;" %>
+      <% end %>
     <% end %>
-    <div class="tc-app-header__tools">
+    <div class="tc-app-header__tools shrink-0" style="margin-left: auto;">
       <% if current_user.agencies.many? %>
         <%= form_with url: admin_agency_context_path, method: :patch, data: { turbo: false }, class: "flex flex-wrap items-end gap-2" do %>
           <%= hidden_field_tag :return_to, request.fullpath %>
@@ -27,6 +35,7 @@
       <span class="hidden sm:inline" style="color: color-mix(in srgb, white 72%, transparent);"><%= current_user.email %></span>
       <%= button_to "Log out", logout_path, method: :delete, class: "tc-btn tc-btn--quiet", form: { class: "inline" }, params: {}, data: { turbo: false } %>
     </div>
+    </div>
   </div>
 </header>
 
@@ -34,69 +43,16 @@
   <div class="tc-section-nav__inner">
     <div class="tc-section-nav__group">
       <span class="tc-section-nav__label">Workspace</span>
-        <div class="tc-section-nav__links">
-        <%= tc_nav_link_to "Dashboard", admin_root_path %>
-        <%= tc_nav_link_to "Search", admin_search_path %>
-      </div>
-    </div>
-
-    <div class="tc-section-nav__group">
-      <span class="tc-section-nav__label">Organization</span>
       <div class="tc-section-nav__links">
-        <%= tc_nav_link_to "Agencies", admin_agencies_path %>
+        <%= tc_nav_link_to "Dashboard", admin_root_path %>
         <% if current_agency.present? %>
-          <%= tc_nav_link_to "Departments", admin_departments_path %>
-          <%= tc_nav_link_to "Locations", admin_locations_path %>
-          <%= tc_nav_link_to "Teams", admin_teams_path %>
+          <%= tc_nav_link_to "People", admin_people_hub_path %>
+          <%= tc_nav_link_to "Onboarding", admin_onboarding_hub_path %>
+          <%= tc_nav_link_to "Documents", admin_documents_hub_path %>
+          <%= tc_nav_link_to "Payroll & settlement", admin_payroll_settlement_hub_path %>
+          <%= tc_nav_link_to "Time & leave", admin_time_leave_hub_path %>
         <% end %>
-      </div>
-    </div>
-
-    <% if current_agency.present? %>
-      <div class="tc-section-nav__group">
-        <span class="tc-section-nav__label">Financial</span>
-        <div class="tc-section-nav__links">
-          <%= tc_nav_link_to "Pay periods", admin_pay_periods_path %>
-          <%= tc_nav_link_to "Leave requests", admin_leave_requests_path %>
-          <%= tc_nav_link_to "Leave types", admin_leave_types_path %>
-          <%= tc_nav_link_to "Compensation plans", admin_compensation_plans_path %>
-          <%= tc_nav_link_to "Charges", admin_contractor_charges_path %>
-          <%= tc_nav_link_to "Settlement runs", admin_contractor_settlement_runs_path %>
-        </div>
-      </div>
-    <% end %>
-
-    <% if current_agency.present? %>
-      <div class="tc-section-nav__group">
-        <span class="tc-section-nav__label">People &amp; relationships</span>
-        <div class="tc-section-nav__links">
-          <%= tc_nav_link_to "Parties", admin_parties_path %>
-          <%= tc_nav_link_to "Team members", admin_team_members_path %>
-          <%= tc_nav_link_to "Engagements", admin_engagements_path %>
-        </div>
-      </div>
-
-      <div class="tc-section-nav__group">
-        <span class="tc-section-nav__label">Compliance</span>
-        <div class="tc-section-nav__links">
-          <%= tc_nav_link_to "Doc records", admin_document_records_path %>
-          <%= tc_nav_link_to "Workbench", admin_document_workbench_path %>
-          <%= tc_nav_link_to "Pending review", admin_document_reviews_path %>
-          <%= tc_nav_link_to "Document alerts", admin_document_alerts_path %>
-        </div>
-      </div>
-
-      <div class="tc-section-nav__group">
-        <span class="tc-section-nav__label">Setup</span>
-        <div class="tc-section-nav__links">
-          <%= tc_nav_link_to "Document types", admin_document_types_path %>
-          <%= tc_nav_link_to "Requirements", admin_document_requirements_path %>
-        </div>
-      </div>
-
-      <div class="tc-section-nav__group">
-        <span class="tc-section-nav__label">Reports</span>
-        <div class="tc-section-nav__links">
+        <% if current_agency.present? %>
           <% reports_active = tc_reports_nav_active? %>
           <%= link_to "Reports", admin_reports_root_path,
                 class: [
@@ -104,7 +60,44 @@
                   ("tc-section-nav__link--active" if reports_active),
                 ].compact.join(" "),
                 "aria-current": (reports_active ? "page" : nil) %>
+          <%= tc_nav_link_to "Configuration", admin_configuration_hub_path %>
+        <% end %>
+      </div>
+    </div>
+
+    <% if current_agency.present? %>
+      <div class="tc-section-nav__group">
+        <span class="tc-section-nav__label">Reference</span>
+        <div class="tc-section-nav__links">
+          <%= tc_nav_link_to "Agencies", admin_agencies_path %>
+          <%= tc_nav_link_to "Departments", admin_departments_path %>
+          <%= tc_nav_link_to "Locations", admin_locations_path %>
+          <%= tc_nav_link_to "Teams", admin_teams_path %>
+          <%= tc_nav_link_to "Parties", admin_parties_path %>
+          <%= tc_nav_link_to "Team members", admin_team_members_path %>
+          <%= tc_nav_link_to "Engagements", admin_engagements_path %>
+          <%= tc_nav_link_to "Pay periods", admin_pay_periods_path %>
+          <%= tc_nav_link_to "Weekly timesheets", admin_weekly_timesheets_path %>
+          <%= tc_nav_link_to "Leave requests", admin_leave_requests_path %>
+          <%= tc_nav_link_to "Leave types", admin_leave_types_path %>
+          <%= tc_nav_link_to "Compensation plans", admin_compensation_plans_path %>
+          <%= tc_nav_link_to "Charges", admin_contractor_charges_path %>
+          <%= tc_nav_link_to "Settlement runs", admin_contractor_settlement_runs_path %>
+          <%= tc_nav_link_to "Payroll adjustment codes", admin_payroll_adjustment_codes_path %>
+          <%= tc_nav_link_to "Doc records", admin_document_records_path %>
+          <%= tc_nav_link_to "Workbench", admin_document_workbench_path %>
+          <%= tc_nav_link_to "Pending review", admin_document_reviews_path %>
+          <%= tc_nav_link_to "Document alerts", admin_document_alerts_path %>
+          <%= tc_nav_link_to "Document types", admin_document_types_path %>
+          <%= tc_nav_link_to "Requirements", admin_document_requirements_path %>
           <%= tc_nav_link_to "Subcontractors", admin_reports_subcontractors_path %>
+        </div>
+      </div>
+    <% elsif current_user.agencies.any? %>
+      <div class="tc-section-nav__group">
+        <span class="tc-section-nav__label">Reference</span>
+        <div class="tc-section-nav__links">
+          <%= tc_nav_link_to "Agencies", admin_agencies_path %>
         </div>
       </div>
     <% end %>

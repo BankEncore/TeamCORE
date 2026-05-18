@@ -30,7 +30,7 @@ Stand up Party → TeamMember → contractor **Engagement**, then complete place
 | Purpose | Route helper | Path pattern |
 | ------- | ------------ | ------------ |
 | Guided hub | `admin_guided_setup_path` | `/admin/guided` |
-| Guided individual contractor | `admin_guided_individual_contractor_path` | `/admin/guided/individual_contractor` |
+| Guided individual contractor | `admin_guided_individual_contractor_path` | `/admin/guided/individual_contractor` — includes derived setup checklist (`#guided-onboarding-checklist`; see [UX design guide](../ux-design-guide.md)). |
 | Person party new/create | `admin_new_person_party_path`, `admin_person_parties_path` | `/admin/parties/new/person`, `POST /admin/parties/person` |
 | Party hub | `admin_party_path(party)` | `/admin/parties/:id` |
 | Team member CRUD | `new_admin_team_member_path`, `admin_team_member_path(team_member)` | `/admin/team_members/new`, `/admin/team_members/:id` |
@@ -48,6 +48,7 @@ Stand up Party → TeamMember → contractor **Engagement**, then complete place
 1. Open guided individual contractor flow.
    - Route helper: `admin_guided_individual_contractor_path`
    - Path pattern: `/admin/guided/individual_contractor`
+   - **Setup checklist (UX-3):** `#guided-onboarding-checklist` — same behavior as employee guided checklist but scoped to `individual_contractor` engagements; preserve `party_id` / `team_member_id` on the URL when stepping through CRUD so rows and `return_to` stay coherent.
    - Primary return: guided hub `admin_guided_setup_path` when exiting.
 
 2. Create or confirm **Party** person.
@@ -90,7 +91,7 @@ Treat Team360 as the contractor **record hub**: contract status signals, documen
 | Starting surface | Action | Return destination |
 | ---------------- | ------ | ------------------ |
 | Team360 | Upload / fix contractor document | Team360 with same `engagement_id` when returns round-trip |
-| Guided contractor flow | Save nested engagement resource | `admin_guided_individual_contractor_path` or engagement show |
+| Guided contractor flow | Save nested engagement resource | Guided flow with checklist (`admin_guided_individual_contractor_path` + `#guided-onboarding-checklist`) or engagement show |
 | Document verification form | Verify or reject record | `admin_document_reviews_path` / `admin_document_workbench_path` or Team360 per `return_to` |
 | Compensation assignment form | Save assignment | `admin_engagement_compensation_plan_assignments_path` or Team360 |
 
@@ -111,7 +112,7 @@ Treat Team360 as the contractor **record hub**: contract status signals, documen
 
 ## Verification checklist
 
-- [ ] Guided helper uses `admin_guided_individual_contractor_path` (distinct from employee + org contractors).
+- [ ] Guided helper uses `admin_guided_individual_contractor_path` (distinct from employee + org contractors); checklist `#guided-onboarding-checklist` reflects selection when engagement exists.
 - [ ] Engagement-scoped URLs include `:engagement_id` segments matching `config/routes.rb`.
 - [ ] Team360 links include `engagement_id` query param when validating contractor readiness.
 - [ ] Document verification actions cite POST helpers `verify_admin_document_record_path` / `reject_admin_document_record_path`.

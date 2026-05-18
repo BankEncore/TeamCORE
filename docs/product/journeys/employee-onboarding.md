@@ -30,7 +30,7 @@ Create identity and workforce records, establish an active **employee engagement
 | Purpose | Route helper | Path pattern |
 | ------- | ------------ | ------------ |
 | Guided hub | `admin_guided_setup_path` | `/admin/guided` |
-| Guided employee checklist | `admin_guided_employee_path` | `/admin/guided/employee` |
+| Guided employee flow | `admin_guided_employee_path` | `/admin/guided/employee` — includes derived setup checklist (`#guided-onboarding-checklist`; mirrors Team360 engagement checklist signals when party + engagement exist; see [UX design guide](../ux-design-guide.md)). |
 | New person party | `admin_new_person_party_path` | `/admin/parties/new/person` |
 | Create person party | `admin_person_parties_path` | `POST /admin/parties/person` |
 | Party hub (identity) | `admin_party_path(party)` | `/admin/parties/:id` |
@@ -54,6 +54,7 @@ Create identity and workforce records, establish an active **employee engagement
    - Intent: Use orchestration entry points and deep links instead of memorizing CRUD order.
    - Route helper: `admin_guided_employee_path`
    - Path pattern: `/admin/guided/employee`
+   - **Setup checklist (UX-3):** `#guided-onboarding-checklist` summarizes party → team member → engagement shell, then (when an engagement exists for this flow’s relationship type) rows aligned with `Admin::EngagementSetupChecklistPresenter` plus an activation readiness row with Team360. Preserve query params such as `party_id` / `team_member_id` so CTAs and returns stay on the same guided URL.
    - Team360: not yet unless returning to an existing profile.
    - Primary return destination after step: same guided screen or `admin_guided_setup_path` when exiting hub scope.
 
@@ -122,7 +123,7 @@ Align with the UX guide: Team360 is the **record hub** for reviewing state, read
 | Starting surface | Action | Return destination |
 | ---------------- | ------ | ------------------ |
 | Team360 | Open “add document” (or equivalent drill-through) | Team360 focused on same `engagement_id` when `team360_return_to` / `return_to` round-trip is honored |
-| Guided employee onboarding | Save focused child record (placement, supervision, document, compensation) | Guided checklist (`admin_guided_employee_path`) or Team360 (`admin_team_member_team360_path`) per linking implementation |
+| Guided employee onboarding | Save focused child record (placement, supervision, document, compensation) | Guided flow with checklist (`admin_guided_employee_path` + `#guided-onboarding-checklist`) or Team360 (`admin_team_member_team360_path`) per `return_to` / `team360_return_to` |
 | Engagement nested form | Save placement / supervision / compensation | Parent engagement show (`admin_engagement_path`) or Team360 with same engagement |
 | Document record form | Save upload / metadata | Document record show or Team360 per form defaults and `return_to` |
 
@@ -143,7 +144,7 @@ Align with the UX guide: Team360 is the **record hub** for reviewing state, read
 
 ## Verification checklist
 
-- [ ] Guided entry uses `admin_guided_employee_path` with concrete fallbacks documented above.
+- [ ] Guided entry uses `admin_guided_employee_path` with concrete fallbacks documented above; checklist panel `#guided-onboarding-checklist` reflects selection + engagement when present.
 - [ ] Engagement-scoped routes include `:engagement_id` segments exactly as listed.
 - [ ] Team360 URLs include `engagement_id` when validating onboarding readiness.
 - [ ] Return expectations cite `return_to` / `team360_return_to` behavior from the UX guide.

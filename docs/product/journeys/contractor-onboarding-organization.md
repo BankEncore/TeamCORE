@@ -29,7 +29,7 @@ Create an **organization Party**, establish the contractor **TeamMember** repres
 
 | Purpose | Route helper | Path pattern |
 | ------- | ------------ | ------------ |
-| Guided contractor organization | `admin_guided_contractor_organization_path` | `/admin/guided/contractor_organization` |
+| Guided contractor organization | `admin_guided_contractor_organization_path` | `/admin/guided/contractor_organization` — includes `#guided-onboarding-checklist` (organization flows omit the “create person party” primary CTA on the checklist row; use organization party creation instead). |
 | New organization party | `admin_new_organization_party_path` | `/admin/parties/new/organization` |
 | Create organization party | `admin_organization_parties_path` | `POST /admin/parties/organization` |
 | Party hub | `admin_party_path(party)` | `/admin/parties/:id` |
@@ -50,6 +50,7 @@ Create an **organization Party**, establish the contractor **TeamMember** repres
 1. Enter guided contractor organization onboarding.
    - Route helper: `admin_guided_contractor_organization_path`
    - Path pattern: `/admin/guided/contractor_organization`
+   - **Setup checklist (UX-3):** `#guided-onboarding-checklist` — mirrors employee/IC checklist patterns for `contractor_organization` engagements; party row favors organization creation links per flow configuration.
 
 2. Create **organization Party**.
    - Route helper: `admin_new_organization_party_path` → `admin_organization_parties_path`
@@ -87,7 +88,7 @@ Team360 remains the **record hub** for the contractor organization’s workforce
 | Starting surface | Action | Return destination |
 | ---------------- | ------ | ------------------ |
 | Party hub | Jump to workforce / team member creation | `admin_team_member_path` / `new_admin_team_member_path` per UI linkage |
-| Guided org contractor flow | Save nested resource | Guided route or `admin_engagement_path` |
+| Guided org contractor flow | Save nested resource | Guided route with checklist (`admin_guided_contractor_organization_path` + `#guided-onboarding-checklist`) or `admin_engagement_path` |
 | Relationship editor | Save party relationship | `admin_party_party_relationships_path` or Party hub |
 | Document upload | Save document record | Team360 with matching `engagement_id` when returns configured |
 
@@ -106,6 +107,7 @@ Team360 remains the **record hub** for the contractor organization’s workforce
 ## Verification checklist
 
 - [ ] Organization creation uses `admin_new_organization_party_path` / `admin_organization_parties_path` (distinct from person contractor path).
+- [ ] Guided contractor organization URL documents checklist anchor `#guided-onboarding-checklist` and org-vs-person CTA expectations.
 - [ ] Relationship routes retain `:party_id` prefix exactly as generated.
 - [ ] Engagement-scoped URLs mirror nested resources under `/admin/engagements/:engagement_id/...`.
 - [ ] Team360 links carry `engagement_id` for organization contractors the same as person contractors.

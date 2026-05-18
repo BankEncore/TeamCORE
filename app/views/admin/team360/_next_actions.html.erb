@@ -1,0 +1,40 @@
+<%# locals: actions:, more_actions: [optional boolean] %>
+<% actions = local_assigns.fetch(:actions) %>
+<% more_actions = local_assigns.fetch(:more_actions, false) %>
+<section class="tc-panel border-l-4" style="border-left-color: var(--tc-secondary);">
+  <div class="tc-panel__header">
+    <div>
+      <div class="tc-panel__title">Next actions</div>
+      <p class="tc-panel__subtitle">
+        Click-through fixes derived from the setup checklist (same signals — no duplicate evaluator).
+        <%= link_to "Full checklist", "#team360-setup-checklist", class: tc_link_classes %>
+      </p>
+    </div>
+  </div>
+  <div class="tc-panel__body">
+    <ul class="m-0 list-none space-y-3 p-0 text-sm">
+      <% actions.each do |action| %>
+        <% badge_kind =
+             case action.urgency.to_sym
+             when :blocking then "blocking"
+             when :warning then "warning"
+             else "info"
+             end %>
+        <li class="flex flex-col gap-1 border-b pb-3 last:border-0 last:pb-0" style="border-color: var(--tc-border);">
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="<%= tc_status_badge_classes(badge_kind) %>"><%= action.urgency.to_s.humanize %></span>
+            <%= link_to action.label, action.href, class: "#{tc_link_classes} font-medium" %>
+          </div>
+          <% if action.description.present? %>
+            <p class="m-0 text-xs" style="color: var(--tc-text-muted);"><%= action.description %></p>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+    <% if more_actions %>
+      <p class="mt-3 text-xs" style="color: var(--tc-text-muted);">
+        Additional checklist items below — see <%= link_to "setup checklist", "#team360-setup-checklist", class: tc_link_classes %>.
+      </p>
+    <% end %>
+  </div>
+</section>
