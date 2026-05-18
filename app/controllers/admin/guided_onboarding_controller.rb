@@ -45,7 +45,7 @@ module Admin
     end
 
     def assign_guided_checklist
-      @guided_checklist_rows =
+      presenter =
         GuidedOnboarding::ChecklistPresenter.new(
           agency: current_agency,
           selected_party: @selected_party,
@@ -54,7 +54,9 @@ module Admin
           guided_return_path: request.fullpath,
           search_q: @search_q,
           team_member_id_param: params[:team_member_id]
-        ).rows
+        )
+      @guided_checklist_rows = presenter.rows
+      @guided_document_ui = presenter.readiness_ui_context
     end
 
     def load_party_context

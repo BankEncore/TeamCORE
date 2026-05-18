@@ -114,6 +114,7 @@
             <th>Doc type</th>
             <th>Record</th>
             <th>Expires</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -121,6 +122,17 @@
             <% eg = row.engagement %>
             <% alert = row.alert %>
             <% dtype = @document_types_by_id[alert.document_type_id] %>
+            <% tm360 = admin_team_member_team360_path(eg.team_member, engagement_id: eg.id, as_of_date: @as_of_date.iso8601) %>
+            <% act =
+                 Documents::DocumentIntakeActions.from_alert_result(
+                   alert,
+                   team_member: eg.team_member,
+                   engagement: eg,
+                   document_type: dtype,
+                   return_to: request.fullpath,
+                   team360_return_to: tm360,
+                   as_of_date: @as_of_date
+                 ) %>
             <tr>
               <td class="tc-data-table__primary">
                 <%= link_to eg.team_member.party.display_name, admin_team_member_path(eg.team_member), class: tc_link_classes %>
@@ -146,6 +158,16 @@
                 <% end %>
               </td>
               <td class="font-mono tc-data-table__cell-muted"><%= alert.expires_on&.iso8601 || "—" %></td>
+              <td class="align-top space-y-1">
+                <% if act&.primary_href.present? %>
+                  <%= link_to act.primary_label, act.primary_href, class: "tc-btn tc-btn--primary inline-flex text-xs py-1 px-2" %>
+                <% end %>
+                <% if act&.secondary_href.present? && act.secondary_label.present? %>
+                  <div>
+                    <%= link_to act.secondary_label, act.secondary_href, class: tc_link_classes(:muted) %>
+                  </div>
+                <% end %>
+              </td>
             </tr>
           <% end %>
         </tbody>

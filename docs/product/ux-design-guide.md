@@ -130,3 +130,18 @@ Orchestration only: step launchers, links to existing resources, and prefilled p
 Each `/admin/guided/*` flow renders a **derived checklist** after the title: party identity → team member → engagement shell rows always appear; when an engagement exists for the selected party and the flow’s relationship type, additional rows mirror [`Admin::EngagementSetupChecklistPresenter`](../../app/presenters/admin/engagement_setup_checklist_presenter.rb) (fed by [`Documents::ReadinessEvaluator`](../../app/services/documents/readiness_evaluator.rb)), plus an activation readiness snapshot with a Team360 link. Primary CTAs round-trip via [`return_to` / `team360_return_to`](#admin-return-navigation-contract) to the current guided URL (`request.fullpath`).
 
 Implementation: [`GuidedOnboarding::ChecklistPresenter`](../../app/presenters/guided_onboarding/checklist_presenter.rb), [`Admin::GuidedOnboardingController`](../../app/controllers/admin/guided_onboarding_controller.rb). Checklist anchor: `#guided-onboarding-checklist`.
+
+### TC-UX-DOC-01 — contextual document intake from readiness
+
+Readiness stays **read-time only** from [`Documents::ReadinessEvaluator`](../../app/services/documents/readiness_evaluator.rb). CTAs (Team360, document alerts, guided onboarding) use [`Documents::DocumentIntakeActions`](../../app/services/documents/document_intake_actions.rb) to build safe `GET` links into [`Admin::DocumentRecordsController#new`](../../app/controllers/admin/document_records_controller.rb); saving still flows through normal document-record create and [`redirect_after_admin_save`](../../app/controllers/concerns/admin/return_navigation.rb).
+
+**Query params (new record):**
+
+| Param | Role |
+| ----- | ---- |
+| `document_type_id` | Prefill when present and belongs to the agency (may be overridden to match a valid requirement). |
+| `document_requirement_id` | Optional; scoped to `current_agency`, must `applies_to_engagement?` when `engagement_id` is set. |
+| `intake` | Display-only mode: `missing_requirement`, `replace_rejected`, `renew_expired`, `general` — drives titles/copy, not a separate persistence path. |
+| `return_to` / `team360_return_to` | Same contract as [Admin return navigation contract](#admin-return-navigation-contract); hidden fields round-trip on the form. |
+
+Invalid cross-agency IDs are ignored; requirement/engagement mismatches surface as flash guidance on **new** rather than silently attaching the wrong requirement.

@@ -9,6 +9,12 @@
     </div>
   <% end %>
 
+  <% if @guided_document_ui.present? %>
+    <div class="mt-4">
+      <%= render "document_requirements", locals: @guided_document_ui %>
+    </div>
+  <% end %>
+
   <div class="tc-panel mt-4">
     <div class="tc-panel__header">
       <div class="tc-panel__title">1 · Party identity</div>

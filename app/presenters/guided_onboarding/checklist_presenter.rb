@@ -73,6 +73,28 @@ module GuidedOnboarding
       list.compact
     end
 
+    # Single evaluator snapshot for guided document intake UI (TC-UX-DOC-01).
+    def readiness_ui_context
+      return nil unless resolved_engagement.present?
+
+      readiness = readiness_result
+      return nil unless readiness
+
+      rows = readiness.requirements.select(&:required)
+      return nil if rows.empty?
+
+      doc_types_by_id, records_by_id = Documents::ReadinessDocumentLookups.indexes_from(readiness)
+      {
+        readiness_result: readiness,
+        document_types_by_id: doc_types_by_id,
+        records_by_id: records_by_id,
+        team_member: resolved_team_member,
+        engagement: resolved_engagement,
+        return_path: @guided_return_path,
+        as_of_date: Date.current
+      }
+    end
+
     private
 
     def rt

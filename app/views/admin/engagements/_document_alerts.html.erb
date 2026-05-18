@@ -1,4 +1,12 @@
-<%# locals: readiness — Documents::ReadinessResult, document_types_by_id — Hash<Integer, DocumentType> %>
+<%# locals: readiness — Documents::ReadinessResult, document_types_by_id — Hash<Integer, DocumentType>
+    Optional: team_member, engagement, return_to, team360_return_to, as_of_date (TC-UX-DOC-01 intake CTAs) %>
+<% ctx_engagement = local_assigns[:engagement] %>
+<% ctx_team_member = local_assigns[:team_member] || ctx_engagement&.team_member %>
+<% ctx_return_to = local_assigns[:return_to] %>
+<% ctx_team360_return_to = local_assigns[:team360_return_to] %>
+<% ctx_as_of_date = local_assigns.fetch(:as_of_date, readiness.as_of_date) %>
+<% show_actions = ctx_engagement.present? && ctx_team_member.present? %>
+
 <div class="space-y-4">
   <div>
     <h3 class="text-sm font-semibold" style="color: var(--tc-text);">Document alerts (TC-07)</h3>
@@ -28,11 +36,25 @@
                 <th>Document type</th>
                 <th>Record</th>
                 <th>Expires</th>
+                <% if show_actions %>
+                  <th>Actions</th>
+                <% end %>
               </tr>
             </thead>
             <tbody>
               <% rows.each do |alert| %>
                 <% dtype = document_types_by_id[alert.document_type_id] %>
+                <% act =
+                     show_actions &&
+                       Documents::DocumentIntakeActions.from_alert_result(
+                         alert,
+                         team_member: ctx_team_member,
+                         engagement: ctx_engagement,
+                         document_type: dtype,
+                         return_to: ctx_return_to,
+                         team360_return_to: ctx_team360_return_to,
+                         as_of_date: ctx_as_of_date
+                       ) %>
                 <tr>
                   <td class="align-top"><%= alert.message %></td>
                   <td class="align-top font-mono"><%= alert.alert_type %></td>
@@ -63,6 +85,18 @@
                       —
                     <% end %>
                   </td>
+                  <% if show_actions %>
+                    <td class="align-top space-y-1">
+                      <% if act&.primary_href.present? %>
+                        <%= link_to act.primary_label, act.primary_href, class: "tc-btn tc-btn--primary inline-flex text-xs py-1 px-2" %>
+                      <% end %>
+                      <% if act&.secondary_href.present? && act.secondary_label.present? %>
+                        <div>
+                          <%= link_to act.secondary_label, act.secondary_href, class: tc_link_classes(:muted) %>
+                        </div>
+                      <% end %>
+                    </td>
+                  <% end %>
                 </tr>
               <% end %>
             </tbody>

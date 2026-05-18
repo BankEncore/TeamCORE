@@ -1,0 +1,61 @@
+<%# locals: readiness_result, document_types_by_id, records_by_id, team_member, engagement, return_path, as_of_date %>
+<% readiness_result = local_assigns.fetch(:readiness_result) %>
+<% document_types_by_id = local_assigns.fetch(:document_types_by_id) %>
+<% team_member = local_assigns.fetch(:team_member) %>
+<% engagement = local_assigns.fetch(:engagement) %>
+<% return_path = local_assigns.fetch(:return_path) %>
+<% as_of_date = local_assigns.fetch(:as_of_date) %>
+<% tm360 = admin_team_member_team360_path(team_member, engagement_id: engagement.id, as_of_date: as_of_date&.iso8601) %>
+<% required_rows = readiness_result.requirements.select(&:required) %>
+<% return if required_rows.empty? %>
+
+<section class="tc-panel mt-4" id="guided-document-requirements">
+  <div class="tc-panel__header">
+    <div class="tc-panel__title">Required documents</div>
+    <p class="tc-panel__subtitle">
+      Same evaluator output as Team360 — add documents without guessing configuration IDs (TC-UX-DOC-01).
+    </p>
+  </div>
+  <div class="tc-panel__body">
+    <div class="tc-table-wrap">
+      <table class="tc-data-table tc-data-table--compact text-xs">
+        <thead>
+          <tr>
+            <th>Requirement</th>
+            <th>Type</th>
+            <th>Outcome</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% required_rows.each do |row| %>
+            <% dtype = document_types_by_id[row.document_type_id] %>
+            <% act =
+                 Documents::DocumentIntakeActions.from_requirement_evaluation(
+                   row,
+                   team_member: team_member,
+                   engagement: engagement,
+                   document_type: dtype,
+                   return_to: return_path,
+                   team360_return_to: tm360,
+                   as_of_date: as_of_date
+                 ) %>
+            <tr>
+              <td class="font-mono"><%= row.document_requirement_id %></td>
+              <td><%= dtype&.name || "##{row.document_type_id}" %></td>
+              <td class="font-mono"><%= row.requirement_outcome %></td>
+              <td class="space-y-1 align-top">
+                <% if act&.primary_href.present? %>
+                  <%= link_to act.primary_label, act.primary_href, class: "tc-btn tc-btn--primary inline-flex text-xs py-1 px-2" %>
+                <% end %>
+                <% if act&.secondary_href.present? && act.secondary_label.present? %>
+                  <div><%= link_to act.secondary_label, act.secondary_href, class: tc_link_classes(:muted) %></div>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
