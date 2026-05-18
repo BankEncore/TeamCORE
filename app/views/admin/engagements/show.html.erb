@@ -90,7 +90,15 @@
           </div>
         </div>
         <div class="tc-panel__body">
-          <%= render partial: "document_alerts", locals: { readiness: @document_readiness, document_types_by_id: @document_types_by_id } %>
+          <%= render partial: "document_alerts", locals: {
+                readiness: @document_readiness,
+                document_types_by_id: @document_types_by_id,
+                team_member: @engagement.team_member,
+                engagement: @engagement,
+                return_to: request.fullpath,
+                team360_return_to: tc_team360_url(@engagement.team_member, engagement: @engagement, as_of_date: @document_readiness.as_of_date),
+                as_of_date: @document_readiness.as_of_date
+              } %>
           <h3 class="mb-2 mt-6 text-sm font-semibold" style="color: var(--tc-text);">Requirements</h3>
           <div class="tc-table-wrap">
             <table class="tc-data-table tc-data-table--compact text-xs">

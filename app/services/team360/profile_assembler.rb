@@ -144,24 +144,7 @@ module Team360
     end
 
     def build_document_lookups(readiness_result)
-      return [ {}, {} ] unless readiness_result
-
-      type_ids =
-        (
-          readiness_result.requirements.map(&:document_type_id) +
-          readiness_result.alerts.map(&:document_type_id)
-        ).uniq
-      doc_types_by_id = DocumentType.where(id: type_ids).index_by(&:id)
-
-      rec_ids = readiness_result.requirements.filter_map(&:document_record_id).uniq
-      records_by_id =
-        if rec_ids.empty?
-          {}
-        else
-          DocumentRecord.where(id: rec_ids).includes(:verified_by).index_by(&:id)
-        end
-
-      [ doc_types_by_id, records_by_id ]
+      Documents::ReadinessDocumentLookups.indexes_from(readiness_result)
     end
 
     def build_workforce_financial(focused_engagement)

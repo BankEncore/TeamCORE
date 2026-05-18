@@ -1,3 +1,38 @@
-<% content_for :title, "New document record — TeamCORE Admin" %>
-<h1 class="text-2xl font-semibold mb-4">New document record</h1>
-<%= render "form" %>
+<% content_for :title,
+      (@document_intake_mode.present? ? "Add document — TeamCORE Admin" : "New document record — TeamCORE Admin") %>
+<div class="tc-page-stack">
+  <header class="tc-page-header">
+    <div>
+      <% if @document_intake_mode == "missing_requirement" %>
+        <p class="tc-page-header__eyebrow">Document intake</p>
+        <h1 class="tc-page-header__title">Add missing document</h1>
+      <% elsif @document_intake_mode == "replace_rejected" %>
+        <p class="tc-page-header__eyebrow">Document intake</p>
+        <h1 class="tc-page-header__title">Upload corrected document</h1>
+      <% elsif @document_intake_mode == "renew_expired" %>
+        <p class="tc-page-header__eyebrow">Document intake</p>
+        <h1 class="tc-page-header__title">Add renewal document</h1>
+      <% else %>
+        <h1 class="tc-page-header__title text-2xl font-semibold">New document record</h1>
+      <% end %>
+      <% if @document_requirement_for_intake.present? %>
+        <% tm = @document_record.team_member_id ? TeamMember.where(agency_id: current_agency.id).find_by(id: @document_record.team_member_id) : nil %>
+        <% eg = @document_record.engagement_id ? Engagement.where(agency_id: current_agency.id).find_by(id: @document_record.engagement_id) : nil %>
+        <p class="tc-page-header__subtitle text-sm mt-2" style="color: var(--tc-text-muted);">
+          Satisfying <strong><%= @document_requirement_for_intake.document_type&.name || "requirement" %></strong>
+          <% if tm&.party %>
+            for <strong><%= tm.party.display_name %></strong>
+          <% end %>
+          <% if eg %>
+            · engagement #<%= eg.id %> <%= eg.relationship_type %> · <%= eg.status %>
+          <% end %>
+          <% if @document_requirement_for_intake.required? %>
+            · required for this engagement pattern.
+          <% end %>
+        </p>
+      <% end %>
+    </div>
+  </header>
+
+  <%= render "form" %>
+</div>

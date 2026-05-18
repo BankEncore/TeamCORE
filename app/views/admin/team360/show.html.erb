@@ -238,7 +238,19 @@
 
       <% if @snapshot.readiness_result %>
         <%= render partial: "admin/engagements/document_alerts",
-              locals: { readiness: @snapshot.readiness_result, document_types_by_id: @snapshot.document_types_by_id } %>
+              locals: {
+                readiness: @snapshot.readiness_result,
+                document_types_by_id: @snapshot.document_types_by_id,
+                team_member: @team_member,
+                engagement: @focused_engagement,
+                return_to: request.fullpath,
+                team360_return_to: admin_team_member_team360_path(
+                  @team_member,
+                  engagement_id: @focused_engagement.id,
+                  as_of_date: @snapshot.as_of_date&.iso8601
+                ),
+                as_of_date: @snapshot.as_of_date
+              } %>
 
         <section class="tc-panel">
           <div class="tc-panel__header">
@@ -275,11 +287,27 @@
                   <th>Record</th>
                   <th>Verifier / dates</th>
                   <th>Rejection</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 <% @snapshot.readiness_result.requirements.each do |row| %>
                   <% rec = row.document_record_id ? @snapshot.records_by_id[row.document_record_id] : nil %>
+                  <% dtype = @snapshot.document_types_by_id[row.document_type_id] %>
+                  <% act =
+                       Documents::DocumentIntakeActions.from_requirement_evaluation(
+                         row,
+                         team_member: @team_member,
+                         engagement: @focused_engagement,
+                         document_type: dtype,
+                         return_to: request.fullpath,
+                         team360_return_to: admin_team_member_team360_path(
+                           @team_member,
+                           engagement_id: @focused_engagement.id,
+                           as_of_date: @snapshot.as_of_date&.iso8601
+                         ),
+                         as_of_date: @snapshot.as_of_date
+                       ) %>
                   <tr>
                     <td class="font-mono"><%= row.document_requirement_id %></td>
                     <td class="font-mono"><%= row.requirement_outcome %></td>
@@ -306,6 +334,16 @@
                       <% end %>
                     </td>
                     <td><%= rec&.rejection_reason.presence || "—" %></td>
+                    <td class="space-y-1 align-top">
+                      <% if act&.primary_href.present? %>
+                        <%= link_to act.primary_label, act.primary_href, class: "tc-btn tc-btn--primary inline-flex text-xs py-1 px-2" %>
+                      <% end %>
+                      <% if act&.secondary_href.present? && act.secondary_label.present? %>
+                        <div>
+                          <%= link_to act.secondary_label, act.secondary_href, class: tc_link_classes(:muted) %>
+                        </div>
+                      <% end %>
+                    </td>
                   </tr>
                 <% end %>
               </tbody>
