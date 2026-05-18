@@ -1,0 +1,47 @@
+<% content_for :title, "Payroll adjustment codes — #{current_agency.name}" %>
+<div class="tc-page-stack">
+  <header class="tc-page-header">
+    <div>
+      <p class="tc-page-header__eyebrow">Payroll · TC‑27</p>
+      <h1 class="tc-page-header__title">Adjustment codes</h1>
+      <p class="tc-page-header__subtitle">Agency-defined earning/deduction codes for payroll preparation.</p>
+    </div>
+    <%= link_to "New code", new_admin_payroll_adjustment_code_path, class: "tc-btn tc-btn--primary" %>
+  </header>
+
+  <div class="tc-panel">
+    <div class="tc-panel__body overflow-x-auto">
+      <% if @codes.empty? %>
+        <p class="text-sm text-slate-600">No adjustment codes.</p>
+      <% else %>
+        <table class="min-w-full text-sm">
+          <thead>
+            <tr class="text-left border-b" style="border-color: var(--tc-border);">
+              <th class="py-2 pr-4">Code</th>
+              <th class="py-2 pr-4">Name</th>
+              <th class="py-2 pr-4">Direction</th>
+              <th class="py-2 pr-4">Active</th>
+              <th class="py-2"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @codes.each do |c| %>
+              <tr class="border-b" style="border-color: var(--tc-border);">
+                <td class="py-2 pr-4 font-mono text-xs"><%= c.code %></td>
+                <td class="py-2 pr-4"><%= c.name %></td>
+                <td class="py-2 pr-4"><%= c.direction %></td>
+                <td class="py-2 pr-4"><%= c.active? ? "yes" : "no" %></td>
+                <td class="py-2">
+                  <%= link_to "Edit", edit_admin_payroll_adjustment_code_path(c), class: tc_link_classes %>
+                  <%= button_to "Delete", admin_payroll_adjustment_code_path(c), method: :delete,
+                        form: { data: { turbo: false } },
+                        class: "text-xs ml-2 #{tc_link_classes}" %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      <% end %>
+    </div>
+  </div>
+</div>

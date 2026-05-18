@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_17_140003) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_17_140004) do
   create_table "agencies", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
     t.string "code", null: false
     t.datetime "created_at", null: false
@@ -539,6 +539,24 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_17_140003) do
     t.index ["target_party_id"], name: "index_party_relationships_on_target_party_id"
   end
 
+  create_table "pay_period_closure_events", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.bigint "actor_id", null: false
+    t.datetime "created_at", null: false
+    t.string "event_type", null: false
+    t.text "metadata", size: :long, collation: "utf8mb4_bin"
+    t.datetime "occurred_at", null: false
+    t.text "override_reason"
+    t.boolean "override_validation", default: false, null: false
+    t.bigint "pay_period_id", null: false
+    t.bigint "payroll_input_batch_id"
+    t.string "source", null: false
+    t.datetime "updated_at", null: false
+    t.index ["actor_id"], name: "index_pay_period_closure_events_on_actor_id"
+    t.index ["pay_period_id"], name: "index_pay_period_closure_events_on_pay_period_id"
+    t.index ["payroll_input_batch_id"], name: "index_pay_period_closure_events_on_payroll_input_batch_id"
+    t.check_constraint "json_valid(`metadata`)", name: "metadata"
+  end
+
   create_table "pay_periods", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
     t.bigint "agency_id", null: false
     t.datetime "closed_at"
@@ -553,6 +571,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_17_140003) do
     t.index ["agency_id", "start_on", "end_on"], name: "index_pay_periods_on_agency_and_bounds"
     t.index ["agency_id"], name: "index_pay_periods_on_agency_id"
     t.index ["closed_by_id"], name: "index_pay_periods_on_closed_by_id"
+  end
+
+  create_table "payroll_adjustment_codes", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.boolean "active", default: true, null: false
+    t.bigint "agency_id", null: false
+    t.string "code", null: false
+    t.datetime "created_at", null: false
+    t.string "direction", null: false
+    t.string "name", null: false
+    t.datetime "updated_at", null: false
+    t.index ["agency_id", "code"], name: "index_payroll_adjustment_codes_on_agency_id_and_code", unique: true
+    t.index ["agency_id"], name: "index_payroll_adjustment_codes_on_agency_id"
   end
 
   create_table "payroll_earning_codes", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
@@ -579,6 +609,70 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_17_140003) do
     t.index ["exported_by_id"], name: "index_payroll_exports_on_exported_by_id"
     t.index ["pay_period_id", "export_sequence"], name: "index_payroll_exports_on_pay_period_and_sequence", unique: true
     t.index ["pay_period_id"], name: "index_payroll_exports_on_pay_period_id"
+  end
+
+  create_table "payroll_input_adjustments", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.decimal "amount", precision: 14, scale: 4
+    t.datetime "created_at", null: false
+    t.string "currency", default: "USD", null: false
+    t.bigint "engagement_id", null: false
+    t.decimal "hours", precision: 12, scale: 4
+    t.text "notes"
+    t.bigint "payroll_adjustment_code_id", null: false
+    t.bigint "payroll_input_batch_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["engagement_id"], name: "index_payroll_input_adjustments_on_engagement_id"
+    t.index ["payroll_adjustment_code_id"], name: "index_payroll_input_adjustments_on_payroll_adjustment_code_id"
+    t.index ["payroll_input_batch_id"], name: "index_payroll_input_adjustments_on_payroll_input_batch_id"
+  end
+
+  create_table "payroll_input_batches", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.bigint "agency_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "exported_at"
+    t.bigint "exported_by_id"
+    t.datetime "finalized_at"
+    t.bigint "finalized_by_id"
+    t.bigint "pay_period_id", null: false
+    t.bigint "payroll_export_id"
+    t.string "reference_number", null: false
+    t.integer "reference_sequence", default: 1, null: false
+    t.text "reversal_reason"
+    t.datetime "reversed_at"
+    t.bigint "reversed_by_id"
+    t.string "status", null: false
+    t.bigint "superseded_by_batch_id"
+    t.bigint "supersedes_batch_id"
+    t.datetime "updated_at", null: false
+    t.index ["agency_id", "pay_period_id", "status"], name: "idx_on_agency_id_pay_period_id_status_cc2e2f4e16"
+    t.index ["agency_id"], name: "index_payroll_input_batches_on_agency_id"
+    t.index ["exported_by_id"], name: "index_payroll_input_batches_on_exported_by_id"
+    t.index ["finalized_by_id"], name: "index_payroll_input_batches_on_finalized_by_id"
+    t.index ["pay_period_id"], name: "index_payroll_input_batches_on_pay_period_id"
+    t.index ["payroll_export_id"], name: "index_payroll_input_batches_on_payroll_export_id"
+    t.index ["reversed_by_id"], name: "index_payroll_input_batches_on_reversed_by_id"
+    t.index ["superseded_by_batch_id"], name: "fk_rails_9783101441"
+    t.index ["supersedes_batch_id"], name: "fk_rails_1e6084095a"
+  end
+
+  create_table "payroll_input_rows", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.decimal "amount", precision: 14, scale: 4
+    t.datetime "created_at", null: false
+    t.string "currency", default: "USD", null: false
+    t.string "direction", default: "earning", null: false
+    t.string "earning_code", null: false
+    t.bigint "engagement_id", null: false
+    t.decimal "hours", precision: 12, scale: 4
+    t.text "metadata", size: :long, collation: "utf8mb4_bin"
+    t.bigint "payroll_input_batch_id", null: false
+    t.bigint "source_id"
+    t.string "source_type"
+    t.datetime "updated_at", null: false
+    t.index ["engagement_id"], name: "index_payroll_input_rows_on_engagement_id"
+    t.index ["payroll_input_batch_id", "engagement_id"], name: "idx_on_payroll_input_batch_id_engagement_id_a6950523ce"
+    t.index ["payroll_input_batch_id"], name: "index_payroll_input_rows_on_payroll_input_batch_id"
+    t.index ["source_type", "source_id"], name: "index_payroll_input_rows_on_source_type_and_source_id"
+    t.check_constraint "json_valid(`metadata`)", name: "metadata"
   end
 
   create_table "person_profiles", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
@@ -767,10 +861,27 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_17_140003) do
   add_foreign_key "party_relationships", "agencies"
   add_foreign_key "party_relationships", "parties", column: "source_party_id"
   add_foreign_key "party_relationships", "parties", column: "target_party_id"
+  add_foreign_key "pay_period_closure_events", "pay_periods"
+  add_foreign_key "pay_period_closure_events", "payroll_input_batches"
+  add_foreign_key "pay_period_closure_events", "users", column: "actor_id"
   add_foreign_key "pay_periods", "agencies"
   add_foreign_key "pay_periods", "users", column: "closed_by_id"
+  add_foreign_key "payroll_adjustment_codes", "agencies"
   add_foreign_key "payroll_exports", "pay_periods"
   add_foreign_key "payroll_exports", "users", column: "exported_by_id"
+  add_foreign_key "payroll_input_adjustments", "engagements"
+  add_foreign_key "payroll_input_adjustments", "payroll_adjustment_codes"
+  add_foreign_key "payroll_input_adjustments", "payroll_input_batches"
+  add_foreign_key "payroll_input_batches", "agencies"
+  add_foreign_key "payroll_input_batches", "pay_periods"
+  add_foreign_key "payroll_input_batches", "payroll_exports"
+  add_foreign_key "payroll_input_batches", "payroll_input_batches", column: "superseded_by_batch_id"
+  add_foreign_key "payroll_input_batches", "payroll_input_batches", column: "supersedes_batch_id"
+  add_foreign_key "payroll_input_batches", "users", column: "exported_by_id"
+  add_foreign_key "payroll_input_batches", "users", column: "finalized_by_id"
+  add_foreign_key "payroll_input_batches", "users", column: "reversed_by_id"
+  add_foreign_key "payroll_input_rows", "engagements"
+  add_foreign_key "payroll_input_rows", "payroll_input_batches"
   add_foreign_key "person_profiles", "parties"
   add_foreign_key "revenue_inputs", "agencies"
   add_foreign_key "revenue_inputs", "engagements"

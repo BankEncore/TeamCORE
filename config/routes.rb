@@ -46,6 +46,15 @@ Rails.application.routes.draw do
       member do
         post :close
       end
+      resources :payroll_input_batches, only: %i[index show create] do
+        resources :payroll_input_adjustments, only: %i[new create destroy]
+        member do
+          post :recalculate
+          post :finalize
+          post :reverse
+          post :complete_final_export
+        end
+      end
     end
     resources :weekly_timesheets, only: %i[index show] do
       member do
@@ -54,6 +63,7 @@ Rails.application.routes.draw do
         post :reopen
       end
     end
+    resources :payroll_adjustment_codes
     resources :leave_types
     resources :leave_requests do
       member do

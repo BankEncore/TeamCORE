@@ -8,6 +8,8 @@ class PayPeriod < ApplicationRecord
   has_many :revenue_inputs, dependent: :restrict_with_exception
   has_many :commission_calculations, dependent: :restrict_with_exception
   has_many :payroll_exports, dependent: :restrict_with_exception
+  has_many :payroll_input_batches, dependent: :restrict_with_exception
+  has_many :pay_period_closure_events, dependent: :restrict_with_exception
 
   validates :start_on, :end_on, presence: true
   validates :status, inclusion: { in: STATUSES }

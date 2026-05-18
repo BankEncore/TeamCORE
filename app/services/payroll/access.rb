@@ -42,5 +42,9 @@ module Payroll
 
       user.agencies.exists?(agency_id)
     end
+
+    def can_manage_payroll_input?(user:, agency:)
+      user.present? && user.agencies.exists?(agency.id)
+    end
   end
 end

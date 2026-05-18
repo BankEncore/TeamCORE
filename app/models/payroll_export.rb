@@ -5,6 +5,7 @@ class PayrollExport < ApplicationRecord
 
   belongs_to :pay_period
   belongs_to :exported_by, class_name: "User", inverse_of: :exported_payroll_exports, optional: true
+  has_one :payroll_input_batch, dependent: :restrict_with_exception
 
   validates :exported_at, presence: true
   validates :file_format, presence: true, inclusion: { in: FILE_FORMATS }

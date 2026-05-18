@@ -24,6 +24,8 @@ class Agency < ApplicationRecord
   has_many :contractor_charges, dependent: :restrict_with_exception
   has_many :contractor_settlement_runs, dependent: :restrict_with_exception
   has_many :leave_types, inverse_of: :agency, dependent: :restrict_with_exception
+  has_many :payroll_adjustment_codes, inverse_of: :agency, dependent: :restrict_with_exception
+  has_many :payroll_input_batches, inverse_of: :agency, dependent: :restrict_with_exception
 
   validates :name, presence: true
   validates :code, presence: true, uniqueness: true

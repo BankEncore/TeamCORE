@@ -60,6 +60,7 @@ module Team360
         records_by_id: records_by_id,
         subcontractor_rows: build_subcontractor_rows(party),
         workforce_financial: build_workforce_financial(focused),
+        payroll_prep_panel: build_payroll_prep_panel(focused),
         weekly_timesheets_panel: build_weekly_timesheets_panel(focused),
         leave_panel: build_leave_panel(focused)
       )
@@ -293,6 +294,43 @@ module Team360
       end
 
       out
+    end
+
+    def build_payroll_prep_panel(focused_engagement)
+      return nil unless focused_engagement&.employee_path?
+
+      period =
+        PayPeriod
+          .where(agency_id: @agency.id)
+          .where("start_on <= ? AND end_on >= ?", @as_of_date, @as_of_date)
+          .first
+      return nil unless period
+
+      batch =
+        PayrollInputBatch
+          .where(pay_period_id: period.id, status: %w[finalized exported])
+          .order(Arel.sql("CASE status WHEN 'exported' THEN 0 ELSE 1 END"), finalized_at: :desc)
+          .first
+      return nil unless batch
+
+      rows =
+        batch.payroll_input_rows.where(engagement_id: focused_engagement.id).order(:earning_code, :id).map do |r|
+          {
+            earning_code: r.earning_code,
+            direction: r.direction,
+            hours: r.hours&.to_s("F"),
+            amount: r.amount&.to_s("F"),
+            currency: r.currency
+          }
+        end
+
+      {
+        pay_period_id: period.id,
+        pay_period_range: "#{period.start_on} – #{period.end_on}",
+        batch_reference: batch.reference_number,
+        batch_status: batch.status,
+        rows: rows
+      }
     end
 
     def build_weekly_timesheets_panel(focused_engagement)

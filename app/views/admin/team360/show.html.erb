@@ -464,6 +464,46 @@
         <% end %>
       <% end %>
 
+      <% if @snapshot.payroll_prep_panel.present? %>
+        <% ppanel = @snapshot.payroll_prep_panel %>
+        <section class="tc-panel">
+          <div class="tc-panel__header">
+            <div class="tc-panel__title">Payroll preparation snapshot</div>
+            <p class="tc-panel__subtitle">
+              Frozen batch for pay period <%= ppanel[:pay_period_range] %> (<%= ppanel[:batch_status] %> · <%= ppanel[:batch_reference] %>).
+            </p>
+          </div>
+          <div class="tc-panel__body text-sm space-y-2" style="color: var(--tc-text);">
+            <% if ppanel[:rows].blank? %>
+              <p class="text-slate-600">No payroll input rows for this engagement in the current finalized/exported batch.</p>
+            <% else %>
+              <div class="tc-table-wrap">
+                <table class="tc-data-table text-xs">
+                  <thead>
+                    <tr>
+                      <th>Code</th>
+                      <th>Direction</th>
+                      <th>Hours</th>
+                      <th>Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% ppanel[:rows].each do |row| %>
+                      <tr>
+                        <td class="font-mono"><%= row[:earning_code] %></td>
+                        <td><%= row[:direction] %></td>
+                        <td><%= row[:hours] || "—" %></td>
+                        <td><%= row[:amount] || "—" %> <%= row[:currency] %></td>
+                      </tr>
+                    <% end %>
+                  </tbody>
+                </table>
+              </div>
+            <% end %>
+          </div>
+        </section>
+      <% end %>
+
       <% unless @snapshot.weekly_timesheets_panel.nil? %>
         <section class="tc-panel">
           <div class="tc-panel__header">

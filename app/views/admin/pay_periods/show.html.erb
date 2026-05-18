@@ -8,6 +8,12 @@
   <% end %>
 
   <section class="mt-8">
+    <h2 class="text-lg font-semibold mb-2">Payroll input (TC‑27)</h2>
+    <p class="text-sm text-slate-600 mb-3">Assemble approved time and leave into payroll-preparation batches.</p>
+    <%= link_to "Payroll input batches", admin_pay_period_payroll_input_batches_path(@pay_period), class: "tc-btn tc-btn--secondary" %>
+  </section>
+
+  <section class="mt-8">
     <h2 class="text-lg font-semibold mb-2">Payroll exports</h2>
     <% if @payroll_exports.blank? %>
       <p class="text-sm text-slate-600">No exports recorded yet (file generation is TC‑20).</p>
@@ -46,10 +52,14 @@
         Closure marks payroll processing complete for this operational window. Validation overrides apply only to missing-timesheet / pending-approval checks (Phase 5 workflows).
       </p>
       <%= form_with url: close_admin_pay_period_path(@pay_period), method: :post, data: { turbo: false } do %>
-        <label class="flex items-center gap-2 text-sm mb-3">
+        <label class="flex items-center gap-2 text-sm mb-2">
           <%= check_box_tag :override_validation, "1", false %>
           Override closure validation (missing timesheets / pending approvals)
         </label>
+        <div class="tc-field mb-3">
+          <%= label_tag :override_reason, "Override reason (required if overriding)", class: "tc-label" %>
+          <%= text_area_tag :override_reason, nil, rows: 2, class: "tc-input w-full" %>
+        </div>
         <%= submit_tag "Close pay period", class: "tc-btn tc-btn--primary" %>
       <% end %>
     </section>

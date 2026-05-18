@@ -44,7 +44,9 @@ module Admin
       Payroll::PayPeriodClosureService.call(
         pay_period: @pay_period,
         actor: current_user,
-        override_validation: override
+        override_validation: override,
+        override_reason: params[:override_reason].presence,
+        source: PayPeriodClosureEvent::SOURCES.fetch(:admin_manual)
       )
       redirect_to admin_pay_period_path(@pay_period), notice: "Pay period closed."
     rescue Payroll::PayPeriodClosureService::Error => e
