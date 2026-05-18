@@ -17,7 +17,7 @@ module Payroll
     end
 
     def export_history(pay_period)
-      pay_period.payroll_exports.includes(:exported_by).ordered
+      pay_period.payroll_exports.includes(:exported_by, export_file_attachment: :blob).ordered
     end
 
     def missing_timesheets_count(agency, pay_period)

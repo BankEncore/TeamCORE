@@ -471,6 +471,10 @@
             <div class="tc-panel__title">Payroll preparation snapshot</div>
             <p class="tc-panel__subtitle">
               Frozen batch for pay period <%= ppanel[:pay_period_range] %> (<%= ppanel[:batch_status] %> · <%= ppanel[:batch_reference] %>).
+              <% if ppanel[:payroll_export_sequence].present? %>
+                <span class="block mt-1 text-xs text-slate-600">Final payroll export #<%= ppanel[:payroll_export_sequence] %> · <%= ppanel[:payroll_export_at] %>
+                  <% if ppanel[:payroll_export_file_present] %> · file available<% end %>.</span>
+              <% end %>
             </p>
           </div>
           <div class="tc-panel__body text-sm space-y-2" style="color: var(--tc-text);">

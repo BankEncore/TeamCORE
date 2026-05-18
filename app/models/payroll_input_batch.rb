@@ -5,7 +5,7 @@ class PayrollInputBatch < ApplicationRecord
 
   belongs_to :agency
   belongs_to :pay_period
-  belongs_to :payroll_export, optional: true
+  belongs_to :payroll_export, optional: true, inverse_of: :payroll_input_batch
   belongs_to :finalized_by, class_name: "User", optional: true
   belongs_to :exported_by, class_name: "User", optional: true
   belongs_to :reversed_by, class_name: "User", optional: true
@@ -14,6 +14,11 @@ class PayrollInputBatch < ApplicationRecord
 
   has_many :payroll_input_rows, dependent: :destroy
   has_many :payroll_input_adjustments, dependent: :destroy
+  has_many :source_payroll_exports,
+    class_name: "PayrollExport",
+    foreign_key: :payroll_input_batch_id,
+    inverse_of: :input_batch,
+    dependent: :restrict_with_exception
 
   validates :status, presence: true, inclusion: { in: STATUSES }
   validates :reference_number, presence: true

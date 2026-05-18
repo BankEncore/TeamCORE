@@ -9,14 +9,14 @@
 
   <section class="mt-8">
     <h2 class="text-lg font-semibold mb-2">Payroll input (TC‑27)</h2>
-    <p class="text-sm text-slate-600 mb-3">Assemble approved time and leave into payroll-preparation batches.</p>
+      <p class="text-sm text-slate-600 mb-3">Assemble approved time and leave into payroll-preparation batches; export files from finalized batches (TC‑27 / TC‑20).</p>
     <%= link_to "Payroll input batches", admin_pay_period_payroll_input_batches_path(@pay_period), class: "tc-btn tc-btn--secondary" %>
   </section>
 
   <section class="mt-8">
     <h2 class="text-lg font-semibold mb-2">Payroll exports</h2>
     <% if @payroll_exports.blank? %>
-      <p class="text-sm text-slate-600">No exports recorded yet (file generation is TC‑20).</p>
+      <p class="text-sm text-slate-600">No exports recorded yet.</p>
     <% else %>
       <div class="tc-table-wrap">
         <table class="tc-data-table text-sm">
@@ -27,6 +27,8 @@
               <th>Format</th>
               <th>Final?</th>
               <th>By</th>
+              <th>Validation</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
@@ -37,6 +39,20 @@
                 <td><%= ex.file_format %></td>
                 <td><%= ex.is_final? ? "yes" : "draft" %></td>
                 <td><%= ex.exported_by&.email || "—" %></td>
+                <td class="text-xs text-slate-600 max-w-xs truncate" title="<%= ex.validation_summary&.to_json %>">
+                  <% if ex.validation_summary.is_a?(Hash) %>
+                    <%= ex.validation_summary["payroll_input_row_count"] || ex.validation_summary[:payroll_input_row_count] %> rows
+                  <% else %>
+                    —
+                  <% end %>
+                </td>
+                <td>
+                  <% if ex.export_file.attached? %>
+                    <%= link_to "Download", download_admin_payroll_export_path(ex), class: tc_link_classes %>
+                  <% else %>
+                    —
+                  <% end %>
+                </td>
               </tr>
             <% end %>
           </tbody>

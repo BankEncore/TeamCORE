@@ -26,4 +26,10 @@ class PayrollExportTest < ActiveSupport::TestCase
     dup = PayrollExport.new(pay_period: @pay_period, file_format: "xlsx", is_final: true, exported_by: @user)
     assert_not dup.valid?
   end
+
+  test "records are immutable after insert" do
+    ex = PayrollExport.create!(pay_period: @pay_period, file_format: "csv", is_final: false, exported_by: @user)
+    assert_not ex.update(notes: "x")
+    assert_includes ex.errors[:base].join, "immutable"
+  end
 end

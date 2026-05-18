@@ -324,13 +324,22 @@ module Team360
           }
         end
 
-      {
+      out = {
         pay_period_id: period.id,
         pay_period_range: "#{period.start_on} – #{period.end_on}",
         batch_reference: batch.reference_number,
         batch_status: batch.status,
         rows: rows
       }
+
+      if batch.payroll_export.present?
+        ex = batch.payroll_export
+        out[:payroll_export_sequence] = ex.export_sequence
+        out[:payroll_export_at] = ex.exported_at&.iso8601
+        out[:payroll_export_file_present] = ex.export_file.attached?
+      end
+
+      out
     end
 
     def build_weekly_timesheets_panel(focused_engagement)

@@ -3,7 +3,7 @@
 module Admin
   class ContractorSettlementRunsController < Admin::BaseController
     before_action :require_current_agency!
-    before_action :set_run, only: %i[show finalize compose_line void mark_paid]
+    before_action :set_run, only: %i[show finalize compose_line void mark_paid draft_settlement_export final_settlement_export]
 
     def index
       @runs = scoped(ContractorSettlementRun).order(id: :desc)
@@ -15,6 +15,7 @@ module Admin
     def show
       @lines = @run.contractor_settlement_lines.includes(:engagement)
       @events = @run.contractor_settlement_run_events.includes(:actor).order(id: :desc)
+      @settlement_exports = @run.contractor_settlement_exports.includes(:exported_by).ordered
       @contractor_engagements = scoped(Engagement).where(
         relationship_type: EngagementFinancialContext::CONTRACTOR_FINANCIAL_TYPES
       ).includes(team_member: :party).order(:id)
@@ -109,6 +110,30 @@ module Admin
       @run.update!(status: "calculated") if @run.status == "draft"
       redirect_to admin_contractor_settlement_run_path(@run), notice: "Settlement line added."
     rescue ArgumentError, ActiveRecord::RecordInvalid => e
+      redirect_to admin_contractor_settlement_run_path(@run), alert: e.message
+    end
+
+    def draft_settlement_export
+      export = Financials::ContractorSettlement::GenerateDraftSettlementExportService.call(
+        run: @run,
+        actor: current_user,
+        file_format: params.fetch(:file_format, "csv")
+      )
+      redirect_to admin_contractor_settlement_run_path(@run),
+        notice: "Draft settlement export ##{export.export_sequence} generated (#{export.file_format.upcase})."
+    rescue Financials::ContractorSettlement::GenerateDraftSettlementExportService::Error => e
+      redirect_to admin_contractor_settlement_run_path(@run), alert: e.message
+    end
+
+    def final_settlement_export
+      export = Financials::ContractorSettlement::GenerateFinalSettlementExportService.call(
+        run: @run,
+        actor: current_user,
+        file_format: params.fetch(:file_format, "csv")
+      )
+      redirect_to admin_contractor_settlement_run_path(@run),
+        notice: "Final settlement export ##{export.export_sequence} generated (#{export.file_format.upcase})."
+    rescue Financials::ContractorSettlement::GenerateFinalSettlementExportService::Error => e
       redirect_to admin_contractor_settlement_run_path(@run), alert: e.message
     end
 

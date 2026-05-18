@@ -5,7 +5,7 @@ module Admin
     before_action :require_current_agency!
     before_action :require_payroll_input_access!
     before_action :set_pay_period
-    before_action :set_batch, only: %i[show recalculate finalize reverse complete_final_export]
+    before_action :set_batch, only: %i[show recalculate finalize reverse complete_final_export draft_payroll_export]
 
     def index
       @batches = @pay_period.payroll_input_batches.order(reference_sequence: :desc)
@@ -14,6 +14,7 @@ module Admin
     def show
       @rows = @batch.payroll_input_rows.includes(:engagement).order(:id)
       @adjustments = @batch.payroll_input_adjustments.includes(:payroll_adjustment_code, :engagement)
+      @source_payroll_exports = @batch.source_payroll_exports.includes(:exported_by).ordered
     end
 
     def create
@@ -46,6 +47,18 @@ module Admin
       redirect_to admin_pay_period_payroll_input_batch_path(@pay_period, successor),
         notice: "Batch reversed; new draft created."
     rescue Payroll::ReversePayrollInputBatchService::Error, ActionController::ParameterMissing => e
+      redirect_to admin_pay_period_payroll_input_batch_path(@pay_period, @batch), alert: e.message
+    end
+
+    def draft_payroll_export
+      export = Payroll::GenerateDraftPayrollExportService.call(
+        batch: @batch,
+        actor: current_user,
+        file_format: params.fetch(:file_format, "csv")
+      )
+      redirect_to admin_pay_period_payroll_input_batch_path(@pay_period, @batch),
+        notice: "Draft payroll export ##{export.export_sequence} generated (#{export.file_format.upcase})."
+    rescue Payroll::GenerateDraftPayrollExportService::Error => e
       redirect_to admin_pay_period_payroll_input_batch_path(@pay_period, @batch), alert: e.message
     end
 

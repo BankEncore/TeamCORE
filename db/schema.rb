@@ -10,7 +10,35 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_17_140004) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_18_024000) do
+  create_table "active_storage_attachments", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.bigint "blob_id", null: false
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.bigint "record_id", null: false
+    t.string "record_type", null: false
+    t.index ["blob_id"], name: "index_active_storage_attachments_on_blob_id"
+    t.index ["record_type", "record_id", "name", "blob_id"], name: "index_active_storage_attachments_uniqueness", unique: true
+  end
+
+  create_table "active_storage_blobs", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.bigint "byte_size", null: false
+    t.string "checksum"
+    t.string "content_type"
+    t.datetime "created_at", null: false
+    t.string "filename", null: false
+    t.string "key", null: false
+    t.text "metadata"
+    t.string "service_name", null: false
+    t.index ["key"], name: "index_active_storage_blobs_on_key", unique: true
+  end
+
+  create_table "active_storage_variant_records", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.bigint "blob_id", null: false
+    t.string "variation_digest", null: false
+    t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
   create_table "agencies", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
     t.string "code", null: false
     t.datetime "created_at", null: false
@@ -149,6 +177,26 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_17_140004) do
     t.index ["agency_id"], name: "index_contractor_charges_on_agency_id"
     t.index ["engagement_id", "status"], name: "index_contractor_charges_on_engagement_and_status"
     t.index ["engagement_id"], name: "index_contractor_charges_on_engagement_id"
+  end
+
+  create_table "contractor_settlement_exports", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.bigint "byte_size"
+    t.string "content_sha256", limit: 64
+    t.bigint "contractor_settlement_run_id", null: false
+    t.datetime "created_at", null: false
+    t.integer "export_sequence", null: false
+    t.datetime "exported_at", null: false
+    t.bigint "exported_by_id"
+    t.string "file_format", null: false
+    t.boolean "is_final", default: false, null: false
+    t.text "notes"
+    t.string "original_filename"
+    t.datetime "updated_at", null: false
+    t.text "validation_summary", size: :long, collation: "utf8mb4_bin"
+    t.index ["contractor_settlement_run_id", "export_sequence"], name: "index_settlement_exports_on_run_and_sequence", unique: true
+    t.index ["contractor_settlement_run_id"], name: "idx_on_contractor_settlement_run_id_64056197c8"
+    t.index ["exported_by_id"], name: "index_contractor_settlement_exports_on_exported_by_id"
+    t.check_constraint "json_valid(`validation_summary`)", name: "validation_summary"
   end
 
   create_table "contractor_settlement_line_commission_calculations", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
@@ -596,6 +644,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_17_140004) do
   end
 
   create_table "payroll_exports", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.bigint "byte_size"
+    t.string "content_sha256", limit: 64
     t.datetime "created_at", null: false
     t.integer "export_sequence", null: false
     t.datetime "exported_at", null: false
@@ -603,12 +653,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_17_140004) do
     t.string "file_format", null: false
     t.boolean "is_final", default: false, null: false
     t.text "notes"
+    t.string "original_filename"
     t.bigint "pay_period_id", null: false
+    t.bigint "payroll_input_batch_id"
     t.string "storage_reference"
     t.datetime "updated_at", null: false
+    t.text "validation_summary", size: :long, collation: "utf8mb4_bin"
     t.index ["exported_by_id"], name: "index_payroll_exports_on_exported_by_id"
     t.index ["pay_period_id", "export_sequence"], name: "index_payroll_exports_on_pay_period_and_sequence", unique: true
     t.index ["pay_period_id"], name: "index_payroll_exports_on_pay_period_id"
+    t.index ["payroll_input_batch_id"], name: "index_payroll_exports_on_payroll_input_batch_id"
+    t.check_constraint "json_valid(`validation_summary`)", name: "validation_summary"
   end
 
   create_table "payroll_input_adjustments", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
@@ -786,6 +841,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_17_140004) do
     t.index ["engagement_id"], name: "index_weekly_timesheets_on_engagement_id"
   end
 
+  add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "agency_payroll_configurations", "agencies"
   add_foreign_key "commission_calculations", "agencies"
   add_foreign_key "commission_calculations", "engagements"
@@ -806,6 +863,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_17_140004) do
   add_foreign_key "contractor_charge_waivers", "users", column: "actor_id"
   add_foreign_key "contractor_charges", "agencies"
   add_foreign_key "contractor_charges", "engagements"
+  add_foreign_key "contractor_settlement_exports", "contractor_settlement_runs"
+  add_foreign_key "contractor_settlement_exports", "users", column: "exported_by_id"
   add_foreign_key "contractor_settlement_line_commission_calculations", "commission_calculations"
   add_foreign_key "contractor_settlement_line_commission_calculations", "contractor_settlement_lines"
   add_foreign_key "contractor_settlement_line_revenue_inputs", "contractor_settlement_lines"
@@ -868,6 +927,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_17_140004) do
   add_foreign_key "pay_periods", "users", column: "closed_by_id"
   add_foreign_key "payroll_adjustment_codes", "agencies"
   add_foreign_key "payroll_exports", "pay_periods"
+  add_foreign_key "payroll_exports", "payroll_input_batches"
   add_foreign_key "payroll_exports", "users", column: "exported_by_id"
   add_foreign_key "payroll_input_adjustments", "engagements"
   add_foreign_key "payroll_input_adjustments", "payroll_adjustment_codes"

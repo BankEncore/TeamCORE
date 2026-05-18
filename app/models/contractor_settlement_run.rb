@@ -4,6 +4,7 @@ class ContractorSettlementRun < ApplicationRecord
   belongs_to :agency
   has_many :contractor_settlement_lines, dependent: :restrict_with_exception
   has_many :contractor_settlement_run_events, dependent: :destroy
+  has_many :contractor_settlement_exports, dependent: :restrict_with_exception
 
   STATUSES = %w[draft calculated finalized paid_recorded voided].freeze
 

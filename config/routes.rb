@@ -53,7 +53,14 @@ Rails.application.routes.draw do
           post :finalize
           post :reverse
           post :complete_final_export
+          post :draft_payroll_export
         end
+      end
+    end
+
+    resources :payroll_exports, only: [], controller: "payroll_exports" do
+      member do
+        get :download
       end
     end
     resources :weekly_timesheets, only: %i[index show] do
@@ -82,6 +89,14 @@ Rails.application.routes.draw do
         post :compose_line
         post :void
         post :mark_paid
+        post :draft_settlement_export
+        post :final_settlement_export
+      end
+    end
+
+    resources :contractor_settlement_exports, only: [], controller: "contractor_settlement_exports" do
+      member do
+        get :download
       end
     end
     resources :engagements, only: %i[index show new create edit update] do
